@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Πρωτόκολλα Εξωσωματικής</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Literata:opsz,wght@7..72,500;7..72,650&family=JetBrains+Mono:wght@400;600&display=swap&subset=greek" rel="stylesheet">
+<style>
+/* Layout: σταθερή πλευρική πλοήγηση + κύρια στήλη ανάγνωσης· πίνακες σε οριζόντια κύλιση */
+:root{
+  --ink:#16222e; --ink-2:#44525f; --ink-3:#6c7884;
+  --paper:#f6f7f8; --card:#ffffff; --line:#dde2e7; --tint:#eef2f4;
+  --accent:#7a2e5c; --accent-soft:#f4e8ef; --teal:#1f6f78; --teal-soft:#e3f1f2;
+  --ok:#2d7a46; --ok-soft:#e5f3e9; --warn:#a46200; --warn-soft:#fbf0dc; --crit:#b3261e; --crit-soft:#fbe7e5;
+  --f-display:"Literata",Georgia,"Times New Roman",serif;
+  --f-body:"Commissioner","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:8px; color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#e6ebef; --ink-2:#b5bfc8; --ink-3:#8b96a1; --paper:#11171d; --card:#18212a; --line:#2b3741; --tint:#1e2832;
+  --accent:#e59ac4; --accent-soft:#3a2231; --teal:#6cc3cb; --teal-soft:#183338;
+  --ok:#73c48d; --ok-soft:#183324; --warn:#f0b35a; --warn-soft:#3a2c14; --crit:#ff8a80; --crit-soft:#3d1c1a; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --ink:#e6ebef; --ink-2:#b5bfc8; --ink-3:#8b96a1; --paper:#11171d; --card:#18212a; --line:#2b3741; --tint:#1e2832;
+  --accent:#e59ac4; --accent-soft:#3a2231; --teal:#6cc3cb; --teal-soft:#183338;
+  --ok:#73c48d; --ok-soft:#183324; --warn:#f0b35a; --warn-soft:#3a2c14; --crit:#ff8a80; --crit-soft:#3d1c1a; color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font:15.5px/1.6 var(--f-body);}
+a{color:var(--teal)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100%}
+nav.side{background:var(--card);border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{font-family:var(--f-display);font-weight:650;font-size:20px;line-height:1.2;margin:0 6px 4px}
+.brand-sub{color:var(--ink-3);font-size:12.5px;margin:0 6px 18px}
+.navgrp{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:16px 8px 6px}
+.navlink{display:block;padding:7px 10px;border-radius:6px;color:var(--ink-2);text-decoration:none;font-size:14.5px}
+.navlink:hover{background:var(--tint);color:var(--ink)}
+.navlink.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.navlink.sub{padding-left:22px;font-size:14px}
+main{padding:28px clamp(16px,4vw,48px) 80px;max-width:1180px;width:100%}
+h1,h2,h3{font-family:var(--f-display);font-weight:650;text-wrap:balance;line-height:1.25}
+h1{font-size:30px;margin:0 0 6px} h2{font-size:22px;margin:34px 0 10px} h3{font-size:17.5px;margin:22px 0 8px}
+.lede{color:var(--ink-2);max-width:72ch;margin:0 0 18px}
+p,li{max-width:78ch}
+.muted{color:var(--ink-3)}
+.small{font-size:13px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+td.mono{white-space:nowrap}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.card h3{margin-top:0}
+a.card{text-decoration:none;color:inherit;display:block;transition:border-color .15s}
+a.card:hover{border-color:var(--accent)}
+.chip{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--tint);color:var(--ink-2);margin:0 4px 4px 0;white-space:nowrap}
+.chip.acc{background:var(--accent-soft);color:var(--accent)}
+.chip.teal{background:var(--teal-soft);color:var(--teal)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.crit{background:var(--crit-soft);color:var(--crit)}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin:10px 0 6px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:9px 11px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--tint);font-weight:600;color:var(--ink-2);font-size:12.5px;letter-spacing:.02em;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+td.when{white-space:nowrap;font-weight:600;color:var(--accent)}
+td .drug{font-weight:600}
+.callout{border-left:4px solid var(--teal);background:var(--teal-soft);padding:10px 14px;border-radius:0 var(--r) var(--r) 0;margin:12px 0}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+.callout.crit{border-color:var(--crit);background:var(--crit-soft)}
+.callout.acc{border-color:var(--accent);background:var(--accent-soft)}
+.callout p{margin:4px 0}
+.cite{color:var(--teal);text-decoration:none;border-bottom:1px dotted var(--teal)}
+.reflist li{margin-bottom:8px;padding-left:2em;text-indent:-2em;list-style:none}
+.reflist{padding-left:0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:14px 0 16px}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 12px;font:inherit;color:var(--ink-2);cursor:pointer}
+.tab.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.timeline{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.timeline svg{display:block;min-width:640px;width:100%;height:auto}
+.timeline text{font-family:var(--f-body);fill:var(--ink-2)}
+.btn{font:inherit;font-size:14px;padding:8px 14px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .btn.pri{color:#1a0f15}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.pri{color:#1a0f15}}
+.btn.danger{color:var(--crit)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--ink-2);font-weight:500}
+input,select,textarea{font:inherit;font-size:14.5px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);min-width:0}
+textarea{width:100%;min-height:90px;font-family:var(--f-mono);font-size:12.5px}
+.form{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.form .wide{grid-column:span 2}
+.pt-list{display:flex;flex-direction:column;gap:6px}
+.pt{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:9px 11px;border:1px solid var(--line);border-radius:6px;background:var(--card);cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.pt.on{border-color:var(--accent);background:var(--accent-soft)}
+.trk{display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;align-items:start}
+.trk>*{min-width:0}
+main{min-width:0}
+.alert{display:flex;gap:10px;padding:10px 12px;border-radius:6px;margin-bottom:8px;border:1px solid var(--line);background:var(--card)}
+.alert .dot{flex:0 0 8px;border-radius:4px}
+.alert.crit .dot{background:var(--crit)} .alert.warn .dot{background:var(--warn)} .alert.ok .dot{background:var(--ok)} .alert.info .dot{background:var(--teal)}
+.alert b{display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:10px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.kpi .v{font-family:var(--f-mono);font-size:22px;font-weight:600}
+.kpi .l{font-size:12px;color:var(--ink-3)}
+.bins{display:flex;gap:4px;align-items:flex-end;height:60px}
+.dialog-bg{position:fixed;inset:0;background:rgba(10,15,20,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.dialog-bg.on{display:flex}
+.dialog{background:var(--card);border-radius:10px;padding:20px;max-width:520px;width:100%;border:1px solid var(--line)}
+.topbar{display:none}
+details.acc{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0 14px;margin:8px 0}
+details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
+.pill-n{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  nav.side{position:fixed;inset:0 30% 0 0;z-index:40;transform:translateX(-102%);transition:transform .2s;height:100%}
+  nav.side.open{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)}
+  .topbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+  .trk{grid-template-columns:1fr}
+  .form .wide{grid-column:auto}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="topbar"><button class="btn sm" id="menuBtn" aria-label="Άνοιγμα μενού">☰ Μενού</button><b style="font-family:var(--f-display)">Πρωτόκολλα Εξωσωματικής</b></div>
+<div class="app">
+<nav class="side" id="side">
+  <div class="brand">Πρωτόκολλα Εξωσωματικής</div>
+  <div class="brand-sub">Εκπαιδευτικός οδηγός και καρτέλα κύκλου για γυναικολόγους</div>
+  <div id="navlinks"></div>
+</nav>
+<main id="view" tabindex="-1"></main>
+</div>
+<div class="dialog-bg" id="dlg"><div class="dialog" role="dialog" aria-modal="true" id="dlgBox"></div></div>
+<script>
+/* ================= ΒΙΒΛΙΟΓΡΑΦΙΑ (APA 7) ================= */
+const REFS = {
+ eshre19:{cite:"The ESHRE Guideline Group on Ovarian Stimulation et al., 2020",
+  apa:"The ESHRE Guideline Group on Ovarian Stimulation, Bosch, E., Broer, S., Griesinger, G., Grynberg, M., Humaidan, P., Kolibianakis, E., Kunicki, M., La Marca, A., Lainas, G., Le Clef, N., Massin, N., Mastenbroek, S., Polyzos, N., Sunkara, S. K., Timeva, T., Töyli, M., Urbancsek, J., Vermeulen, N., & Broekmans, F. (2020). ESHRE guideline: Ovarian stimulation for IVF/ICSI. <i>Human Reproduction Open, 2020</i>(2), Article hoaa009.", doi:"10.1093/hropen/hoaa009"},
+ eshre25:{cite:"ESHRE Guideline Group on Ovarian Stimulation et al., 2026",
+  apa:"ESHRE Guideline Group on Ovarian Stimulation, Ata, B., Bosch, E., Broer, S., Griesinger, G., Grynberg, M., Kolibianakis, E., Kunicki, M., La Marca, A., Lainas, G., Le Clef, N., Massin, N., Polyzos, N. P., Sunkara, S. K., Timeva, T., Töyli, M., Urbancsek, J., & Broekmans, F. (2026). ESHRE guideline: Ovarian stimulation for IVF/ICSI: An update in 2025. <i>Human Reproduction, 41</i>(4), 498–514.", doi:"10.1093/humrep/deag018"},
+ alinany16:{cite:"Al-Inany et al., 2016",
+  apa:"Al-Inany, H. G., Youssef, M. A., Ayeleke, R. O., Brown, J., Lam, W. S., & Broekmans, F. J. (2016). Gonadotrophin-releasing hormone antagonists for assisted reproductive technology. <i>Cochrane Database of Systematic Reviews, 2016</i>(4), Article CD001750.", doi:"10.1002/14651858.CD001750.pub4"},
+ venetis23:{cite:"Venetis et al., 2023",
+  apa:"Venetis, C. A., Storr, A., Chua, S. J., Mol, B. W., Longobardi, S., Yin, X., & D'Hooghe, T. (2023). What is the optimal GnRH antagonist protocol for ovarian stimulation during ART treatment? A systematic review and network meta-analysis. <i>Human Reproduction Update, 29</i>(3), 307–326.", doi:"10.1093/humupd/dmac040"},
+ kuang15:{cite:"Kuang et al., 2015",
+  apa:"Kuang, Y., Chen, Q., Fu, Y., Wang, Y., Hong, Q., Lyu, Q., Ai, A., & Shoham, Z. (2015). Medroxyprogesterone acetate is an effective oral alternative for preventing premature luteinizing hormone surges in women undergoing controlled ovarian hyperstimulation for in vitro fertilization. <i>Fertility and Sterility, 104</i>(1), 62–70.e3.", doi:"10.1016/j.fertnstert.2015.03.022"},
+ guan21:{cite:"Guan et al., 2021",
+  apa:"Guan, S., Feng, Y., Huang, Y., & Huang, J. (2021). Progestin-primed ovarian stimulation protocol for patients in assisted reproductive technology: A meta-analysis of randomized controlled trials. <i>Frontiers in Endocrinology, 12</i>, Article 702558.", doi:"10.3389/fendo.2021.702558"},
+ muharam25:{cite:"Muharam et al., 2025",
+  apa:"Muharam, R., Nurdya, A. N., Yo, E. C., Sumapraja, K., Harzif, A. K., Maidarti, M., Wiweko, B., & Hestiantoro, A. (2025). Comparing dydrogesterone versus medroxyprogesterone in progestin-primed ovarian stimulation (PPOS) for patients undergoing in vitro fertilization/intracytoplasmic sperm injection: A systematic review. <i>Cureus, 17</i>(6), Article e85959.", doi:"10.7759/cureus.85959"},
+ filippi23:{cite:"Filippi et al., 2023",
+  apa:"Filippi, F., Reschini, M., Polledri, E., Cecchele, A., Guarneri, C., Vigano, P., Fustinoni, S., Platteau, P., & Somigliana, E. (2023). Progestin-primed ovarian stimulation for fertility preservation in women with cancer: A comparative study. <i>PLOS ONE, 18</i>(3), Article e0280238.", doi:"10.1371/journal.pone.0280238"},
+ huang22:{cite:"Huang et al., 2022",
+  apa:"Huang, H., Itaya, Y., Samejima, K., Ichinose, S., Narita, T., Matsunaga, S., Saitoh, M., & Takai, Y. (2022). Usefulness of random-start progestin-primed ovarian stimulation for fertility preservation. <i>Journal of Ovarian Research, 15</i>(1), Article 2.", doi:"10.1186/s13048-021-00935-5"},
+ mathieu25:{cite:"Mathieu d'Argent et al., 2025",
+  apa:"Mathieu d'Argent, E., Guivarc'h-Leveque, A., Catteau-Jonard, S., Cedrin-Durnerin, I., Peigné, M., Jung, C., Goro, S., Wang, X. X., & Massin, N. (2025). Feasibility and efficacy of random-start progestin-primed ovarian stimulation: A multicenter pilot randomized controlled trial in oocyte donation. <i>Reproductive Biology and Endocrinology, 24</i>(1), Article 7.", doi:"10.1186/s12958-025-01509-6"},
+ zaat23:{cite:"Zaat et al., 2023",
+  apa:"Zaat, T. R., Kostova, E. B., Korsen, P., Showell, M. G., Mol, F., & van Wely, M. (2023). Obstetric and neonatal outcomes after natural versus artificial cycle frozen embryo transfer and the role of luteal phase support: A systematic review and meta-analysis. <i>Human Reproduction Update, 29</i>(5), 634–654.", doi:"10.1093/humupd/dmad011"},
+ ho24:{cite:"Ho et al., 2024",
+  apa:"Ho, V. N. A., Pham, T. D., Nguyen, N. T., Wang, R., Norman, R. J., Mol, B. W., Ho, T. M., & Vuong, L. N. (2024). Livebirth rate after one frozen embryo transfer in ovulatory women starting with natural, modified natural, or artificial endometrial preparation in Viet Nam: An open-label randomised controlled trial. <i>The Lancet, 404</i>(10449), 266–275.", doi:"10.1016/S0140-6736(24)00756-6"},
+ ghobara25:{cite:"Ghobara et al., 2025",
+  apa:"Ghobara, T., Gelbaya, T. A., & Ayeleke, R. O. (2025). Cycle regimens for endometrial preparation prior to frozen embryo transfer. <i>Cochrane Database of Systematic Reviews, 2025</i>(6), Article CD003414.", doi:"10.1002/14651858.CD003414.pub4"},
+ bulow25:{cite:"Bülow et al., 2025",
+  apa:"Bülow, N. S., Wissing, M. L., Macklon, N., Pinborg, A., & Løssl, K. (2025). Reproductive outcomes after letrozole stimulated versus artificial frozen-thawed embryo transfer cycles in women with PCOS and/or oligo-anovulation: A systematic review and meta-analysis. <i>Human Reproduction Update, 31</i>(5), 445–463.", doi:"10.1093/humupd/dmaf011"},
+ geysen26:{cite:"Geysenbergh et al., 2026",
+  apa:"Geysenbergh, B., Debrock, S., Lie Fong, S., Vanhie, A., Tomassetti, C., Bafort, C., Meeuwis, L., Neyens, S., Pelckmans, S., Laenen, A., Vriens, J., De Loecker, P., Dancet, E., & Peeraer, K. (2026). Natural versus artificial cycle for endometrial preparation in ovulatory women undergoing frozen-thawed embryo transfer: A randomised controlled trial. <i>Human Reproduction, 41</i>(8), 1420–1429.", doi:"10.1093/humrep/deag095"},
+ stormlund20:{cite:"Stormlund et al., 2020",
+  apa:"Stormlund, S., Sopa, N., Zedeler, A., Bogstad, J., Prætorius, L., Nielsen, H. S., Kitlinski, M. L., Skouby, S. O., Mikkelsen, A. L., Spangmose, A. L., Jeppesen, J. V., Khatibi, A., la Cour Freiesleben, N., Ziebe, S., Polyzos, N. P., Bergh, C., Humaidan, P., Andersen, A. N., Løssl, K., & Pinborg, A. (2020). Freeze-all versus fresh blastocyst transfer strategy during in vitro fertilisation in women with regular menstrual cycles: Multicentre randomised controlled trial. <i>BMJ, 370</i>, Article m2519.", doi:"10.1136/bmj.m2519"},
+ chen16:{cite:"Chen et al., 2016",
+  apa:"Chen, Z.-J., Shi, Y., Sun, Y., Zhang, B., Liang, X., Cao, Y., Yang, J., Liu, J., Wei, D., Weng, N., Tian, L., Hao, C., Yang, D., Zhou, F., Shi, J., Xu, Y., Li, J., Yan, J., Qin, Y., . . . Legro, R. S. (2016). Fresh versus frozen embryos for infertility in the polycystic ovary syndrome. <i>The New England Journal of Medicine, 375</i>(6), 523–533.", doi:"10.1056/NEJMoa1513873"},
+ shi18:{cite:"Shi et al., 2018",
+  apa:"Shi, Y., Sun, Y., Hao, C., Zhang, H., Wei, D., Zhang, Y., Zhu, Y., Deng, X., Qi, X., Li, H., Ma, X., Ren, H., Wang, Y., Zhang, D., Wang, B., Liu, F., Wu, Q., Wang, Z., Bai, H., . . . Chen, Z.-J. (2018). Transfer of fresh versus frozen embryos in ovulatory women. <i>The New England Journal of Medicine, 378</i>(2), 126–136.", doi:"10.1056/NEJMoa1705334"},
+ labarta22:{cite:"Labarta et al., 2022",
+  apa:"Labarta, E., Mariani, G., Rodríguez-Varela, C., & Bosch, E. (2022). Individualized luteal phase support normalizes live birth rate in women with low progesterone levels on the day of embryo transfer in artificial endometrial preparation cycles. <i>Fertility and Sterility, 117</i>(1), 96–103.", doi:"10.1016/j.fertnstert.2021.08.040"},
+ cozzolino24:{cite:"Cozzolino et al., 2024",
+  apa:"Cozzolino, M., Hervás, I., Ergun, Y., Massaro, M. G., Pellicer, N., de Angelis, F., Labarta, E., & Galliano, D. (2024). Higher serum progesterone level has no negative impact on live birth rate in frozen embryo transfer. <i>European Journal of Obstetrics &amp; Gynecology and Reproductive Biology, 303</i>, 15–21.", doi:"10.1016/j.ejogrb.2024.10.011"},
+ poseidon16:{cite:"Poseidon Group et al., 2016",
+  apa:"Poseidon Group, Alviggi, C., Andersen, C. Y., Buehler, K., Conforti, A., De Placido, G., Esteves, S. C., Fischer, R., Galliano, D., Polyzos, N. P., Sunkara, S. K., Ubaldi, F. M., & Humaidan, P. (2016). A new more detailed stratification of low responders to ovarian stimulation: From a poor ovarian response to a low prognosis concept. <i>Fertility and Sterility, 105</i>(6), 1452–1453.", doi:"10.1016/j.fertnstert.2016.02.005"}
+};
+
+/* ================= ΠΡΩΤΟΚΟΛΛΑ =================
+   Στο κείμενο, {{key}} ή {{key1;key2}} γίνεται παραπομπή APA εντός πρότασης. */
+const PROTOCOLS = [
+{
+ id:"antagonist", cat:"stim", name:"Πρωτόκολλο ανταγωνιστή GnRH", en:"GnRH antagonist protocol",
+ tags:["Πρώτη επιλογή","Χαμηλός κίνδυνος OHSS","Trigger με αγωνιστή εφικτό"],
+ summary:"Διέγερση με γοναδοτροπίνες από την αρχή του κύκλου και προσθήκη ανταγωνιστή GnRH από τη μέση της διέγερσης για να αποτραπεί η πρόωρη αιχμή LH. Είναι το βασικό πρωτόκολλο στις περισσότερες ασθενείς.",
+ snapshot:{supp:"Ανταγωνιστής GnRH (άμεσος αποκλεισμός υποδοχέα)",dur:"≈ 9–12 ημέρες διέγερσης",ohss:"Χαμηλός",ag:"Ναι",fresh:"Ναι",who:"Αναμενόμενες φυσιολογικές και υψηλές απαντήτριες, PCOS, δότριες, PGT"},
+ principle:[
+  "Οι ανταγωνιστές (γκανιρελίξη, σετρορελίξη) δεσμεύουν ανταγωνιστικά τον υποδοχέα GnRH της υπόφυσης. Η καταστολή LH αρχίζει μέσα σε λίγες ώρες, χωρίς αρχική έξαρση (flare) και χωρίς την υπο-οιστρογονική φάση του μακρού αγωνιστή.",
+  "Επειδή η υπόφυση μένει ευαίσθητη, ένα bolus αγωνιστή GnRH μπορεί να προκαλέσει ενδογενή αιχμή LH/FSH. Έτσι γίνεται εφικτό το trigger με αγωνιστή, το οποίο σχεδόν εξαλείφει τον πρώιμο OHSS.",
+  "Σε σύγκριση με τον μακρύ αγωνιστή δεν υπάρχει σαφής διαφορά στον ρυθμό ζώντων γεννήσεων (OR 1,02), ενώ ο OHSS κάθε βαθμού είναι λιγότερος (OR 0,61) {{alinany16}}."
+ ],
+ indications:["Οι περισσότερες ασθενείς ως πρώτη επιλογή","Αναμενόμενες υψηλές απαντήτριες και PCOS (μείωση OHSS)","Δότριες ωαρίων, κρυοσυντήρηση ωαρίων, κύκλοι PGT-A με σχεδιασμένο freeze-all","Χαμηλή ωοθηκική εφεδρεία (σύντομο, χωρίς υπερκαταστολή)","Όταν χρειάζεται γρήγορη έναρξη"],
+ cautions:["Καθυστερημένη έναρξη ανταγωνιστή σε γρήγορη ανάπτυξη ωοθυλακίων: κίνδυνος πρόωρης αιχμής LH","Ο προγραμματισμός με αντισυλληπτικό συνδέθηκε με χαμηλότερο ποσοστό συνεχιζόμενης κύησης (RR 0,79) {{venetis23}}: αν χρησιμοποιηθεί, άφησε ελεύθερο διάστημα πριν τη διέγερση","Το ευέλικτο σχήμα έδωσε χαμηλότερο ποσοστό συνεχιζόμενης κύησης από το σταθερό ημέρας 5/6 (RR 0,76, χαμηλή βεβαιότητα) {{venetis23}}"],
+ timeline:{axis:"Ημέρα διέγερσης (Η1 = 2η–3η ημέρα κύκλου)",from:0,to:16,ticks:[1,3,5,7,9,11,13,15],
+  rows:[
+   {label:"FSH / hMG",bars:[{s:1,e:10.5,c:"acc",t:"150–225 IU/ημ (εξατομίκευση)"}]},
+   {label:"Ανταγωνιστής",bars:[{s:5,e:10.5,c:"teal",t:"σταθερό: από Η5–6"},{s:6.5,e:10.5,c:"teal",dash:1,t:""}]},
+   {label:"Υπέρηχος / E2",marks:[1,5,7,9,10]},
+   {label:"Trigger → OPU",events:[{d:10.5,t:"Trigger"},{d:12,t:"OPU (34–36 ω)"}]},
+   {label:"Ωχρινική στήριξη",bars:[{s:12,e:16,c:"ok",t:"P4 αν φρέσκια ET"}]}
+  ]},
+ table:[
+  {when:"Προηγούμενος κύκλος (προαιρετικά)",drug:"Αντισυλληπτικό ή οιστραδιόλη/προγεσταγόνο ωχρινικής",dose:"Κατά το πρόγραμμα του κέντρου",why:"Μόνο για προγραμματισμό. Το αντισυλληπτικό συνδέθηκε με χαμηλότερη συνεχιζόμενη κύηση {{venetis23}}.",expect:"Ελεύθερο διάστημα 3–5 ημερών πριν τη διέγερση"},
+  {when:"Ημέρα 2–3 κύκλου (Η1)",drug:"Βασικός υπέρηχος και ορμόνες",dose:"AFC, κύστεις, ενδομήτριο",why:"Επιβεβαίωση ηρεμίας ωοθηκών πριν τη διέγερση.",expect:"E2 < 50–80 pg/mL, P4 < 1,5 ng/mL, χωρίς λειτουργική κύστη > 10 mm"},
+  {when:"Η1 έως ημέρα trigger",drug:"rFSH ή hMG (± LH)",dose:"Συνήθως 150 IU σε φυσιολογική αναμενόμενη απάντηση· χαμηλότερα σε υψηλή· όχι πάνω από 300 IU σε χαμηλή",why:"Πολυωοθυλακική ανάπτυξη. Η δόση εξατομικεύεται με AMH/AFC, ηλικία, ΔΜΣ {{eshre19}}.",expect:"Ανάπτυξη ≈ 1–2 mm/ημέρα μετά τη Η5"},
+  {when:"Η5 ή Η6 (σταθερό) ή ηγετικό ≥ 13–14 mm (ευέλικτο)",drug:"Γκανιρελίξη ή σετρορελίξη",dose:"0,25 mg υποδόρια/ημέρα, έως και την ημέρα του trigger",why:"Αποτρέπει την πρόωρη αιχμή LH που προκαλεί η άνοδος της E2.",expect:"LH χαμηλή (συνήθως < 5 IU/L), χωρίς άνοδο P4"},
+  {when:"Η5–6 και ανά 1–3 ημέρες",drug:"Υπέρηχος ± E2, LH, P4",dose:"Μέτρηση όλων των ωοθυλακίων ≥ 10 mm",why:"Τιτλοποίηση δόσης, χρόνος trigger, εκτίμηση κινδύνου OHSS.",expect:"Ομοιόμορφη κοόρτη· E2 ≈ 200–300 pg/mL ανά ωοθυλάκιο ≥ 14 mm στο trigger"},
+  {when:"Όταν ≥ 3 ωοθυλάκια ≥ 17 mm",drug:"hCG ή αγωνιστής GnRH ή διπλό trigger",dose:"r-hCG 250 μg ή u-hCG 5.000–10.000 IU· τριπτορελίνη 0,2 mg",why:"Τελική ωρίμανση ωαρίων. Αγωνιστής όταν υπάρχει κίνδυνος OHSS ή σχεδιάζεται freeze-all.",expect:"Τελευταία δόση ανταγωνιστή την ημέρα του trigger· P4 < 1,5 ng/mL για φρέσκια ET"},
+  {when:"34–36 ώρες μετά",drug:"Ωοληψία (OPU)",dose:"",why:"Πριν την αυτόματη ωορρηξία.",expect:"Περίπου 80% ώριμα (MII) ωάρια"},
+  {when:"Από το βράδυ της OPU έως την 3η ημέρα",drug:"Προγεστερόνη (κολπική, υποδόρια, ενδομυϊκή) ή δυδρογεστερόνη",dose:"π.χ. κολπική μικρονιοποιημένη 600 mg/ημ ή γέλη 90 mg/ημ",why:"Η διέγερση και ο ανταγωνιστής προκαλούν ανεπάρκεια ωχρινικού σωματίου.",expect:"Συνέχεια τουλάχιστον έως το τεστ κύησης"}
+ ],
+ trigger:[
+  "<b>hCG</b>: κλασική επιλογή για φρέσκια μεταφορά. Μακρύς χρόνος ημίσειας ζωής, γι' αυτό αυξάνει τον κίνδυνο OHSS.",
+  "<b>Αγωνιστής GnRH</b> (π.χ. τριπτορελίνη 0,2 mg): μόνο σε πρωτόκολλο ανταγωνιστή ή PPOS. Σύντομη αιχμή LH, σχεδόν μηδενικός πρώιμος OHSS. Χρειάζεται freeze-all ή εντατική ωχρινική στήριξη, γιατί το ωχρινικό σωμάτιο υπολειτουργεί.",
+  "<b>Διπλό trigger</b> (αγωνιστής + hCG): εξετάζεται όταν υπάρχει ιστορικό χαμηλού ποσοστού ώριμων ωαρίων ή κενών ωοθυλακίων."
+ ],
+ ohss:"Σε ≥ 18 ωοθυλάκια ≥ 11 mm την ημέρα του trigger (κριτήριο που χρησιμοποιήθηκε στη μελέτη {{stormlund20}}), προτίμησε trigger με αγωνιστή και freeze-all. Σε PCOS, το freeze-all αύξησε τις ζώσες γεννήσεις μετά την πρώτη μεταφορά και μείωσε τον OHSS, αλλά με περισσότερη προεκλαμψία {{chen16}}.",
+ pearls:["Το σταθερό σχήμα (Η5/Η6) είναι απλούστερο και φαίνεται τουλάχιστον ισοδύναμο {{venetis23}}.","Στην ενημέρωση 2025 της ESHRE οι συστάσεις για καταστολή και διέγερση έγιναν 50, με βάση στοιχεία έως τον Φεβρουάριο 2025 {{eshre25}}. Έλεγξε τη διατύπωση κάθε σύστασης στο πλήρες κείμενο.","Σε ασθενείς με κανονικούς κύκλους χωρίς κίνδυνο OHSS, το καθολικό freeze-all δεν αύξησε τις γεννήσεις {{stormlund20;shi18}}."],
+ refs:["alinany16","venetis23","eshre19","eshre25","stormlund20","chen16","shi18"]
+},
+{
+ id:"long-agonist", cat:"stim", name:"Μακρύ πρωτόκολλο αγωνιστή GnRH", en:"Long GnRH agonist protocol (luteal start)",
+ tags:["Πλήρης καταστολή","Προγραμματισμός","Μόνο trigger με hCG"],
+ summary:"Αγωνιστής GnRH από τη μέση ωχρινική φάση του προηγούμενου κύκλου έως την πλήρη απευαισθητοποίηση της υπόφυσης, και μετά διέγερση με γοναδοτροπίνες υπό συνεχή καταστολή.",
+ snapshot:{supp:"Αγωνιστής GnRH (απευαισθητοποίηση υποδοχέα)",dur:"≈ 3–4 εβδομάδες συνολικά",ohss:"Υψηλότερος",ag:"Όχι",fresh:"Ναι",who:"Ενδομητρίωση/αδενομύωση (κατά κρίση), ιστορικό πρόωρης ωχρινοποίησης, ανάγκη προγραμματισμού"},
+ principle:[
+  "Ο αγωνιστής προκαλεί αρχικά έξαρση (flare) έκκρισης LH/FSH για λίγες ημέρες. Η συνεχής χορήγηση οδηγεί σε εσωτερίκευση και απευαισθητοποίηση των υποδοχέων, με βαθιά καταστολή LH σε 10–14 ημέρες.",
+  "Η καταστολή συγχρονίζει την κοόρτη και αποκλείει την πρόωρη αιχμή LH, με κόστος μεγαλύτερη διάρκεια, περισσότερες γοναδοτροπίνες και υπο-οιστρογονικά συμπτώματα.",
+  "Επειδή η υπόφυση είναι απευαισθητοποιημένη, ο αγωνιστής δεν μπορεί να χρησιμοποιηθεί ως trigger. Μένει μόνο το hCG, και γι' αυτό ο OHSS είναι συχνότερος από ό,τι με τον ανταγωνιστή {{alinany16}}."
+ ],
+ indications:["Ενδομητρίωση ή αδενομύωση, κατά την κρίση του κέντρου (για βαθύτερη καταστολή υπάρχει και το υπερ-μακρύ σχήμα)","Ιστορικό πρόωρης αιχμής LH ή ωχρινοποίησης","Ανάγκη αυστηρού προγραμματισμού του κύκλου"],
+ cautions:["Υψηλή αναμενόμενη απάντηση ή PCOS: προτίμησε ανταγωνιστή {{eshre19}}","Έναρξη σε πιθανή κύηση: κάνε τεστ κύησης ή ξεκίνα με αντισυλληπτικό","Λειτουργικές κύστεις από το flare","Χαμηλή εφεδρεία: η βαθιά καταστολή μπορεί να μειώσει την απάντηση· στη Cochrane η ακύρωση λόγω χαμηλής απάντησης ήταν συχνότερη με ανταγωνιστή (OR 1,32), άρα η απόφαση είναι εξατομικευμένη {{alinany16}}"],
+ timeline:{axis:"Ημέρες από την έναρξη του αγωνιστή (Η0 ≈ 21η ημέρα προηγούμενου κύκλου)",from:0,to:30,ticks:[0,5,10,14,18,22,26,30],
+  rows:[
+   {label:"Αγωνιστής GnRH",bars:[{s:0,e:24.5,c:"teal",t:"τριπτορελίνη 0,1 mg/ημ (ή depot)"}]},
+   {label:"Έμμηνος ρύση",bars:[{s:7,e:11,c:"line",t:"αιμόρροια απόσυρσης"}]},
+   {label:"Έλεγχος καταστολής",marks:[14]},
+   {label:"FSH / hMG",bars:[{s:14,e:24.5,c:"acc",t:"150–300 IU/ημ"}]},
+   {label:"Υπέρηχος / E2",marks:[19,21,23,24]},
+   {label:"Trigger → OPU",events:[{d:24.5,t:"hCG"},{d:26,t:"OPU"}]},
+   {label:"Ωχρινική στήριξη",bars:[{s:26,e:30,c:"ok",t:"P4"}]}
+  ]},
+ table:[
+  {when:"Ημέρα 21 προηγούμενου κύκλου (μέση ωχρινική)",drug:"Τεστ κύησης, έναρξη αγωνιστή GnRH",dose:"Τριπτορελίνη 0,1 mg υποδόρια/ημ ή depot 3,75 mg· εναλλακτικά βουσερελίνη, λευπρορελίνη",why:"Η έναρξη στην ωχρινική φάση αποφεύγει το flare πάνω σε αναπτυσσόμενο ωοθυλάκιο.",expect:"Αιμόρροια απόσυρσης σε 5–10 ημέρες"},
+  {when:"Μετά από 10–14 ημέρες",drug:"Έλεγχος καταστολής",dose:"Υπέρηχος + E2 (± LH, P4)",why:"Βεβαίωση πλήρους απευαισθητοποίησης πριν τη διέγερση.",expect:"Συνήθη κριτήρια: E2 < 50 pg/mL, ενδομήτριο ≤ 5 mm, χωρίς κύστη > 10 mm, LH < 5 IU/L"},
+  {when:"Μετά την επιβεβαίωση καταστολής",drug:"rFSH ή hMG",dose:"Συνήθως 150–300 IU/ημ ανάλογα με την εφεδρεία",why:"Η απουσία ενδογενούς FSH απαιτεί συχνά λίγο υψηλότερες συνολικές δόσεις.",expect:"Πιο ομοιογενής κοόρτη"},
+  {when:"Σε όλη τη διέγερση",drug:"Συνέχιση αγωνιστή",dose:"Πολλά κέντρα μειώνουν στο μισό (0,05 mg) στην έναρξη FSH",why:"Διατήρηση καταστολής έως το trigger.",expect:"LH χαμηλή, χωρίς πρόωρη ωχρινοποίηση"},
+  {when:"Ανά 2–3 ημέρες από τη Η5 διέγερσης",drug:"Υπέρηχος ± E2, P4",dose:"",why:"Τιτλοποίηση δόσης και χρόνος trigger.",expect:"E2 ≈ 200–300 pg/mL ανά ώριμο ωοθυλάκιο"},
+  {when:"Όταν ≥ 3 ωοθυλάκια ≥ 17 mm",drug:"hCG",dose:"r-hCG 250 μg ή u-hCG 5.000–10.000 IU",why:"Ο αγωνιστής δεν λειτουργεί ως trigger σε απευαισθητοποιημένη υπόφυση.",expect:"Τελευταία δόση αγωνιστή την ημέρα του trigger"},
+  {when:"34–36 ώρες μετά",drug:"Ωοληψία",dose:"",why:"",expect:""},
+  {when:"Από την OPU",drug:"Προγεστερόνη",dose:"Όπως στο πρωτόκολλο ανταγωνιστή",why:"Η καταστολή LH διαρκεί και στην ωχρινική φάση· η στήριξη είναι απαραίτητη.",expect:"Έως το τεστ κύησης ή περισσότερο, κατά το κέντρο"}
+ ],
+ trigger:["<b>Μόνο hCG</b>. Σε κίνδυνο OHSS οι επιλογές είναι μειωμένη δόση hCG, freeze-all, καβεργολίνη ή, σε ακραίες περιπτώσεις, ακύρωση. Αν ο κίνδυνος είναι προβλέψιμος από την αρχή, προτίμησε εξαρχής ανταγωνιστή {{eshre19}}."],
+ ohss:"Ο κίνδυνος OHSS είναι μεγαλύτερος από ό,τι με ανταγωνιστή (OR 0,61 υπέρ του ανταγωνιστή) {{alinany16}}. Το freeze-all μειώνει τον όψιμο OHSS που οφείλεται στην hCG της κύησης.",
+ pearls:["Το depot δίνει βαθύτερη και μακρύτερη καταστολή· μπορεί να χρειαστούν περισσότερες γοναδοτροπίνες.","Αν δεν επιτευχθεί καταστολή, συνέχισε τον αγωνιστή 5–7 ημέρες και επανέλεγξε.","Ο μακρύς αγωνιστής δεν βελτιώνει τις ζώσες γεννήσεις έναντι του ανταγωνιστή στον γενικό πληθυσμό {{alinany16}}."],
+ refs:["alinany16","eshre19","eshre25"]
+},
+{
+ id:"ppos", cat:"stim", name:"Διέγερση με προγεσταγόνο (PPOS)", en:"Progestin-primed ovarian stimulation",
+ tags:["Από του στόματος","Υποχρεωτικό freeze-all","Χαμηλό κόστος"],
+ summary:"Από του στόματος προγεσταγόνο από την έναρξη της διέγερσης, αντί για ανάλογο GnRH, για να αποτραπεί η αιχμή LH. Το ενδομήτριο δεν είναι δεκτικό, γι' αυτό όλα τα έμβρυα καταψύχονται.",
+ snapshot:{supp:"Προγεσταγόνο (αναστολή θετικής παλίνδρομης ρύθμισης E2)",dur:"≈ 9–12 ημέρες",ohss:"Χαμηλός",ag:"Ναι",fresh:"Όχι",who:"Freeze-all: διατήρηση γονιμότητας, δότριες, PGT-A, υψηλές απαντήτριες"},
+ principle:[
+  "Η υψηλή προγεστερονική δράση στον υποθάλαμο αναστέλλει τη θετική παλίνδρομη ρύθμιση από την E2 που προκαλεί την αιχμή LH. Η βασική έκκριση LH διατηρείται, άρα η υπόφυση παραμένει ευαίσθητη.",
+  "Στην αρχική μελέτη με μεδροξυπρογεστερόνη, πρόωρη αιχμή LH εμφανίστηκε σε 1 από 150 ασθενείς (0,7%), με παρόμοιο αριθμό ωαρίων και ποσοστά κύησης στις κατεψυγμένες μεταφορές {{kuang15}}.",
+  "Σε μετα-ανάλυση RCT, τα ποσοστά κλινικής κύησης και ζώσας γέννησης δεν διέφεραν από τα σχήματα σύγκρισης, ενώ ο OHSS ήταν λιγότερος (RR 0,52) {{guan21}}."
+ ],
+ indications:["Κρυοσυντήρηση ωαρίων (ογκολογική ή κοινωνική), και σε έναρξη οποιαδήποτε ημέρα του κύκλου {{huang22;mathieu25}}","Δότριες ωαρίων","PGT-A και κάθε σχεδιασμένο freeze-all","Υψηλές απαντήτριες ή PCOS (trigger με αγωνιστή, χωρίς φρέσκια ET)","Περιορισμένοι πόροι: χαμηλότερο κόστος φαρμάκων {{filippi23}}"],
+ cautions:["Δεν επιτρέπει φρέσκια μεταφορά","Ορμονοευαίσθητος καρκίνος: συζήτηση με ογκολόγο (συχνά προσθήκη λετροζόλης)","Η μεδροξυπρογεστερόνη καταστέλλει περισσότερο την LH από τη δυδρογεστερόνη· η επιλογή επηρεάζει την παρακολούθηση {{muharam25}}"],
+ timeline:{axis:"Ημέρα διέγερσης (Η1 = 2η–3η ημέρα κύκλου ή τυχαία έναρξη)",from:0,to:14,ticks:[1,3,5,7,9,11,13],
+  rows:[
+   {label:"FSH / hMG",bars:[{s:1,e:10.5,c:"acc",t:"150–225 IU/ημ"}]},
+   {label:"Προγεσταγόνο",bars:[{s:1,e:10.5,c:"teal",t:"MPA 4–10 mg ή DYG 20 mg/ημ"}]},
+   {label:"Υπέρηχος / LH",marks:[1,5,8,10]},
+   {label:"Trigger → OPU",events:[{d:10.5,t:"Trigger"},{d:12,t:"OPU"}]},
+   {label:"Κρυοσυντήρηση",bars:[{s:12,e:14,c:"line",t:"freeze-all"}]}
+  ]},
+ table:[
+  {when:"Ημέρα 2–3 κύκλου (ή οποιαδήποτε ημέρα σε επείγουσα διατήρηση)",drug:"Βασικός υπέρηχος",dose:"AFC, κύστεις",why:"",expect:"Ηρεμία ωοθηκών (σε τυχαία έναρξη μπορεί να υπάρχει ωχρινικό σωμάτιο)"},
+  {when:"Η1 έως ημέρα trigger",drug:"rFSH ή hMG",dose:"Συνήθως 150–225 IU/ημ",why:"Πολυωοθυλακική ανάπτυξη.",expect:"Ανάπτυξη όπως στον ανταγωνιστή"},
+  {when:"Η1 έως ημέρα trigger (ίδια ημέρα με τη FSH)",drug:"Μεδροξυπρογεστερόνη (MPA) ή δυδρογεστερόνη (DYG) ή μικρονιοποιημένη P4",dose:"MPA 4–10 mg/ημ, DYG 20 mg/ημ (10 mg × 2), μικρονιοποιημένη P4 100–200 mg/ημ",why:"Αναστολή της αιχμής LH χωρίς ενέσεις.",expect:"LH χαμηλή έως μέτρια, σταθερή· P4 ορού δεν αξιολογείται ως ωχρινοποίηση με MPA/DYG"},
+  {when:"Ανά 2–3 ημέρες από Η5",drug:"Υπέρηχος ± E2, LH",dose:"",why:"Παρακολούθηση ανάπτυξης και LH.",expect:"Χωρίς απότομη άνοδο LH"},
+  {when:"Όταν ≥ 3 ωοθυλάκια ≥ 17 mm",drug:"Αγωνιστής GnRH ή διπλό trigger ή hCG",dose:"π.χ. τριπτορελίνη 0,1–0,2 mg ± hCG 1.000 IU",why:"Η υπόφυση είναι ευαίσθητη, άρα ο αγωνιστής λειτουργεί.",expect:"Τελευταία δόση προγεσταγόνου την ημέρα του trigger"},
+  {when:"34–36 ώρες μετά",drug:"Ωοληψία, υαλοποίηση ωαρίων ή εμβρύων",dose:"",why:"Το ενδομήτριο είναι εκτός φάσης.",expect:"Χωρίς ωχρινική στήριξη (δεν γίνεται μεταφορά)"}
+ ],
+ trigger:["Συνήθως <b>αγωνιστής GnRH</b> ή <b>διπλό trigger</b>, ώστε να αποφευχθεί ο OHSS. Το hCG είναι αποδεκτό όταν ο κίνδυνος είναι χαμηλός, αφού ούτως ή άλλως γίνεται freeze-all."],
+ ohss:"Με trigger αγωνιστή και freeze-all ο πρώιμος και ο όψιμος OHSS γίνονται σπάνιοι. Στη μετα-ανάλυση ο OHSS ήταν μειωμένος κατά περίπου το μισό {{guan21}}.",
+ pearls:["Στη διατήρηση γονιμότητας η PPOS μείωσε τις επισκέψεις παρακολούθησης και το κόστος φαρμάκων (διάμεση τιμή 520 € έναντι 940 €), με ίδιο λόγο ώριμων ωαρίων/AMH {{filippi23}}.","Η τυχαία έναρξη PPOS σε δότριες δεν υστέρησε σε αριθμό ωαρίων όταν άρχισε σε όψιμη θυλακική ή ωορρηκτική φάση (πιλοτικό RCT) {{mathieu25}}.","Οι δύο συνήθεις επιλογές προγεσταγόνου δεν έχουν συγκριθεί σε μεγάλα RCT για ζώσες γεννήσεις· τα στοιχεία είναι περιορισμένα {{muharam25}}."],
+ refs:["kuang15","guan21","muharam25","filippi23","huang22","mathieu25"]
+},
+{
+ id:"fet-hrt", cat:"fet", name:"Κατεψυγμένη μεταφορά σε κύκλο ορμονικής υποκατάστασης (HRT-FET)", en:"Artificial / HRT cycle frozen embryo transfer",
+ tags:["Πλήρης προγραμματισμός","Χωρίς ωχρινικό σωμάτιο","Παρακολούθηση P4 ορού"],
+ summary:"Προετοιμασία ενδομητρίου με οιστρογόνα και, όταν είναι επαρκές, προγεστερόνη σε καθορισμένη διάρκεια πριν τη μεταφορά. Η ωορρηξία δεν συμβαίνει, άρα όλη η ωχρινική λειτουργία είναι εξωγενής.",
+ snapshot:{supp:"Η εξωγενής E2 αναστέλλει την ανάπτυξη ωοθυλακίου (± αγωνιστής)",dur:"≈ 2–3 εβδομάδες έως ET",ohss:"Κανένας",ag:"—",fresh:"—",who:"Ανωορρηξία/PCOS, λήπτριες ωαρίων, πρόωρη ωοθηκική ανεπάρκεια, ανάγκη προγραμματισμού"},
+ principle:[
+  "Η E2 προκαλεί υπερπλασία του ενδομητρίου και έκφραση υποδοχέων προγεστερόνης. Η προγεστερόνη ανοίγει το «παράθυρο εμφύτευσης», γι' αυτό η μεταφορά προγραμματίζεται με βάση τις ημέρες έκθεσης στην P4.",
+  "Σε ωορρηκτικές γυναίκες, ο ρυθμός ζώσας γέννησης μετά από μία μεταφορά δεν διέφερε μεταξύ φυσικού (37%), τροποποιημένου φυσικού (33%) και τεχνητού κύκλου (34%) {{ho24}}. Η Cochrane του 2025 κρίνει τα στοιχεία αβέβαια για τη σύγκριση φυσικού και ορμονικού κύκλου {{ghobara25}}.",
+  "Χωρίς ωχρινικό σωμάτιο λείπουν ορμόνες όπως η ρελαξίνη. Ο φυσικός κύκλος συνδέθηκε με λιγότερες δυσμενείς μαιευτικές εκβάσεις {{zaat23}}, και σε πρόσφατο RCT η καισαρική ήταν συχνότερη μετά τον τεχνητό κύκλο (42,7% έναντι 20,2%) {{geysen26}}."
+ ],
+ indications:["Ανωορρηξία ή ακανόνιστοι κύκλοι, PCOS (εναλλακτικά κύκλος με λετροζόλη {{bulow25}})","Λήπτριες ωαρίων δότριας, πρόωρη ωοθηκική ανεπάρκεια","Ανάγκη ακριβούς προγραμματισμού (κέντρο ή ασθενής)","Αποτυχία φυσικού κύκλου (ακύρωση, ασαφής ωορρηξία)"],
+ cautions:["Σε ωορρηκτικές γυναίκες ο φυσικός κύκλος είναι εξίσου αποτελεσματικός και πιθανώς ασφαλέστερος μαιευτικά {{ho24;zaat23;geysen26}}","Διαφυγή ωορρηξίας (σπάνια): μέτρησε P4 πριν την έναρξη προγεστερόνης","Λεπτό ενδομήτριο < 7 mm: παράταση οιστρογόνων ή αλλαγή οδού χορήγησης","Μεταβλητή απορρόφηση κολπικής P4: έλεγχος P4 ορού την ημέρα της ET {{labarta22}}"],
+ timeline:{axis:"Ημέρα κύκλου (Η1 = 1η ημέρα περιόδου)",from:0,to:30,ticks:[1,4,8,12,14,16,19,22,26,30],
+  rows:[
+   {label:"Οιστραδιόλη",bars:[{s:1,e:30,c:"acc",t:"E2 βαλερική 6–8 mg/ημ από του στόματος ή διαδερμικά"}]},
+   {label:"Υπέρηχος ± E2/P4",marks:[12]},
+   {label:"Προγεστερόνη",bars:[{s:14,e:30,c:"teal",t:"κολπική 600–800 mg/ημ ή SC 25 mg ή IM 50 mg"}]},
+   {label:"Μεταφορά",events:[{d:19,t:"ET βλαστ. (P+5)"},{d:17,t:"ET Η3 (P+3)"}]},
+   {label:"P4 ορού",marks:[19]},
+   {label:"βhCG",events:[{d:28,t:"τεστ"}]}
+  ]},
+ table:[
+  {when:"Ημέρα 1–3 κύκλου",drug:"Οιστραδιόλη (από του στόματος, διαδερμικά ή κολπικά)",dose:"Π.χ. βαλερική E2 6–8 mg/ημ σταθερή ή κλιμακωτή· διαδερμικά 100–200 μg",why:"Ανάπτυξη ενδομητρίου και καταστολή επιλογής ωοθυλακίου. Στο RCT του Lancet: 8 mg/ημ από την 2η–4η ημέρα {{ho24}}.",expect:"Χωρίς ανάπτυξη ωοθυλακίου· E2 ορού συνήθως > 100 pg/mL"},
+  {when:"Μετά από 10–14 ημέρες E2",drug:"Υπέρηχος ενδομητρίου ± E2, P4, LH",dose:"",why:"Επάρκεια ενδομητρίου και αποκλεισμός ωορρηξίας.",expect:"Ενδομήτριο ≥ 7 mm, τριστρωματικό· P4 < 1,5 ng/mL, χωρίς κυρίαρχο ωοθυλάκιο"},
+  {when:"Όταν ενδομήτριο ≥ 7 mm (P0)",drug:"Προγεστερόνη",dose:"Κολπική μικρονιοποιημένη 600–800 mg/ημ ή γέλη 90 mg × 2, ή υποδόρια 25 mg/ημ, ή ενδομυϊκή 50 mg/ημ",why:"Εκκριτικός μετασχηματισμός. Το RCT χρησιμοποίησε κολπική 800 mg/ημ {{ho24}}.",expect:"Συνεχίζεται και η E2"},
+  {when:"P+3 (4η ημέρα P4) ή P+5 (6η ημέρα P4)",drug:"Μεταφορά εμβρύου Η3 ή βλαστοκύστης",dose:"",why:"Συγχρονισμός εμβρύου και ενδομητρίου.",expect:""},
+  {when:"Ημέρα ET",drug:"P4 ορού",dose:"",why:"Χαμηλή P4 με κολπική χορήγηση συνδέεται με λιγότερες γεννήσεις· η προσθήκη υποδόριας P4 25 mg σε τιμές < 9,2 ng/mL εξίσωσε τον ρυθμό ζώσας γέννησης (44,9% έναντι 45,0%) {{labarta22}}.",expect:"Υψηλές τιμές (> 20–40 ng/mL) δεν συνδέθηκαν με χειρότερη έκβαση {{cozzolino24}}"},
+  {when:"9–11 ημέρες μετά τη μεταφορά βλαστοκύστης",drug:"βhCG ορού",dose:"",why:"",expect:"Αν θετικό: συνέχιση E2 + P4 έως 10–12 εβδομάδες"}
+ ],
+ trigger:["Δεν υπάρχει trigger. Ο χρόνος ορίζεται από την ημέρα έναρξης της προγεστερόνης (P0)."],
+ ohss:"Δεν υπάρχει κίνδυνος OHSS. Ο σημαντικός κίνδυνος είναι μαιευτικός: ο τεχνητός κύκλος συνδέθηκε με υπερτασικές διαταραχές της κύησης σε σύγκριση με τον φυσικό {{zaat23}}.",
+ pearls:["Σε PCOS ή ολιγο-ανωορρηξία, ο διεγερμένος κύκλος με λετροζόλη αποτελεί εναλλακτική του τεχνητού κύκλου· δες τη μετα-ανάλυση {{bulow25}}.","Στο πρόσφατο RCT οι ακυρώσεις ήταν λιγότερες στον φυσικό κύκλο (3,9% έναντι 9,4%) αλλά χρειάστηκαν περισσότερες επισκέψεις {{geysen26}}.","Η ενδομυϊκή P4 50 mg/ημ ή η προσθήκη υποδόριας είναι συνήθεις επιλογές διάσωσης όταν η P4 είναι χαμηλή."],
+ refs:["ho24","ghobara25","zaat23","geysen26","labarta22","cozzolino24","bulow25"]
+}
+];
+
+/* ================= ΦΑΡΜΑΚΑ ================= */
+const DRUGS = [
+ {id:"rfsh",name:"Ανασυνδυασμένη FSH (φολλιτροπίνη άλφα / βήτα)",cls:"Γοναδοτροπίνη",brands:"Gonal-f, Bemfola, Ovaleap (άλφα)· Puregon (βήτα)",mech:"Δρα στους υποδοχείς FSH των κοκκιωδών κυττάρων, διασώζει περισσότερα ωοθυλάκια από την ατρησία και διεγείρει την αρωματάση.",pk:"Ημιζωή ≈ 1–2 ημέρες· σταθερά επίπεδα σε 3–5 ημέρες, γι' αυτό οι αλλαγές δόσης φαίνονται μετά από λίγες ημέρες.",dose:"Συνήθως 150 IU/ημ σε αναμενόμενη φυσιολογική απάντηση· χαμηλότερα σε υψηλή· όχι πάνω από 300 IU/ημ σε χαμηλή απάντηση {{eshre19}}.",use:["antagonist","long-agonist","ppos"],note:"Δεν υπάρχει σαφής διαφορά στις γεννήσεις μεταξύ rFSH και hMG· η επιλογή βασίζεται σε κόστος και διαθεσιμότητα."},
+ {id:"fdelta",name:"Φολλιτροπίνη δέλτα",cls:"Γοναδοτροπίνη (ανθρώπινη κυτταρική σειρά)",brands:"Rekovelle",mech:"Ανασυνδυασμένη FSH με διαφορετικό προφίλ γλυκοζυλίωσης και μεγαλύτερη έκθεση ανά μικρογραμμάριο.",pk:"Δοσολογία σε μg, όχι σε IU.",dose:"Ατομικός αλγόριθμος με βάση AMH και σωματικό βάρος (σταθερή ημερήσια δόση στον πρώτο κύκλο).",use:["antagonist","long-agonist"],note:"Η δοσολογία δεν μεταφέρεται 1:1 από IU άλλων σκευασμάτων."},
+ {id:"hmg",name:"hMG (μενοτροπίνη)",cls:"Γοναδοτροπίνη ούρων με δραστικότητα FSH και LH",brands:"Menopur, Meriofert",mech:"FSH και δραστικότητα LH (κυρίως από hCG) που υποστηρίζει την παραγωγή ανδρογόνων στα θηκικά κύτταρα.",pk:"Ημιζωή παρόμοια με FSH· η συνιστώσα hCG έχει μεγαλύτερη διάρκεια.",dose:"Ίδιο εύρος με τη FSH (ανά IU FSH).",use:["antagonist","long-agonist","ppos"],note:"Χρήσιμη όπου η LH είναι βαθιά κατεσταλμένη (μακρύς αγωνιστής, PPOS με MPA)."},
+ {id:"cori",name:"Κοριφολλιτροπίνη άλφα",cls:"FSH μακράς δράσης",brands:"Elonva",mech:"Αγωνιστής FSH με προέκταση της β-υπομονάδας· μία ένεση καλύπτει τις πρώτες 7 ημέρες.",pk:"Ημιζωή ≈ 3 ημέρες.",dose:"100 μg αν βάρος ≤ 60 kg, 150 μg αν > 60 kg, την Η1· ανταγωνιστής από Η5–6· καθημερινή FSH από Η8 αν χρειάζεται.",use:["antagonist"],note:"Μόνο σε πρωτόκολλο ανταγωνιστή· όχι σε υψηλές αναμενόμενες απαντήτριες."},
+ {id:"antag",name:"Ανταγωνιστές GnRH (γκανιρελίξη, σετρορελίξη)",cls:"Ανάλογα GnRH",brands:"Orgalutran, Fyremadel (γκανιρελίξη)· Cetrotide (σετρορελίξη)",mech:"Ανταγωνιστική δέσμευση του υποδοχέα GnRH της υπόφυσης, πτώση LH σε ώρες.",pk:"Δράση εντός 1–2 ωρών, διάρκεια ≈ 24 ώρες· δεν επιτρέπεται κενό δόσης.",dose:"0,25 mg υποδόρια/ημ από Η5–6 ή όταν ηγετικό ≥ 13–14 mm, έως και την ημέρα του trigger.",use:["antagonist"],note:"Η ώρα χορήγησης να είναι σταθερή· η καθυστέρηση μιας δόσης μπορεί να επιτρέψει αιχμή LH."},
+ {id:"agon",name:"Αγωνιστές GnRH (τριπτορελίνη, λευπρορελίνη, βουσερελίνη)",cls:"Ανάλογα GnRH",brands:"Decapeptyl, Arvekap (τριπτορελίνη)· Suprefact (βουσερελίνη)· σκευάσματα λευπρορελίνης",mech:"Αρχική έξαρση LH/FSH, μετά απευαισθητοποίηση υποδοχέα με συνεχή χορήγηση. Ως εφάπαξ bolus σε ευαίσθητη υπόφυση προκαλεί αιχμή LH (trigger).",pk:"Καθημερινή υποδόρια, ρινική (βουσερελίνη) ή depot.",dose:"Καταστολή: τριπτορελίνη 0,1 mg/ημ ή depot 3,75 mg. Trigger: τριπτορελίνη 0,2 mg εφάπαξ.",use:["long-agonist","antagonist","ppos"],note:"Ως trigger λειτουργεί μόνο σε πρωτόκολλο ανταγωνιστή ή PPOS."},
+ {id:"hcg",name:"hCG (ανασυνδυασμένη ή ούρων)",cls:"Τελική ωρίμανση ωαρίων",brands:"Ovitrelle (r-hCG 250 μg)· Pregnyl (u-hCG)",mech:"Δρα στον υποδοχέα LH και μιμείται την αιχμή LH: επανέναρξη μείωσης, ωχρινοποίηση.",pk:"Ημιζωή > 24 ώρες· δράση για αρκετές ημέρες, γι' αυτό αυξάνει τον OHSS.",dose:"r-hCG 250 μg ή u-hCG 5.000–10.000 IU· 1.000–1.500 IU στο διπλό trigger.",use:["antagonist","long-agonist","ppos"],note:"Ωοληψία 34–36 ώρες μετά. Το τεστ κύησης μπορεί να είναι ψευδώς θετικό για περίπου 10–14 ημέρες."},
+ {id:"mpa",name:"Μεδροξυπρογεστερόνη οξική (MPA)",cls:"Προγεσταγόνο",brands:"Provera",mech:"Ισχυρή προγεσταγονική δράση στον υποθάλαμο: αναστέλλει τη θετική παλίνδρομη ρύθμιση από την E2.",pk:"Από του στόματος· δεν μετριέται στις συνήθεις μεθόδους P4 ορού.",dose:"4–10 mg/ημ από την έναρξη της FSH έως το trigger· 10 mg/ημ στην αρχική μελέτη {{kuang15}}.",use:["ppos"],note:"Βαθύτερη καταστολή LH από τη δυδρογεστερόνη {{muharam25}}."},
+ {id:"dyg",name:"Δυδρογεστερόνη",cls:"Προγεσταγόνο (ρετρο-προγεστερόνη)",brands:"Duphaston",mech:"Εκλεκτικός αγωνιστής υποδοχέα προγεστερόνης· στην PPOS ηπιότερη καταστολή LH.",pk:"Από του στόματος· δεν ανιχνεύεται στις συνήθεις μεθόδους P4 ορού.",dose:"PPOS: 20 mg/ημ. Ωχρινική στήριξη: 10 mg × 3/ημ.",use:["ppos","antagonist","long-agonist"],note:"Από του στόματος επιλογή για ωχρινική στήριξη σε φρέσκιους κύκλους."},
+ {id:"prog",name:"Μικρονιοποιημένη προγεστερόνη",cls:"Φυσική προγεστερόνη",brands:"Utrogestan (κάψουλες), Crinone (κολπική γέλη 8%), Prolutex (υποδόρια 25 mg), ενδομυϊκά σκευάσματα",mech:"Εκκριτικός μετασχηματισμός ενδομητρίου και διατήρηση της πρώιμης κύησης.",pk:"Κολπική: υψηλή συγκέντρωση στη μήτρα με χαμηλότερη P4 ορού· υποδόρια και ενδομυϊκή: υψηλότερη και σταθερότερη P4 ορού.",dose:"Κολπική 600–800 mg/ημ ή γέλη 90 mg 1–2 φορές· υποδόρια 25 mg 1–2 φορές· ενδομυϊκή 50 mg/ημ.",use:["antagonist","long-agonist","fet-hrt"],note:"Σε HRT-FET με P4 ορού < 9,2 ng/mL την ημέρα της ET, η προσθήκη 25 mg υποδόρια βελτίωσε την έκβαση σε αναδρομική μελέτη {{labarta22}}."},
+ {id:"e2",name:"Οιστραδιόλη (βαλερική, ημιυδρική, διαδερμική)",cls:"Οιστρογόνο",brands:"Σκευάσματα βαλερικής οιστραδιόλης 2 mg, διαδερμικά έμπλαστρα ή γέλη (ελέγξτε διαθεσιμότητα)",mech:"Πολλαπλασιασμός ενδομητρίου, έκφραση υποδοχέων P4, καταστολή FSH και επιλογής ωοθυλακίου.",pk:"Από του στόματος: ηπατικός μεταβολισμός πρώτης διόδου· διαδερμικά: σταθερότερα επίπεδα.",dose:"6–8 mg/ημ από του στόματος ή 100–200 μg διαδερμικά· 8 mg/ημ στο RCT {{ho24}}.",use:["fet-hrt"],note:"Αξιολόγησε θρομβοεμβολικό κίνδυνο (ιστορικό, θρομβοφιλία, ΔΜΣ)."}
+];
+
+/* ================= ΜΕΛΕΤΕΣ ΜΕ ΑΝΤΙΚΤΥΠΟ ================= */
+const STUDIES = [
+ {ref:"eshre25",yr:2026,type:"Κατευθυντήρια οδηγία",tags:["antagonist","long-agonist","ppos"],title:"Ενημέρωση ESHRE 2025 για τη διέγερση ωοθηκών",pico:"Όλες οι γυναίκες σε IVF/ICSI· βιβλιογραφία Νοέμβριος 2018 έως Φεβρουάριος 2025.",find:"121 συστάσεις (46 νέες, 29 αναθεωρημένες), με νέα κεφάλαια για ογκολογική και κοινωνική κρυοσυντήρηση και δωρεά ωαρίων. Καμία σύσταση δεν στηρίζεται σε στοιχεία υψηλής ποιότητας.",impact:"Νέο σημείο αναφοράς για κάθε πρωτόκολλο. Πολλές νεότερες παρεμβάσεις έλαβαν σύσταση κατά ή «μόνο για έρευνα».",crit:"Η πλειονότητα των συστάσεων βασίζεται σε στοιχεία πολύ χαμηλής ποιότητας· χρειάζεται τοπική προσαρμογή."},
+ {ref:"geysen26",yr:2026,type:"RCT",tags:["fet-hrt"],title:"Φυσικός έναντι τεχνητού κύκλου για FET σε ωορρηκτικές γυναίκες",pico:"P: ωορρηκτικές γυναίκες για FET· I: φυσικός κύκλος· C: τεχνητός κύκλος· O: κλινική κύηση με καρδιακή λειτουργία.",find:"Παρόμοια κλινική κύηση (33,1% έναντι 28,9%). Λιγότερες ακυρώσεις στον φυσικό (3,9% έναντι 9,4%) αλλά περισσότερες επισκέψεις. Καισαρική 42,7% στον τεχνητό έναντι 20,2%.",impact:"Ενισχύει τον φυσικό κύκλο ως πρώτη επιλογή σε ωορρηκτικές γυναίκες.",crit:"Μη τυφλή μελέτη· η διαφορά στην καισαρική μπορεί να επηρεάζεται από πρακτικές τοκετού."},
+ {ref:"ho24",yr:2024,type:"RCT (Lancet)",tags:["fet-hrt"],title:"Φυσικός, τροποποιημένος φυσικός ή τεχνητός κύκλος για FET",pico:"1.428 ωορρηκτικές γυναίκες 18–45 ετών· ζώσα γέννηση μετά από μία FET.",find:"Ζώσα γέννηση 37% (φυσικός), 33% (τροποποιημένος), 34% (τεχνητός), χωρίς σημαντική διαφορά. 99 ακυρώσεις σε κάθε ομάδα φυσικού κύκλου, καμία στον τεχνητό.",impact:"Η αποτελεσματικότητα δεν καθορίζει την επιλογή· σημασία έχουν η ασφάλεια, η ευελιξία και η προτίμηση.",crit:"Ανεπαρκής ισχύς για μαιευτικές εκβάσεις· μεταφέρθηκαν και έμβρυα Η3."},
+ {ref:"ghobara25",yr:2025,type:"Ανασκόπηση Cochrane",tags:["fet-hrt"],title:"Σχήματα προετοιμασίας ενδομητρίου πριν από FET",pico:"32 RCT, 6.352 γυναίκες.",find:"Αβέβαιη διαφορά στη ζώσα γέννηση μεταξύ φυσικού και ορμονικού κύκλου (OR 1,18· χαμηλή βεβαιότητα). Συχνή ελλιπής αναφορά κλινικών εκβάσεων.",impact:"Δεν υπάρχει ένα «καλύτερο» σχήμα· η επιλογή εξατομικεύεται.",crit:"Η ανασκόπηση δεν περιλαμβάνει όλα τα πιο πρόσφατα RCT."},
+ {ref:"venetis23",yr:2023,type:"Μετα-ανάλυση δικτύου",tags:["antagonist"],title:"Ποιο σχήμα ανταγωνιστή είναι το καλύτερο;",pico:"75 μελέτες· σταθερό έναντι ευέλικτου, γκανιρελίξη έναντι σετρορελίξης, με ή χωρίς προθεραπεία.",find:"Το ευέλικτο σχήμα είχε χαμηλότερη συνεχιζόμενη κύηση (RR 0,76). Η προθεραπεία με αντισυλληπτικό μείωσε τη συνεχιζόμενη κύηση (RR 0,79). Το σταθερό χωρίς προθεραπεία κατατάχθηκε πρώτο.",impact:"Υποστηρίζει σταθερή έναρξη ανταγωνιστή και αποφυγή ρουτίνας αντισυλληπτικού.",crit:"Τα περισσότερα RCT χαμηλής ποιότητας· λίγα στοιχεία για ζώσες γεννήσεις."},
+ {ref:"labarta22",yr:2022,type:"Αναδρομική κοορτή",tags:["fet-hrt"],title:"Εξατομικευμένη ωχρινική στήριξη όταν η P4 είναι χαμηλή",pico:"2.275 μεταφορές βλαστοκύστης σε τεχνητό κύκλο με κολπική P4.",find:"Με προσθήκη υποδόριας P4 25 mg σε P4 < 9,2 ng/mL, η ζώσα γέννηση ήταν 44,9%, ίδια με όσες είχαν επαρκή P4 (45,0%), και υψηλότερη από ιστορική ομάδα χωρίς διάσωση (37,3%).",impact:"Στηρίζει τη μέτρηση P4 την ημέρα της ET και τη διάσωση.",crit:"Αναδρομική μελέτη με ιστορική ομάδα ελέγχου, ένα κέντρο."},
+ {ref:"stormlund20",yr:2020,type:"RCT (BMJ)",tags:["antagonist"],title:"Freeze-all έναντι φρέσκιας μεταφοράς σε κανονικούς κύκλους",pico:"460 γυναίκες 18–39 ετών με κανονικούς κύκλους.",find:"Χωρίς διαφορά στη συνεχιζόμενη κύηση (27,8% έναντι 29,6%) ή στη ζώσα γέννηση. Μεγαλύτερος χρόνος έως την κύηση με freeze-all.",impact:"Το freeze-all χωρίς ένδειξη δεν προσφέρει όφελος σε φυσιολογικές απαντήτριες.",crit:"Μία μόνο μεταφορά βλαστοκύστης· δεν αφορά PCOS."},
+ {ref:"guan21",yr:2021,type:"Μετα-ανάλυση RCT",tags:["ppos"],title:"PPOS έναντι συμβατικών πρωτοκόλλων",pico:"RCT με PPOS έναντι αναλόγων GnRH.",find:"Ίδια κλινική κύηση και ζώσα γέννηση· λιγότερος OHSS (RR 0,52). Σε χαμηλή εφεδρεία, πολύ λιγότερες πρόωρες αιχμές LH.",impact:"Η PPOS είναι αξιόπιστη επιλογή όταν σχεδιάζεται freeze-all.",crit:"Ετερογενή σχήματα και πληθυσμοί, κυρίως από την Κίνα."}
+];
+
+/* ================= ΒΟΗΘΗΤΙΚΑ ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function cite(txt){
+  return String(txt).replace(/\{\{([^}]+)\}\}/g,(m,keys)=>{
+    const parts = keys.split(";").map(k=>k.trim()).filter(k=>REFS[k]);
+    return "(" + parts.map(k=>`<a class="cite" href="#refs" title="${esc(REFS[k].apa.replace(/<[^>]+>/g,""))}">${esc(REFS[k].cite)}</a>`).join("; ") + ")";
+  });
+}
+function refItem(k){const r=REFS[k];return `<li>${r.apa} <a href="https://doi.org/${r.doi}" target="_blank" rel="noopener">https://doi.org/${r.doi}</a></li>`;}
+function sortedRefKeys(keys){return [...new Set(keys)].sort((a,b)=>REFS[a].apa.replace(/<[^>]+>/g,"").localeCompare(REFS[b].apa.replace(/<[^>]+>/g,""),"en"));}
+const PROTO_BY_ID = Object.fromEntries(PROTOCOLS.map(p=>[p.id,p]));
+
+/* ================= ΠΛΟΗΓΗΣΗ ================= */
+function navHTML(cur){
+  const L=(h,t,sub)=>`<a class="navlink${sub?" sub":""}${cur===h?" on":""}" href="#${h}">${t}</a>`;
+  return `<div class="navgrp">Οδηγός</div>${L("home","Αρχική")}${L("protocols","Πρωτόκολλα")}
+   ${PROTOCOLS.map(p=>L("p-"+p.id,p.name.replace("Κατεψυγμένη μεταφορά σε κύκλο ορμονικής υποκατάστασης (HRT-FET)","HRT-FET"),1)).join("")}
+   ${L("drugs","Φαρμακολογία")}${L("studies","Νέες μελέτες")}
+   <div class="navgrp">Κλινική</div>${L("tracker","Καρτέλα παρακολούθησης")}
+   <div class="navgrp">Πληροφορίες</div>${L("refs","Βιβλιογραφία")}${L("about","Μεθοδολογία και επόμενα βήματα")}`;
+}
+function route(){
+  const h=(location.hash||"#home").slice(1);
+  $("#navlinks").innerHTML=navHTML(h.startsWith("p-")?h:h);
+  $("#side").classList.remove("open");
+  const v=$("#view");
+  if(h==="protocols") v.innerHTML=pageProtocols();
+  else if(h.startsWith("p-") && PROTO_BY_ID[h.slice(2)]) v.innerHTML=pageProtocol(PROTO_BY_ID[h.slice(2)]);
+  else if(h==="drugs") v.innerHTML=pageDrugs();
+  else if(h==="studies") v.innerHTML=pageStudies("all");
+  else if(h==="tracker") {v.innerHTML=pageTracker(); bindTracker();}
+  else if(h==="refs") v.innerHTML=pageRefs();
+  else if(h==="about") v.innerHTML=pageAbout();
+  else v.innerHTML=pageHome();
+  window.scrollTo(0,0);
+}
+
+/* ================= ΣΕΛΙΔΕΣ ================= */
+function pageHome(){
+  return `<h1>Πρωτόκολλα Εξωσωματικής</h1>
+  <p class="lede">Οδηγός για γυναικολόγους που εφαρμόζουν ή εκπαιδεύονται στην ιατρική αναπαραγωγής: κάθε πρωτόκολλο με τον λόγο ύπαρξης κάθε φαρμάκου, το χρονοδιάγραμμα, τι περιμένουμε στις μετρήσεις και τα στοιχεία που το στηρίζουν, μαζί με καρτέλα παρακολούθησης κύκλου.</p>
+  <div class="grid g3">
+   <a class="card" href="#protocols"><h3>Πρωτόκολλα</h3><p class="muted small">${PROTOCOLS.length} πρωτόκολλα στην 1η φάση, με πίνακα φαρμάκων, χρονοδιάγραμμα και τεκμηρίωση.</p></a>
+   <a class="card" href="#drugs"><h3>Φαρμακολογία</h3><p class="muted small">${DRUGS.length} κάρτες φαρμάκων: μηχανισμός, φαρμακοκινητική, δόσεις, σκευάσματα.</p></a>
+   <a class="card" href="#studies"><h3>Νέες μελέτες</h3><p class="muted small">${STUDIES.length} μελέτες με PICO, ευρήματα, αντίκτυπο και κριτική.</p></a>
+   <a class="card" href="#tracker"><h3>Καρτέλα παρακολούθησης</h3><p class="muted small">Ωοθυλάκια ανά ωοθήκη, ορμόνες, ειδοποιήσεις για trigger, OHSS, P4 και ώρα ωοληψίας. Τα δεδομένα μένουν μόνο στη συσκευή.</p></a>
+  </div>
+  <div class="callout acc"><p><b>Τελευταίος έλεγχος βιβλιογραφίας:</b> 21 Νοεμβρίου 2026, με βάση την ενημέρωση ESHRE 2025 ${cite("{{eshre25}}")} και πρόσφατα RCT και μετα-αναλύσεις.</p></div>
+  <div class="callout warn"><p>Εκπαιδευτικό εργαλείο για επαγγελματίες υγείας. Οι δόσεις και τα όρια είναι ενδεικτικά· η κλινική απόφαση και τα πρωτόκολλα του κέντρου υπερισχύουν.</p></div>`;
+}
+function pageProtocols(){
+  return `<h1>Πρωτόκολλα</h1><p class="lede">Σύγκριση με μια ματιά. Πάτησε ένα πρωτόκολλο για την πλήρη ανάλυση.</p>
+  <div class="tblwrap"><table><thead><tr><th>Πρωτόκολλο</th><th>Καταστολή LH</th><th>Διάρκεια</th><th>Κίνδυνος OHSS</th><th>Trigger με αγωνιστή</th><th>Φρέσκια ET</th><th>Τυπικές υποψήφιες</th></tr></thead><tbody>
+  ${PROTOCOLS.map(p=>`<tr><td><a href="#p-${p.id}"><b>${esc(p.name)}</b></a><div class="muted small">${esc(p.en)}</div></td><td>${esc(p.snapshot.supp)}</td><td>${esc(p.snapshot.dur)}</td><td>${chipLevel(p.snapshot.ohss)}</td><td>${esc(p.snapshot.ag)}</td><td>${esc(p.snapshot.fresh)}</td><td>${esc(p.snapshot.who)}</td></tr>`).join("")}
+  </tbody></table></div>
+  <div class="grid g2" style="margin-top:16px">${PROTOCOLS.map(p=>`<a class="card" href="#p-${p.id}"><h3>${esc(p.name)}</h3><div>${p.tags.map(t=>`<span class="chip acc">${esc(t)}</span>`).join("")}</div><p class="small">${esc(p.summary)}</p></a>`).join("")}</div>
+  <p class="muted small">Επόμενη φάση: short/flare, υπερ-μακρύ αγωνιστή, ήπια διέγερση, φυσικό και τροποποιημένο φυσικό κύκλο, DuoStim, τυχαία έναρξη, IVM, στρατηγικές POSEIDON, FET σε φυσικό και διεγερμένο κύκλο.</p>`;
+}
+function chipLevel(v){const m={"Χαμηλός":"ok","Υψηλότερος":"warn","Κανένας":"ok"};return `<span class="chip ${m[v]||""}">${esc(v)}</span>`;}
+
+function timelineSVG(tl){
+  const W=900,lw=150,rh=40,top=10,H=top+tl.rows.length*rh+38;
+  const x=d=>lw+ (d-tl.from)/(tl.to-tl.from)*(W-lw-20);
+  const col={acc:"var(--accent)",teal:"var(--teal)",ok:"var(--ok)",line:"var(--ink-3)"};
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Χρονοδιάγραμμα πρωτοκόλλου">`;
+  tl.ticks.forEach(t=>{s+=`<line x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${H-30}" stroke="var(--line)"/><text x="${x(t)}" y="${H-14}" font-size="12" text-anchor="middle">${t}</text>`;});
+  tl.rows.forEach((r,i)=>{
+    const y=top+i*rh;
+    s+=`<text x="0" y="${y+24}" font-size="13" font-weight="600" style="fill:var(--ink)">${esc(r.label)}</text>`;
+    (r.bars||[]).forEach(b=>{
+      const c=col[b.c]||col.acc, w=Math.max(4,x(b.e)-x(b.s));
+      s+= b.dash? `<rect x="${x(b.s)}" y="${y+28}" width="${w}" height="5" rx="2" fill="none" stroke="${c}" stroke-dasharray="4 3"/>`
+                : `<rect x="${x(b.s)}" y="${y+8}" width="${w}" height="20" rx="4" fill="${c}" opacity=".88"/>`;
+      if(b.t) s+=`<text x="${x(b.s)+6}" y="${y+22}" font-size="11.5" style="fill:#fff;font-weight:600">${esc(b.t)}</text>`;
+    });
+    (r.marks||[]).forEach(d=>{s+=`<circle cx="${x(d)}" cy="${y+18}" r="6" fill="var(--card)" stroke="var(--teal)" stroke-width="2.5"/>`;});
+    (r.events||[]).forEach(e=>{s+=`<path d="M${x(e.d)} ${y+8} l7 10 l-7 10 l-7 -10z" fill="var(--crit)"/><text x="${x(e.d)+10}" y="${y+23}" font-size="12" style="fill:var(--ink);font-weight:600">${esc(e.t)}</text>`;});
+  });
+  s+=`<text x="${lw}" y="${H-1}" font-size="11.5" style="fill:var(--ink-3)">${esc(tl.axis)}</text></svg>`;
+  return s;
+}
+function pageProtocol(p){
+  return `<p class="small muted"><a href="#protocols">Πρωτόκολλα</a> / ${esc(p.en)}</p>
+  <h1>${esc(p.name)}</h1><div>${p.tags.map(t=>`<span class="chip acc">${esc(t)}</span>`).join("")}</div>
+  <p class="lede" style="margin-top:10px">${esc(p.summary)}</p>
+  <div class="kpis">
+   <div class="kpi"><div class="l">Καταστολή LH</div><div class="small"><b>${esc(p.snapshot.supp)}</b></div></div>
+   <div class="kpi"><div class="l">Διάρκεια</div><div class="small"><b>${esc(p.snapshot.dur)}</b></div></div>
+   <div class="kpi"><div class="l">Κίνδυνος OHSS</div><div>${chipLevel(p.snapshot.ohss)}</div></div>
+   <div class="kpi"><div class="l">Trigger αγωνιστή / Φρέσκια ET</div><div class="small"><b>${esc(p.snapshot.ag)} / ${esc(p.snapshot.fresh)}</b></div></div>
+  </div>
+  <h2>Χρονοδιάγραμμα</h2><div class="timeline">${timelineSVG(p.timeline)}</div>
+  <p class="muted small">Κύκλοι: επισκέψεις παρακολούθησης· ρόμβοι: trigger, ωοληψία, μεταφορά· διακεκομμένη γραμμή: ευέλικτη έναρξη.</p>
+  <h2>Πώς λειτουργεί</h2>${p.principle.map(t=>`<p>${cite(esc(t).replace(/\{\{/g,"{{"))}</p>`).join("")}
+  <h2>Πίνακας φαρμάκων και παρακολούθησης</h2>
+  <div class="tblwrap"><table><thead><tr><th>Πότε</th><th>Τι δίνουμε / κάνουμε</th><th>Δόση</th><th>Γιατί</th><th>Τι περιμένουμε να δούμε</th></tr></thead><tbody>
+  ${p.table.map(r=>`<tr><td class="when">${esc(r.when)}</td><td><span class="drug">${esc(r.drug)}</span></td><td>${esc(r.dose)}</td><td>${cite(esc(r.why))}</td><td>${cite(esc(r.expect))}</td></tr>`).join("")}
+  </tbody></table></div>
+  <div class="grid g2" style="margin-top:14px">
+   <div class="card"><h3>Ενδείξεις</h3><ul>${p.indications.map(t=>`<li>${cite(esc(t))}</li>`).join("")}</ul></div>
+   <div class="card"><h3>Προσοχή</h3><ul>${p.cautions.map(t=>`<li>${cite(esc(t))}</li>`).join("")}</ul></div>
+  </div>
+  <h2>Τελική ωρίμανση (trigger)</h2>${p.trigger.map(t=>`<p>${cite(t)}</p>`).join("")}
+  <div class="callout crit"><p><b>OHSS:</b> ${cite(esc(p.ohss))}</p></div>
+  <h2>Κλινικά σημεία</h2><ul>${p.pearls.map(t=>`<li>${cite(esc(t))}</li>`).join("")}</ul>
+  <h2>Φάρμακα του πρωτοκόλλου</h2><div>${DRUGS.filter(d=>d.use.includes(p.id)).map(d=>`<a class="chip teal" href="#drugs" style="text-decoration:none">${esc(d.name)}</a>`).join("")}</div>
+  <h2>Βιβλιογραφία</h2><ul class="reflist">${sortedRefKeys(p.refs).map(refItem).join("")}</ul>`;
+}
+function pageDrugs(){
+  return `<h1>Φαρμακολογία</h1><p class="lede">Γιατί δίνουμε κάθε φάρμακο: μηχανισμός, φαρμακοκινητική και πώς μεταφράζονται σε κλινικές αποφάσεις. Τα σκευάσματα είναι ενδεικτικά· έλεγξε διαθεσιμότητα και ΠΧΠ.</p>
+  ${DRUGS.map(d=>`<details class="acc"><summary>${esc(d.name)} <span class="chip">${esc(d.cls)}</span></summary>
+   <p><b>Σκευάσματα:</b> ${esc(d.brands)}</p><p><b>Μηχανισμός:</b> ${esc(d.mech)}</p><p><b>Φαρμακοκινητική:</b> ${esc(d.pk)}</p>
+   <p><b>Δόσεις:</b> ${cite(esc(d.dose))}</p><p><b>Σημείωση:</b> ${cite(esc(d.note))}</p>
+   <p>${d.use.filter(u=>PROTO_BY_ID[u]).map(u=>`<a class="chip acc" style="text-decoration:none" href="#p-${u}">${esc(PROTO_BY_ID[u].name)}</a>`).join("")}</p></details>`).join("")}`;
+}
+function pageStudies(f){
+  const list=STUDIES.filter(s=>f==="all"||s.tags.includes(f)).sort((a,b)=>b.yr-a.yr);
+  return `<h1>Νέες μελέτες με αντίκτυπο</h1><p class="lede">Μελέτες που άλλαξαν ή επιβεβαίωσαν την πρακτική. Κάθε κάρτα: ερώτημα (PICO), ευρήματα, τι αλλάζει στην πράξη, και κριτική ανάγνωση.</p>
+  <div class="tabs">${[["all","Όλες"],...PROTOCOLS.map(p=>[p.id,p.name.split(" (")[0].replace("Κατεψυγμένη μεταφορά σε κύκλο ορμονικής υποκατάστασης","HRT-FET")])].map(([k,t])=>`<button class="tab${f===k?" on":""}" onclick="document.getElementById('view').innerHTML=pageStudies('${k}')">${esc(t)}</button>`).join("")}</div>
+  <div class="grid g2">${list.map(s=>`<div class="card"><div><span class="chip acc">${esc(s.type)}</span><span class="chip">${s.yr}</span></div>
+   <h3>${esc(s.title)}</h3><p class="small"><b>PICO:</b> ${esc(s.pico)}</p><p class="small"><b>Ευρήματα:</b> ${esc(s.find)}</p>
+   <div class="callout" style="margin:8px 0"><p class="small"><b>Αντίκτυπος:</b> ${esc(s.impact)}</p></div>
+   <p class="small muted"><b>Κριτική:</b> ${esc(s.crit)}</p><p class="small">${cite("{{"+s.ref+"}}")} · <a href="https://doi.org/${REFS[s.ref].doi}" target="_blank" rel="noopener">DOI</a></p></div>`).join("")}</div>`;
+}
+function pageRefs(){
+  const keys=sortedRefKeys(Object.keys(REFS));
+  return `<h1>Βιβλιογραφία</h1><p class="lede">Όλες οι πηγές σε μορφή APA 7. Τα μεταδεδομένα ελέγχθηκαν στο PubMed στις 21 Νοεμβρίου 2026.</p><ul class="reflist">${keys.map(refItem).join("")}</ul>`;
+}
+function pageAbout(){
+  return `<h1>Μεθοδολογία και επόμενα βήματα</h1>
+  <h2>Πώς γράφτηκε το περιεχόμενο</h2><p>Βάση είναι οι κατευθυντήριες οδηγίες ESHRE για τη διέγερση ωοθηκών ${cite("{{eshre19;eshre25}}")}, ανασκοπήσεις Cochrane και RCT ή μετα-αναλύσεις που αναζητήθηκαν στο PubMed. Όπου η τεκμηρίωση είναι αδύναμη, αναφέρεται. Οι δόσεις δίνονται ως εύρη που χρησιμοποιούνται στην κλινική πράξη και στις μελέτες.</p>
+  <h2>Καρτέλα παρακολούθησης και GDPR</h2><p>Τα δεδομένα αποθηκεύονται μόνο στον browser αυτής της συσκευής (localStorage). Δεν αποστέλλονται πουθενά. Αν καθαριστούν τα δεδομένα του browser χάνονται· χρησιμοποίησε τακτικά το αντίγραφο ασφαλείας. Προτείνεται κωδικός αντί για ονοματεπώνυμο.</p>
+  <h2>Οδικός χάρτης</h2><ol><li><b>Φάση 1 (τώρα):</b> ανταγωνιστής, μακρύς αγωνιστής, PPOS, HRT-FET, φαρμακολογία, καρτέλα.</li><li><b>Φάση 2:</b> υπόλοιπα πρωτόκολλα διέγερσης και FET, επιπλέον φάρμακα (λετροζόλη, κλομιφαίνη, LH, adjuvants).</li><li><b>Φάση 3:</b> επέκταση των μελετών με συστηματική αναζήτηση.</li><li><b>Φάση 4:</b> υπολογιστές (αρχική δόση FSH, FORT/FOI), quiz ανά πρωτόκολλο.</li></ol>`;
+}
+
+/* ================= ΚΑΡΤΕΛΑ ΠΑΡΑΚΟΛΟΥΘΗΣΗΣ ================= */
+const KEY="ivfprot.v1";
+const DEFCFG={trigN:3,trigSize:17,ohssN:18,ohssSize:11,e2Ohss:3500,p4Trig:1.5,lhSurge:10,antFix:5,antFlex:14,endoMin:7,p4ET:9.2,opuH:35};
+let DB={patients:[],cfg:{...DEFCFG}}, CUR=null, STORAGE_OK=true;
+function load(){try{const r=localStorage.getItem(KEY);if(r){DB=JSON.parse(r);DB.cfg={...DEFCFG,...(DB.cfg||{})};}else{DB.patients=[examplePatient()];}}catch(e){STORAGE_OK=false;DB.patients=[examplePatient()];}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));STORAGE_OK=true;}catch(e){STORAGE_OK=false;}}
+function uid(){return Math.random().toString(36).slice(2,9);}
+function isoAdd(d,n){const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);}
+function examplePatient(){
+  const s=isoAdd(new Date().toISOString().slice(0,10),-9);
+  return {id:uid(),code:"ΠΑΡΑΔΕΙΓΜΑ-01",example:true,age:33,bmi:23,amh:3.1,afc:16,prevOoc:"",dx:"Σαλπιγγικός παράγοντας",proto:"antagonist",start:s,fsh:"150 IU rFSH",trig:"",notes:"Παράδειγμα για επίδειξη. Μπορείς να το διαγράψεις.",
+   visits:[
+    {id:uid(),date:s,type:"base",e2:38,lh:5.2,p4:0.4,endo:4.5,pat:"",R:"",L:"",drugs:"rFSH 150 IU"},
+    {id:uid(),date:isoAdd(s,4),type:"mon",e2:420,lh:3.1,p4:0.5,endo:7.2,pat:"τριστρωματικό",R:"12,11,10,10,9",L:"11,10,10,9",drugs:"rFSH 150 + γκανιρελίξη 0,25"},
+    {id:uid(),date:isoAdd(s,6),type:"mon",e2:1150,lh:1.8,p4:0.7,endo:8.6,pat:"τριστρωματικό",R:"15,14,13,12,11,10",L:"14,13,12,11,10",drugs:"rFSH 150 + γκανιρελίξη 0,25"},
+    {id:uid(),date:isoAdd(s,8),type:"mon",e2:2350,lh:1.5,p4:0.9,endo:9.8,pat:"τριστρωματικό",R:"18,17,16,15,13,12",L:"17,16,15,14,12",drugs:"rFSH 150 + γκανιρελίξη 0,25"}
+   ]};
+}
+function sizes(v){return [...String(v.R||"").split(/[,\s;]+/),...String(v.L||"").split(/[,\s;]+/)].map(Number).filter(n=>n>0);}
+function sizesSide(s){return String(s||"").split(/[,\s;]+/).map(Number).filter(n=>n>0);}
+function dayOf(p,v){if(!p.start||!v.date)return "";return Math.round((new Date(v.date+"T12:00:00")-new Date(p.start+"T12:00:00"))/864e5)+1;}
+function poseidon(p){
+  const low=(p.amh!==""&&+p.amh<1.2)||(p.afc!==""&&+p.afc<5), old=+p.age>=35, prev=p.prevOoc===""?null:+p.prevOoc;
+  if(p.age===""||(p.amh===""&&p.afc==="")) return {g:"—",t:"Συμπλήρωσε ηλικία και AMH ή AFC"};
+  if(low) return {g:old?"Ομάδα 4":"Ομάδα 3",t:`${old?"≥ 35":"< 35"} ετών, χαμηλή εφεδρεία (AMH < 1,2 ng/mL ή AFC < 5)`};
+  if(prev!==null&&prev<=9) return {g:(old?"Ομάδα 2":"Ομάδα 1")+(prev<4?"a":"b"),t:`Επαρκής εφεδρεία με απρόσμενα ${prev<4?"χαμηλή (< 4 ωάρια)":"υποβέλτιστη (4–9 ωάρια)"} απάντηση σε προηγούμενο κύκλο`};
+  return {g:"Εκτός POSEIDON",t:"Επαρκής εφεδρεία χωρίς ιστορικό χαμηλής απάντησης"};
+}
+function alertsFor(p){
+  const c=DB.cfg, out=[], vs=[...p.visits].sort((a,b)=>a.date.localeCompare(b.date)), v=vs[vs.length-1];
+  const proto=p.proto, stim=["antagonist","long-agonist","ppos","other-stim"].includes(proto);
+  if(proto==="ppos") out.push(["info","Freeze-all υποχρεωτικό","Στην PPOS το ενδομήτριο δεν είναι δεκτικό· δεν γίνεται φρέσκια μεταφορά."]);
+  if(!v) {out.push(["info","Καμία επίσκεψη","Πρόσθεσε την πρώτη επίσκεψη για να ενεργοποιηθούν οι ειδοποιήσεις."]);return out;}
+  const s=sizes(v), d=dayOf(p,v), lead=s.length?Math.max(...s):0;
+  const nT=s.filter(x=>x>=c.trigSize).length, nO=s.filter(x=>x>=c.ohssSize).length;
+  if(stim){
+    if(proto==="long-agonist"&&(v.type==="down"||d<=0)){
+      const bad=[]; if(+v.e2>50)bad.push("E2 > 50 pg/mL"); if(+v.endo>5)bad.push("ενδομήτριο > 5 mm"); if(+v.lh>=5)bad.push("LH ≥ 5 IU/L"); if(lead>10)bad.push("κύστη/ωοθυλάκιο > 10 mm");
+      out.push(bad.length?["warn","Ατελής καταστολή",bad.join(", ")+". Συνέχισε τον αγωνιστή και επανέλεγξε σε 5–7 ημέρες."]:["ok","Επαρκής καταστολή","Μπορεί να ξεκινήσει η διέγερση με γοναδοτροπίνες."]);
+      return out;
+    }
+    if(nO>=c.ohssN||(+v.e2>=c.e2Ohss)){
+      const why=[nO>=c.ohssN?`${nO} ωοθυλάκια ≥ ${c.ohssSize} mm`:"",(+v.e2>=c.e2Ohss)?`E2 ${v.e2} pg/mL`:""].filter(Boolean).join(", ");
+      out.push(["crit","Υψηλός κίνδυνος OHSS",why+". "+(proto==="long-agonist"?"Trigger με αγωνιστή δεν είναι εφικτό: εξέτασε μειωμένη δόση hCG, freeze-all, καβεργολίνη ή ακύρωση.":"Εξέτασε trigger με αγωνιστή GnRH και freeze-all.")]);
+    }
+    if(nT>=c.trigN) out.push(["ok","Πληρούνται κριτήρια trigger",`${nT} ωοθυλάκια ≥ ${c.trigSize} mm. Ωοληψία ${c.opuH} ώρες μετά το trigger.`]);
+    else if(lead>=c.trigSize) out.push(["info","Πλησιάζει το trigger",`Ηγετικό ${lead} mm, ${nT}/${c.trigN} ωοθυλάκια στο όριο. Επανέλεγχος σε 1–2 ημέρες.`]);
+    if(proto==="antagonist"&&(d>=c.antFix||lead>=c.antFlex)) out.push(["warn","Ανταγωνιστής",`Ημέρα διέγερσης ${d}, ηγετικό ${lead||"–"} mm: βεβαιώσου ότι χορηγείται ανταγωνιστής καθημερινά (σταθερό από Η${c.antFix} ή ευέλικτο από ${c.antFlex} mm).`]);
+    if(v.lh!==""&&+v.lh>=c.lhSurge&&proto!=="ppos") out.push(["crit","Πιθανή πρόωρη άνοδος LH",`LH ${v.lh} IU/L. Επανέλεγχος άμεσα· εξέτασε άμεσο trigger ή ακύρωση ανάλογα με το μέγεθος.`]);
+    if(v.lh!==""&&+v.lh>=c.lhSurge&&proto==="ppos") out.push(["warn","Άνοδος LH σε PPOS",`LH ${v.lh} IU/L. Έλεγξε συμμόρφωση στο προγεσταγόνο και τη δυναμική της LH.`]);
+    if(v.p4!==""&&+v.p4>=c.p4Trig&&proto!=="ppos") out.push(["warn","Αυξημένη P4",`P4 ${v.p4} ng/mL. Αν επιμένει την ημέρα του trigger, εξέτασε freeze-all.`]);
+    if(s.length&&nT&&v.e2) out.push(["info","E2 ανά ωοθυλάκιο ≥ 14 mm",`${Math.round(+v.e2/Math.max(1,s.filter(x=>x>=14).length))} pg/mL (αναμενόμενο περίπου 200–300 σε ώριμα ωοθυλάκια).`]);
+  }
+  if(proto==="fet-hrt"){
+    if(v.type==="et"){
+      if(v.p4!==""&&+v.p4<c.p4ET) out.push(["warn","Χαμηλή P4 την ημέρα της ET",`P4 ${v.p4} ng/mL < ${c.p4ET}. Εξέτασε εξατομικευμένη ενίσχυση (π.χ. P4 25 mg υποδόρια).`]);
+      else if(v.p4!=="") out.push(["ok","Επαρκής P4 την ημέρα της ET",`P4 ${v.p4} ng/mL.`]);
+    } else {
+      if(v.p4!==""&&+v.p4>=1.5&&v.type!=="pp") out.push(["warn","P4 ≥ 1,5 πριν την προγεστερόνη","Πιθανή διαφυγή ωορρηξίας: εξέτασε μετάθεση της ET ή ακύρωση."]);
+      if(v.endo!==""&&+v.endo>=c.endoMin&&(v.p4===""||+v.p4<1.5)) out.push(["ok","Ενδομήτριο επαρκές",`${v.endo} mm ≥ ${c.endoMin}. Έναρξη προγεστερόνης (P0): βλαστοκύστη την P+5, έμβρυο Η3 την P+3.`]);
+      else if(v.endo!==""&&+v.endo<c.endoMin&&d>=10) out.push(["warn","Λεπτό ενδομήτριο",`${v.endo} mm < ${c.endoMin} την ημέρα ${d}. Εξέτασε παράταση ή αλλαγή οδού οιστρογόνων.`]);
+    }
+  }
+  if(p.trig){const t=new Date(p.trig); if(!isNaN(t)){const o=new Date(t.getTime()+c.opuH*36e5);out.push(["info","Προγραμματισμός ωοληψίας",`Trigger ${fmtDT(t)} → ωοληψία ${fmtDT(o)} (${c.opuH} ώρες).`]);}}
+  return out;
+}
+function fmtDT(d){return d.toLocaleString("el-GR",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
+const PROTO_OPTS=[["antagonist","Ανταγωνιστής GnRH"],["long-agonist","Μακρύς αγωνιστής"],["ppos","PPOS"],["fet-hrt","HRT-FET"],["other-stim","Άλλο πρωτόκολλο διέγερσης"]];
+const VTYPES=[["base","Βασικός έλεγχος"],["down","Έλεγχος καταστολής"],["mon","Παρακολούθηση"],["trig","Ημέρα trigger"],["pp","Μετά την έναρξη P4"],["et","Ημέρα ET"]];
+
+function chartSVG(p){
+  const vs=[...p.visits].sort((a,b)=>a.date.localeCompare(b.date)).filter(v=>p.start);
+  if(!vs.length) return `<p class="muted small">Δεν υπάρχουν μετρήσεις ακόμη.</p>`;
+  const days=vs.map(v=>dayOf(p,v)); const dMin=Math.min(1,...days), dMax=Math.max(dMin+6,...days)+1;
+  const W=720,H=300,L=44,R=54,T=14,B=34; const e2max=Math.max(1000,...vs.map(v=>+v.e2||0))*1.1;
+  const x=d=>L+(d-dMin)/(dMax-dMin)*(W-L-R), y=mm=>T+(1-mm/26)*(H-T-B), y2=e=>T+(1-e/e2max)*(H-T-B);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Γράφημα ανάπτυξης ωοθυλακίων και E2" style="min-width:560px">`;
+  [0,5,10,15,20,25].forEach(m=>{s+=`<line x1="${L}" x2="${W-R}" y1="${y(m)}" y2="${y(m)}" stroke="var(--line)"/><text x="${L-8}" y="${y(m)+4}" font-size="11" text-anchor="end">${m}</text>`;});
+  s+=`<rect x="${L}" y="${y(20)}" width="${W-L-R}" height="${y(DB.cfg.trigSize)-y(20)}" fill="var(--ok)" opacity=".10"/>`;
+  for(let d=Math.ceil(dMin);d<=dMax;d++) s+=`<text x="${x(d)}" y="${H-14}" font-size="11" text-anchor="middle">${d}</text>`;
+  const e2pts=vs.filter(v=>v.e2!==""&&v.e2!=null).map(v=>[x(dayOf(p,v)),y2(+v.e2)]);
+  if(e2pts.length>1) s+=`<path d="M${e2pts.map(q=>q.join(" ")).join(" L")}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+  e2pts.forEach(q=>s+=`<circle cx="${q[0]}" cy="${q[1]}" r="3.5" fill="var(--accent)"/>`);
+  [0,.5,1].forEach(f=>s+=`<text x="${W-R+6}" y="${y2(e2max*f)+4}" font-size="11" style="fill:var(--accent)">${Math.round(e2max*f)}</text>`);
+  vs.forEach(v=>{const d=dayOf(p,v);
+    sizesSide(v.R).forEach((m,i)=>s+=`<circle cx="${x(d)-5}" cy="${y(m)}" r="4" fill="var(--teal)" opacity=".8"/>`);
+    sizesSide(v.L).forEach((m,i)=>s+=`<rect x="${x(d)+2}" y="${y(m)-3.5}" width="7" height="7" fill="var(--ink-2)" opacity=".8"/>`);
+    const ss=sizes(v); if(ss.length) s+=`<text x="${x(d)}" y="${y(Math.max(...ss))-9}" font-size="11" text-anchor="middle" style="fill:var(--ink);font-weight:600">${Math.max(...ss)}</text>`;
+  });
+  s+=`<text x="${L}" y="${H-1}" font-size="11" style="fill:var(--ink-3)">${p.proto==="fet-hrt"?"Ημέρα κύκλου":"Ημέρα διέγερσης"} · αριστερός άξονας: mm · δεξιός: E2 pg/mL</text></svg>`;
+  return `<div class="timeline">${s}</div><p class="small muted"><span style="color:var(--teal)">●</span> δεξιά ωοθήκη &nbsp; <span style="color:var(--ink-2)">■</span> αριστερή ωοθήκη &nbsp; <span style="color:var(--accent)">—</span> E2 &nbsp; πράσινη ζώνη: ${DB.cfg.trigSize}–20 mm</p>`;
+}
+function binsRow(v){
+  const s=sizes(v), b=[["<10",x=>x<10],["10–13",x=>x>=10&&x<14],["14–16",x=>x>=14&&x<17],["17–19",x=>x>=17&&x<20],["≥20",x=>x>=20]];
+  return b.map(([l,f])=>`<span class="chip">${l}: <b class="mono">${s.filter(f).length}</b></span>`).join("");
+}
+function pageTracker(){
+  if(!DB.patients.length&&!DB._loaded){}
+  const p=DB.patients.find(x=>x.id===CUR)||DB.patients[0]; if(p) CUR=p.id;
+  return `<h1>Καρτέλα παρακολούθησης</h1>
+  <div class="callout ${STORAGE_OK?"":"crit"}"><p>${STORAGE_OK?"Τα δεδομένα αποθηκεύονται <b>μόνο σε αυτόν τον browser, σε αυτή τη συσκευή</b>. Δεν στέλνονται πουθενά. Χρησιμοποίησε κωδικό αντί για ονοματεπώνυμο και κράτα αντίγραφο ασφαλείας.":"Η τοπική αποθήκευση δεν είναι διαθέσιμη σε αυτό το περιβάλλον. Οι αλλαγές θα χαθούν όταν κλείσει η σελίδα· κράτα αντίγραφο ασφαλείας."}</p></div>
+  <div class="trk">
+   <div>
+    <div class="row" style="margin-bottom:10px"><button class="btn pri" id="newPt">+ Νέος κύκλος</button><button class="btn" id="cfgBtn">Όρια</button></div>
+    <div class="pt-list">${DB.patients.map(x=>`<button class="pt${x.id===CUR?" on":""}" data-pt="${x.id}"><span><b>${esc(x.code||"χωρίς κωδικό")}</b><br><span class="small muted">${esc((PROTO_OPTS.find(o=>o[0]===x.proto)||[])[1]||"")}</span></span><span class="pill-n">${x.visits.length} επισκ.</span></button>`).join("")||`<p class="muted small">Δεν υπάρχουν κύκλοι.</p>`}</div>
+    <div class="row" style="margin-top:14px"><button class="btn sm" id="bkCopy">Αντιγραφή αντιγράφου</button><button class="btn sm" id="bkRestore">Επαναφορά</button></div>
+    <p class="small muted" id="bkMsg"></p>
+   </div>
+   <div id="ptPane">${p?ptPane(p):`<p>Πάτησε «Νέος κύκλος».</p>`}</div>
+  </div>`;
+}
+function ptPane(p){
+  const al=alertsFor(p), pos=poseidon(p), vs=[...p.visits].sort((a,b)=>a.date.localeCompare(b.date)), last=vs[vs.length-1];
+  const f=(id,l,val,type="text",extra="")=>`<label class="f" for="f_${id}">${l}<input id="f_${id}" data-f="${id}" type="${type}" value="${esc(val??"")}" ${extra}></label>`;
+  return `${p.example?`<div class="callout warn"><p>Αυτό είναι <b>παράδειγμα</b> για επίδειξη.</p></div>`:""}
+  <h2 style="margin-top:0">${esc(p.code||"Νέος κύκλος")}</h2>
+  <div class="card"><h3>Στοιχεία κύκλου</h3><div class="form">
+   ${f("code","Κωδικός ασθενούς",p.code)}${f("age","Ηλικία",p.age,"number",'min="16" max="55"')}${f("bmi","ΔΜΣ (kg/m²)",p.bmi,"number",'step="0.1"')}
+   ${f("amh","AMH (ng/mL)",p.amh,"number",'step="0.01"')}${f("afc","AFC",p.afc,"number")}${f("prevOoc","Ωάρια προηγ. κύκλου",p.prevOoc,"number")}
+   <label class="f" for="f_proto">Πρωτόκολλο<select id="f_proto" data-f="proto">${PROTO_OPTS.map(o=>`<option value="${o[0]}"${p.proto===o[0]?" selected":""}>${o[1]}</option>`).join("")}</select></label>
+   ${f("start",p.proto==="fet-hrt"?"1η ημέρα κύκλου":"Ημέρα 1 διέγερσης",p.start,"date")}${f("fsh",p.proto==="fet-hrt"?"Σχήμα E2 / P4":"Γοναδοτροπίνη και δόση",p.fsh)}
+   ${f("trig","Trigger (ημ/νία, ώρα)",p.trig,"datetime-local")}
+   <label class="f wide" for="f_dx">Διάγνωση / ένδειξη<input id="f_dx" data-f="dx" value="${esc(p.dx||"")}"></label>
+   <label class="f wide" for="f_notes">Σημειώσεις<input id="f_notes" data-f="notes" value="${esc(p.notes||"")}"></label>
+  </div>
+  <p class="small" style="margin-bottom:0"><b>POSEIDON:</b> <span class="chip acc">${esc(pos.g)}</span> ${esc(pos.t)} ${cite("{{poseidon16}}")}</p></div>
+  <h3>Ειδοποιήσεις</h3>
+  ${al.map(([k,t,d])=>`<div class="alert ${k}"><span class="dot"></span><div><b>${esc(t)}</b><span class="small">${esc(d)}</span></div></div>`).join("")}
+  <p class="small muted">Οι ειδοποιήσεις βασίζονται στην τελευταία επίσκεψη και στα όρια που ορίζεις στο «Όρια». Είναι υποστήριξη απόφασης, όχι οδηγία.</p>
+  ${last?`<div class="kpis"><div class="kpi"><div class="v">${dayOf(p,last)}</div><div class="l">${p.proto==="fet-hrt"?"Ημέρα κύκλου":"Ημέρα διέγερσης"}</div></div><div class="kpi"><div class="v">${sizes(last).length?Math.max(...sizes(last)):"–"}</div><div class="l">Ηγετικό (mm)</div></div><div class="kpi"><div class="v">${sizes(last).filter(x=>x>=DB.cfg.ohssSize).length}</div><div class="l">Ωοθυλάκια ≥ ${DB.cfg.ohssSize} mm</div></div><div class="kpi"><div class="v">${last.e2||"–"}</div><div class="l">E2 (pg/mL)</div></div><div class="kpi"><div class="v">${last.endo||"–"}</div><div class="l">Ενδομήτριο (mm)</div></div></div><div>${binsRow(last)}</div>`:""}
+  <h3>Γράφημα</h3>${chartSVG(p)}
+  <h3>Επισκέψεις</h3>
+  <div class="tblwrap"><table><thead><tr><th>Ημ/νία</th><th>Ημέρα</th><th>Τύπος</th><th>Δεξιά (mm)</th><th>Αριστερή (mm)</th><th>E2</th><th>LH</th><th>P4</th><th>Ενδομ.</th><th>Φάρμακα</th><th></th></tr></thead><tbody>
+  ${vs.map(v=>`<tr><td class="mono">${esc(v.date)}</td><td class="mono">${dayOf(p,v)}</td><td>${esc((VTYPES.find(t=>t[0]===v.type)||[])[1]||"")}</td><td class="mono">${esc(v.R)}</td><td class="mono">${esc(v.L)}</td><td class="mono">${esc(v.e2)}</td><td class="mono">${esc(v.lh)}</td><td class="mono">${esc(v.p4)}</td><td class="mono">${esc(v.endo)}${v.pat?`<div class="small muted">${esc(v.pat)}</div>`:""}</td><td class="small">${esc(v.drugs)}</td><td><button class="btn sm" data-ev="${v.id}">Επεξ.</button></td></tr>`).join("")||`<tr><td colspan="11" class="muted">Καμία επίσκεψη.</td></tr>`}
+  </tbody></table></div>
+  <div class="row" style="margin-top:10px"><button class="btn pri" id="addV">+ Νέα επίσκεψη</button><button class="btn danger" id="delPt">Διαγραφή κύκλου</button></div>`;
+}
+function visitForm(p,v){
+  v=v||{id:"",date:new Date().toISOString().slice(0,10),type:"mon",e2:"",lh:"",p4:"",endo:"",pat:"",R:"",L:"",drugs:""};
+  const i=(k,l,t="text",x="")=>`<label class="f" for="v_${k}">${l}<input id="v_${k}" data-v="${k}" type="${t}" value="${esc(v[k]??"")}" ${x}></label>`;
+  openDlg(`<h3 style="margin-top:0">${v.id?"Επεξεργασία":"Νέα"} επίσκεψη</h3><div class="form">
+   ${i("date","Ημερομηνία","date")}<label class="f" for="v_type">Τύπος<select id="v_type" data-v="type">${VTYPES.map(t=>`<option value="${t[0]}"${v.type===t[0]?" selected":""}>${t[1]}</option>`).join("")}</select></label>
+   <label class="f wide" for="v_R">Δεξιά ωοθήκη: μεγέθη σε mm, με κόμμα<input id="v_R" data-v="R" value="${esc(v.R)}" placeholder="π.χ. 18,17,15,12" inputmode="decimal"></label>
+   <label class="f wide" for="v_L">Αριστερή ωοθήκη: μεγέθη σε mm<input id="v_L" data-v="L" value="${esc(v.L)}" placeholder="π.χ. 16,14,11" inputmode="decimal"></label>
+   ${i("e2","E2 (pg/mL)","number")}${i("lh","LH (IU/L)","number",'step="0.1"')}${i("p4","P4 (ng/mL)","number",'step="0.01"')}${i("endo","Ενδομήτριο (mm)","number",'step="0.1"')}
+   ${i("pat","Μορφολογία ενδομ.")}<label class="f wide" for="v_drugs">Φάρμακα / δόσεις<input id="v_drugs" data-v="drugs" value="${esc(v.drugs)}"></label></div>
+   <p class="small muted">Μονάδες: E2 pmol/L ÷ 3,67 = pg/mL · P4 nmol/L ÷ 3,18 = ng/mL</p>
+   <div class="row" style="justify-content:flex-end;margin-top:12px">${v.id?`<button class="btn danger" id="vDel">Διαγραφή</button>`:""}<button class="btn" id="vCancel">Ακύρωση</button><button class="btn pri" id="vSave">Αποθήκευση</button></div>`);
+  $("#vCancel").onclick=closeDlg;
+  if(v.id) $("#vDel").onclick=()=>{p.visits=p.visits.filter(x=>x.id!==v.id);save();closeDlg();refreshTracker();};
+  $("#vSave").onclick=()=>{
+    const nv={id:v.id||uid()}; document.querySelectorAll("[data-v]").forEach(el=>nv[el.dataset.v]=el.value.trim());
+    if(!nv.date){$("#v_date").focus();return;}
+    const ix=p.visits.findIndex(x=>x.id===nv.id); if(ix>=0)p.visits[ix]=nv; else p.visits.push(nv);
+    save();closeDlg();refreshTracker();
+  };
+}
+function cfgForm(){
+  const c=DB.cfg, L={trigN:"Trigger: αριθμός ωοθυλακίων",trigSize:"Trigger: μέγεθος (mm)",ohssN:"OHSS: αριθμός ωοθυλακίων",ohssSize:"OHSS: μέγεθος (mm)",e2Ohss:"OHSS: E2 (pg/mL)",p4Trig:"P4 για freeze-all (ng/mL)",lhSurge:"Πρόωρη LH (IU/L)",antFix:"Ανταγωνιστής σταθερό: ημέρα",antFlex:"Ανταγωνιστής ευέλικτο: mm",endoMin:"FET: ελάχιστο ενδομήτριο (mm)",p4ET:"FET: ελάχιστη P4 ημέρα ET",opuH:"Ώρες trigger → OPU"};
+  openDlg(`<h3 style="margin-top:0">Όρια ειδοποιήσεων</h3><p class="small muted">Προσάρμοσε στα πρωτόκολλα του κέντρου σου.</p><div class="form">${Object.keys(L).map(k=>`<label class="f" for="c_${k}">${L[k]}<input id="c_${k}" data-c="${k}" type="number" step="0.1" value="${c[k]}"></label>`).join("")}</div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="cReset">Προεπιλογές</button><button class="btn" id="cCancel">Ακύρωση</button><button class="btn pri" id="cSave">Αποθήκευση</button></div>`);
+  $("#cCancel").onclick=closeDlg;
+  $("#cReset").onclick=()=>{DB.cfg={...DEFCFG};save();closeDlg();refreshTracker();};
+  $("#cSave").onclick=()=>{document.querySelectorAll("[data-c]").forEach(el=>{const n=parseFloat(el.value);if(!isNaN(n))DB.cfg[el.dataset.c]=n;});save();closeDlg();refreshTracker();};
+}
+function openDlg(h){$("#dlgBox").innerHTML=h;$("#dlg").classList.add("on");const f=$("#dlgBox input,#dlgBox select,#dlgBox button");f&&f.focus();}
+function closeDlg(){$("#dlg").classList.remove("on");}
+function refreshTracker(){$("#view").innerHTML=pageTracker();bindTracker();}
+function bindTracker(){
+  document.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{CUR=b.dataset.pt;refreshTracker();});
+  $("#newPt").onclick=()=>{const n={id:uid(),code:"",age:"",bmi:"",amh:"",afc:"",prevOoc:"",dx:"",proto:"antagonist",start:new Date().toISOString().slice(0,10),fsh:"",trig:"",notes:"",visits:[]};DB.patients.unshift(n);CUR=n.id;save();refreshTracker();setTimeout(()=>{const e=$("#f_code");e&&e.focus();},30);};
+  $("#cfgBtn").onclick=cfgForm;
+  $("#bkCopy").onclick=async()=>{const t=JSON.stringify(DB);try{await navigator.clipboard.writeText(t);$("#bkMsg").textContent="Αντιγράφηκε. Επικόλλησέ το σε ασφαλές αρχείο.";}catch(e){openDlg(`<h3 style="margin-top:0">Αντίγραφο ασφαλείας</h3><p class="small">Επίλεξε και αντίγραψε το κείμενο.</p><textarea readonly>${esc(t)}</textarea><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" onclick="closeDlg()">Κλείσιμο</button></div>`);}};
+  $("#bkRestore").onclick=()=>{openDlg(`<h3 style="margin-top:0">Επαναφορά</h3><p class="small">Επικόλλησε το αντίγραφο ή διάλεξε αρχείο .json/.txt. Τα τρέχοντα δεδομένα θα αντικατασταθούν.</p><input type="file" id="rsFile" accept=".json,.txt"><textarea id="rsTxt" style="margin-top:8px"></textarea><p class="small" id="rsMsg" style="color:var(--crit)"></p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeDlg()">Ακύρωση</button><button class="btn pri" id="rsGo">Επαναφορά</button></div>`);
+    $("#rsFile").onchange=e=>{const fl=e.target.files[0];if(fl)fl.text().then(t=>$("#rsTxt").value=t);};
+    $("#rsGo").onclick=()=>{try{const d=JSON.parse($("#rsTxt").value);if(!Array.isArray(d.patients))throw 0;DB={patients:d.patients,cfg:{...DEFCFG,...(d.cfg||{})}};save();CUR=null;closeDlg();refreshTracker();}catch(e){$("#rsMsg").textContent="Το κείμενο δεν είναι έγκυρο αντίγραφο της εφαρμογής.";}};};
+  const p=DB.patients.find(x=>x.id===CUR); if(!p) return;
+  document.querySelectorAll("[data-f]").forEach(el=>el.onchange=()=>{p[el.dataset.f]=el.value.trim(); if(el.dataset.f!=="notes"&&el.dataset.f!=="dx")p.example=p.example&&el.dataset.f!=="code"; save(); refreshTracker();});
+  $("#addV").onclick=()=>visitForm(p);
+  document.querySelectorAll("[data-ev]").forEach(b=>b.onclick=()=>visitForm(p,p.visits.find(v=>v.id===b.dataset.ev)));
+  $("#delPt").onclick=()=>{openDlg(`<h3 style="margin-top:0">Διαγραφή κύκλου</h3><p>Να διαγραφεί οριστικά ο κύκλος <b>${esc(p.code||"χωρίς κωδικό")}</b> και όλες οι επισκέψεις του;</p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeDlg()">Ακύρωση</button><button class="btn pri" id="dGo">Διαγραφή</button></div>`);$("#dGo").onclick=()=>{DB.patients=DB.patients.filter(x=>x.id!==p.id);CUR=null;save();closeDlg();refreshTracker();};};
+}
+
+/* ================= ΕΚΚΙΝΗΣΗ ================= */
+load();
+$("#dlg").addEventListener("click",e=>{if(e.target.id==="dlg")closeDlg();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDlg();});
+$("#menuBtn").onclick=()=>$("#side").classList.toggle("open");
+window.addEventListener("hashchange",route);
+route();
+</script>
+</body>
+</html>
