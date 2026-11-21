@@ -135,10 +135,14 @@ details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
   <div class="brand">Πρωτόκολλα Εξωσωματικής</div>
   <div class="brand-sub">Εκπαιδευτικός οδηγός και καρτέλα κύκλου για γυναικολόγους</div>
   <div id="navlinks"></div>
+  <div id="acct"></div>
 </nav>
 <main id="view" tabindex="-1"></main>
 </div>
 <div class="dialog-bg" id="dlg"><div class="dialog" role="dialog" aria-modal="true" id="dlgBox"></div></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 /* ================= ΒΙΒΛΙΟΓΡΑΦΙΑ (APA 7) ================= */
 const REFS = {
@@ -380,7 +384,7 @@ function navHTML(cur){
   return `<div class="navgrp">Οδηγός</div>${L("home","Αρχική")}${L("protocols","Πρωτόκολλα")}
    ${PROTOCOLS.map(p=>L("p-"+p.id,p.name.replace("Κατεψυγμένη μεταφορά σε κύκλο ορμονικής υποκατάστασης (HRT-FET)","HRT-FET"),1)).join("")}
    ${L("drugs","Φαρμακολογία")}${L("studies","Νέες μελέτες")}
-   <div class="navgrp">Κλινική</div>${L("tracker","Καρτέλα παρακολούθησης")}
+   <div class="navgrp">Κλινική</div>${L("tracker","Φάκελοι ασθενών")}
    <div class="navgrp">Πληροφορίες</div>${L("refs","Βιβλιογραφία")}${L("about","Μεθοδολογία και επόμενα βήματα")}`;
 }
 function route(){
@@ -407,7 +411,7 @@ function pageHome(){
    <a class="card" href="#protocols"><h3>Πρωτόκολλα</h3><p class="muted small">${PROTOCOLS.length} πρωτόκολλα στην 1η φάση, με πίνακα φαρμάκων, χρονοδιάγραμμα και τεκμηρίωση.</p></a>
    <a class="card" href="#drugs"><h3>Φαρμακολογία</h3><p class="muted small">${DRUGS.length} κάρτες φαρμάκων: μηχανισμός, φαρμακοκινητική, δόσεις, σκευάσματα.</p></a>
    <a class="card" href="#studies"><h3>Νέες μελέτες</h3><p class="muted small">${STUDIES.length} μελέτες με PICO, ευρήματα, αντίκτυπο και κριτική.</p></a>
-   <a class="card" href="#tracker"><h3>Καρτέλα παρακολούθησης</h3><p class="muted small">Ωοθυλάκια ανά ωοθήκη, ορμόνες, ειδοποιήσεις για trigger, OHSS, P4 και ώρα ωοληψίας. Τα δεδομένα μένουν μόνο στη συσκευή.</p></a>
+   <a class="card" href="#tracker"><h3>Φάκελοι ασθενών</h3><p class="muted small">Φάκελος ανά ασθενή με κύκλους, ωοθυλάκια ανά ωοθήκη, ορμόνες και ειδοποιήσεις για trigger, OHSS, P4 και ώρα ωοληψίας. Σύνδεση με Google και κρυπτογράφηση στη συσκευή.</p></a>
   </div>
   <div class="callout acc"><p><b>Τελευταίος έλεγχος βιβλιογραφίας:</b> 21 Νοεμβρίου 2026, με βάση την ενημέρωση ESHRE 2025 ${cite("{{eshre25}}")} και πρόσφατα RCT και μετα-αναλύσεις.</p></div>
   <div class="callout warn"><p>Εκπαιδευτικό εργαλείο για επαγγελματίες υγείας. Οι δόσεις και τα όρια είναι ενδεικτικά· η κλινική απόφαση και τα πρωτόκολλα του κέντρου υπερισχύουν.</p></div>`;
@@ -493,28 +497,132 @@ function pageRefs(){
 function pageAbout(){
   return `<h1>Μεθοδολογία και επόμενα βήματα</h1>
   <h2>Πώς γράφτηκε το περιεχόμενο</h2><p>Βάση είναι οι κατευθυντήριες οδηγίες ESHRE για τη διέγερση ωοθηκών ${cite("{{eshre19;eshre25}}")}, ανασκοπήσεις Cochrane και RCT ή μετα-αναλύσεις που αναζητήθηκαν στο PubMed. Όπου η τεκμηρίωση είναι αδύναμη, αναφέρεται. Οι δόσεις δίνονται ως εύρη που χρησιμοποιούνται στην κλινική πράξη και στις μελέτες.</p>
-  <h2>Καρτέλα παρακολούθησης και GDPR</h2><p>Τα δεδομένα αποθηκεύονται μόνο στον browser αυτής της συσκευής (localStorage). Δεν αποστέλλονται πουθενά. Αν καθαριστούν τα δεδομένα του browser χάνονται· χρησιμοποίησε τακτικά το αντίγραφο ασφαλείας. Προτείνεται κωδικός αντί για ονοματεπώνυμο.</p>
+  <h2>Φάκελοι ασθενών, ασφάλεια και GDPR</h2>
+  <p><b>Χωρίς σύνδεση:</b> οι φάκελοι αποθηκεύονται μόνο στον browser της συσκευής (localStorage).</p>
+  <p><b>Με σύνδεση Google:</b> κάθε φάκελος κρυπτογραφείται στη συσκευή σου με AES-GCM 256 bit. Το κλειδί παράγεται από το προσωπικό σου συνθηματικό (PBKDF2-SHA256, 310.000 επαναλήψεις) και δεν φεύγει ποτέ από τη συσκευή. Στο Firebase (Firestore, Φρανκφούρτη, ΕΕ) αποθηκεύεται μόνο το κρυπτογραφημένο περιεχόμενο. Οι κανόνες ασφαλείας επιτρέπουν σε κάθε λογαριασμό πρόσβαση μόνο στους δικούς του φακέλους. Αν χαθεί το συνθηματικό, τα δεδομένα δεν ανακτώνται.</p>
+  <p>Κάθε γιατρός παραμένει υπεύθυνος επεξεργασίας για τα δεδομένα των ασθενών του. Χρησιμοποίησε κωδικό αντί για ονοματεπώνυμο και ενημέρωσε τις ασθενείς σύμφωνα με την πολιτική της δομής σου.</p>
   <h2>Οδικός χάρτης</h2><ol><li><b>Φάση 1 (τώρα):</b> ανταγωνιστής, μακρύς αγωνιστής, PPOS, HRT-FET, φαρμακολογία, καρτέλα.</li><li><b>Φάση 2:</b> υπόλοιπα πρωτόκολλα διέγερσης και FET, επιπλέον φάρμακα (λετροζόλη, κλομιφαίνη, LH, adjuvants).</li><li><b>Φάση 3:</b> επέκταση των μελετών με συστηματική αναζήτηση.</li><li><b>Φάση 4:</b> υπολογιστές (αρχική δόση FSH, FORT/FOI), quiz ανά πρωτόκολλο.</li></ol>`;
 }
 
-/* ================= ΚΑΡΤΕΛΑ ΠΑΡΑΚΟΛΟΥΘΗΣΗΣ ================= */
+/* ================= ΚΑΡΤΕΛΑ ΠΑΡΑΚΟΛΟΥΘΗΣΗΣ: ΚΑΤΑΣΤΑΣΗ, ΤΟΠΙΚΗ ΚΑΙ CLOUD ΑΠΟΘΗΚΕΥΣΗ ================= */
 const KEY="ivfprot.v1";
 const DEFCFG={trigN:3,trigSize:17,ohssN:18,ohssSize:11,e2Ohss:3500,p4Trig:1.5,lhSurge:10,antFix:5,antFlex:14,endoMin:7,p4ET:9.2,opuH:35};
-let DB={patients:[],cfg:{...DEFCFG}}, CUR=null, STORAGE_OK=true;
-function load(){try{const r=localStorage.getItem(KEY);if(r){DB=JSON.parse(r);DB.cfg={...DEFCFG,...(DB.cfg||{})};}else{DB.patients=[examplePatient()];}}catch(e){STORAGE_OK=false;DB.patients=[examplePatient()];}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));STORAGE_OK=true;}catch(e){STORAGE_OK=false;}}
-function uid(){return Math.random().toString(36).slice(2,9);}
+const FB_CONFIG={apiKey:"AIzaSyBylP1Guq3c0Opr8lrBY5PaiQxpPoNzfv0",authDomain:"ivf-protocols.firebaseapp.com",projectId:"ivf-protocols",storageBucket:"ivf-protocols.firebasestorage.app",messagingSenderId:"662020211580",appId:"1:662020211580:web:2b6ffda0f000545aabdaf9"};
+const KDF_ITER=310000;
+let DB={patients:[],cfg:{...DEFCFG}}, CUR=null, CURC=null, STORAGE_OK=true;
+/* MODE: local | cloud-wait | cloud-locked | cloud */
+let MODE="local", USER=null, USERMETA=null, CKEY=null, LAST={}, LASTCFG="", SYNC="", FB_OK=false, AUTH=null, FS=null;
+
+function uid(){return (crypto.randomUUID?crypto.randomUUID().replace(/-/g,""):Math.random().toString(36).slice(2)+Date.now().toString(36)).slice(0,20);}
 function isoAdd(d,n){const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);}
+function today(){return new Date().toISOString().slice(0,10);}
+function newCycle(n){return {id:uid(),label:"Κύκλος "+n,proto:"antagonist",start:today(),fsh:"",trig:"",visits:[]};}
+function normPatient(p){
+  if(Array.isArray(p.cycles)) return p;
+  return {id:p.id||uid(),code:p.code||"",example:!!p.example,age:p.age??"",bmi:p.bmi??"",amh:p.amh??"",afc:p.afc??"",prevOoc:p.prevOoc??"",dx:p.dx||"",notes:p.notes||"",
+    cycles:[{id:uid(),label:"Κύκλος 1",proto:p.proto||"antagonist",start:p.start||"",fsh:p.fsh||"",trig:p.trig||"",visits:p.visits||[]}]};
+}
 function examplePatient(){
-  const s=isoAdd(new Date().toISOString().slice(0,10),-9);
-  return {id:uid(),code:"ΠΑΡΑΔΕΙΓΜΑ-01",example:true,age:33,bmi:23,amh:3.1,afc:16,prevOoc:"",dx:"Σαλπιγγικός παράγοντας",proto:"antagonist",start:s,fsh:"150 IU rFSH",trig:"",notes:"Παράδειγμα για επίδειξη. Μπορείς να το διαγράψεις.",
-   visits:[
+  const s=isoAdd(today(),-9);
+  return {id:uid(),code:"ΠΑΡΑΔΕΙΓΜΑ-01",example:true,age:33,bmi:23,amh:3.1,afc:16,prevOoc:"",dx:"Σαλπιγγικός παράγοντας",notes:"Παράδειγμα για επίδειξη. Μπορείς να το διαγράψεις.",
+   cycles:[{id:uid(),label:"Κύκλος 1",proto:"antagonist",start:s,fsh:"150 IU rFSH",trig:"",visits:[
     {id:uid(),date:s,type:"base",e2:38,lh:5.2,p4:0.4,endo:4.5,pat:"",R:"",L:"",drugs:"rFSH 150 IU"},
     {id:uid(),date:isoAdd(s,4),type:"mon",e2:420,lh:3.1,p4:0.5,endo:7.2,pat:"τριστρωματικό",R:"12,11,10,10,9",L:"11,10,10,9",drugs:"rFSH 150 + γκανιρελίξη 0,25"},
     {id:uid(),date:isoAdd(s,6),type:"mon",e2:1150,lh:1.8,p4:0.7,endo:8.6,pat:"τριστρωματικό",R:"15,14,13,12,11,10",L:"14,13,12,11,10",drugs:"rFSH 150 + γκανιρελίξη 0,25"},
-    {id:uid(),date:isoAdd(s,8),type:"mon",e2:2350,lh:1.5,p4:0.9,endo:9.8,pat:"τριστρωματικό",R:"18,17,16,15,13,12",L:"17,16,15,14,12",drugs:"rFSH 150 + γκανιρελίξη 0,25"}
-   ]};
+    {id:uid(),date:isoAdd(s,8),type:"mon",e2:2350,lh:1.5,p4:0.9,endo:9.8,pat:"τριστρωματικό",R:"18,17,16,15,13,12",L:"17,16,15,14,12",drugs:"rFSH 150 + γκανιρελίξη 0,25"}]}]};
 }
+function readLocal(){try{const r=localStorage.getItem(KEY);if(!r)return null;const d=JSON.parse(r);return {patients:(d.patients||[]).map(normPatient),cfg:{...DEFCFG,...(d.cfg||{})}};}catch(e){STORAGE_OK=false;return null;}}
+function loadLocal(){const d=readLocal();DB=d||{patients:[examplePatient()],cfg:{...DEFCFG}};}
+function save(){
+  if(MODE==="local"){try{localStorage.setItem(KEY,JSON.stringify(DB));STORAGE_OK=true;}catch(e){STORAGE_OK=false;}}
+  else if(MODE==="cloud") queueCloud();
+}
+
+/* ---------- Κρυπτογράφηση (AES-GCM 256, κλειδί από PBKDF2-SHA256) ---------- */
+const TE=new TextEncoder(), TD=new TextDecoder();
+const b64=buf=>{const u=new Uint8Array(buf);let s="";for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s);};
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function deriveKey(pass,salt,iter){
+  const base=await crypto.subtle.importKey("raw",TE.encode(pass),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:iter,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function encObj(obj,key=CKEY){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,TE.encode(JSON.stringify(obj)));return {iv:b64(iv),ct:b64(ct)};}
+async function decObj(o,key=CKEY){const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(o.iv)},key,unb64(o.ct));return JSON.parse(TD.decode(pt));}
+
+/* ---------- Firebase ---------- */
+function initFirebase(){
+  try{
+    if(typeof firebase==="undefined") return;
+    firebase.initializeApp(FB_CONFIG); AUTH=firebase.auth(); FS=firebase.firestore(); FB_OK=true;
+    AUTH.onAuthStateChanged(onAuth);
+    AUTH.getRedirectResult().catch(e=>authErr(e));
+  }catch(e){FB_OK=false;console.warn("Firebase",e);}
+}
+async function onAuth(u){
+  USER=u; CKEY=null; LAST={}; LASTCFG="";
+  if(!u){MODE="local";loadLocal();USERMETA=null;renderAcct();afterModeChange();return;}
+  MODE="cloud-wait"; DB={patients:[],cfg:{...DEFCFG}}; renderAcct(); afterModeChange();
+  try{const snap=await FS.collection("users").doc(u.uid).get();USERMETA=snap.exists?snap.data():null;MODE="cloud-locked";}
+  catch(e){USERMETA=null;MODE="cloud-locked";SYNC="Σφάλμα ανάγνωσης: "+(e.code||e.message);}
+  renderAcct(); afterModeChange();
+}
+function authErr(e){if(!e)return;const m={"auth/popup-closed-by-user":"Το παράθυρο σύνδεσης έκλεισε.","auth/unauthorized-domain":"Το domain δεν είναι εξουσιοδοτημένο στο Firebase.","auth/network-request-failed":"Πρόβλημα δικτύου. Δοκίμασε ξανά."};const t=m[e.code]||("Η σύνδεση απέτυχε ("+(e.code||e.message)+").");const el=$("#acctMsg");if(el)el.textContent=t;}
+async function signIn(){
+  if(!FB_OK){const el=$("#acctMsg");if(el)el.textContent="Η σύνδεση δεν είναι διαθέσιμη σε αυτή την προβολή. Άνοιξε το site από το GitHub.";return;}
+  const prov=new firebase.auth.GoogleAuthProvider(); prov.setCustomParameters({prompt:"select_account"});
+  try{await AUTH.signInWithPopup(prov);}catch(e){if(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment"){AUTH.signInWithRedirect(prov);}else authErr(e);}
+}
+function signOut(){CKEY=null;if(AUTH)AUTH.signOut();}
+function lockNow(){CKEY=null;DB={patients:[],cfg:{...DEFCFG}};LAST={};MODE="cloud-locked";renderAcct();afterModeChange();}
+
+async function setupPass(p1){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const key=await deriveKey(p1,salt,KDF_ITER);
+  const verifier=await encObj({check:"ivfprot-ok"},key);
+  const cfgEnc=await encObj({...DEFCFG},key);
+  const meta={salt:b64(salt),iter:KDF_ITER,kdf:"PBKDF2-SHA256",cipher:"AES-GCM-256",verifier,cfgEnc,created:firebase.firestore.FieldValue.serverTimestamp()};
+  await FS.collection("users").doc(USER.uid).set(meta);
+  USERMETA=meta; CKEY=key; await loadCloud();
+}
+async function unlock(pass){
+  const key=await deriveKey(pass,unb64(USERMETA.salt),USERMETA.iter||KDF_ITER);
+  try{const v=await decObj(USERMETA.verifier,key);if(v.check!=="ivfprot-ok")throw 0;}catch(e){return false;}
+  CKEY=key; await loadCloud(); return true;
+}
+async function loadCloud(){
+  SYNC="Φόρτωση…"; const pats=[]; LAST={};
+  const qs=await FS.collection("users").doc(USER.uid).collection("patients").get();
+  for(const d of qs.docs){try{const p=normPatient(await decObj(d.data()));p.id=d.id;pats.push(p);LAST[d.id]=JSON.stringify(p);}catch(e){console.warn("decrypt",d.id);}}
+  let cfg={...DEFCFG}; try{if(USERMETA.cfgEnc)cfg={...DEFCFG,...(await decObj(USERMETA.cfgEnc))};}catch(e){}
+  LASTCFG=JSON.stringify(cfg);
+  pats.sort((a,b)=>(a.code||"").localeCompare(b.code||"","el"));
+  DB={patients:pats,cfg}; CUR=null; CURC=null; MODE="cloud"; SYNC="Συγχρονισμένο"; renderAcct(); afterModeChange();
+}
+let cloudTimer=null, cloudBusy=false, cloudAgain=false;
+function queueCloud(){SYNC="Αποθήκευση…";setSync();clearTimeout(cloudTimer);cloudTimer=setTimeout(flushCloud,400);}
+async function flushCloud(){
+  if(cloudBusy){cloudAgain=true;return;} cloudBusy=true;
+  try{
+    const col=FS.collection("users").doc(USER.uid).collection("patients"); const ids=new Set();
+    for(const p of DB.patients){ids.add(p.id);const s=JSON.stringify(p);if(LAST[p.id]!==s){const e=await encObj(p);await col.doc(p.id).set({...e,updated:firebase.firestore.FieldValue.serverTimestamp()});LAST[p.id]=s;}}
+    for(const id of Object.keys(LAST)) if(!ids.has(id)){await col.doc(id).delete();delete LAST[id];}
+    const cs=JSON.stringify(DB.cfg); if(cs!==LASTCFG){const e=await encObj(DB.cfg);await FS.collection("users").doc(USER.uid).update({cfgEnc:e});LASTCFG=cs;}
+    SYNC="Αποθηκεύτηκε "+new Date().toLocaleTimeString("el-GR",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){SYNC="Σφάλμα αποθήκευσης ("+(e.code||e.message)+"). Οι αλλαγές θα ξαναδοκιμαστούν.";setTimeout(queueCloud,5000);}
+  cloudBusy=false; setSync(); if(cloudAgain){cloudAgain=false;flushCloud();}
+}
+function setSync(){const el=$("#syncMsg");if(el)el.textContent=SYNC;}
+window.addEventListener("beforeunload",e=>{if(MODE==="cloud"&&(cloudBusy||cloudTimer&&SYNC.startsWith("Αποθήκευση"))){e.preventDefault();e.returnValue="";}});
+
+function renderAcct(){
+  const el=$("#acct"); if(!el) return;
+  if(!USER){el.innerHTML=`<div class="navgrp">Λογαριασμός</div><div style="padding:0 8px"><button class="btn sm pri" id="btnIn" style="width:100%">Σύνδεση με Google</button><p class="small muted" style="margin:6px 0 0">Χωρίς σύνδεση, η καρτέλα αποθηκεύεται μόνο σε αυτή τη συσκευή.</p><p class="small" id="acctMsg" style="color:var(--crit);margin:4px 0 0"></p></div>`;$("#btnIn").onclick=signIn;return;}
+  el.innerHTML=`<div class="navgrp">Λογαριασμός</div><div style="padding:0 8px"><div class="small"><b>${esc(USER.displayName||"")}</b><br><span class="muted">${esc(USER.email||"")}</span></div>
+   <div class="small" style="margin:4px 0">${MODE==="cloud"?'<span class="chip ok">Ξεκλείδωτο</span>':'<span class="chip warn">Κλειδωμένο</span>'}</div>
+   <div class="row">${MODE==="cloud"?'<button class="btn sm" id="btnLock">Κλείδωμα</button>':""}<button class="btn sm" id="btnOut">Αποσύνδεση</button></div><p class="small" id="acctMsg" style="color:var(--crit);margin:4px 0 0"></p></div>`;
+  $("#btnOut").onclick=signOut; const l=$("#btnLock"); if(l) l.onclick=lockNow;
+}
+function afterModeChange(){if((location.hash||"").slice(1)==="tracker")refreshTracker();}
 function sizes(v){return [...String(v.R||"").split(/[,\s;]+/),...String(v.L||"").split(/[,\s;]+/)].map(Number).filter(n=>n>0);}
 function sizesSide(s){return String(s||"").split(/[,\s;]+/).map(Number).filter(n=>n>0);}
 function dayOf(p,v){if(!p.start||!v.date)return "";return Math.round((new Date(v.date+"T12:00:00")-new Date(p.start+"T12:00:00"))/864e5)+1;}
@@ -593,46 +701,116 @@ function binsRow(v){
   const s=sizes(v), b=[["<10",x=>x<10],["10–13",x=>x>=10&&x<14],["14–16",x=>x>=14&&x<17],["17–19",x=>x>=17&&x<20],["≥20",x=>x>=20]];
   return b.map(([l,f])=>`<span class="chip">${l}: <b class="mono">${s.filter(f).length}</b></span>`).join("");
 }
+function trackerBanner(){
+  if(MODE==="local") return `<div class="callout ${STORAGE_OK?"":"crit"}"><p>${STORAGE_OK?"<b>Τοπική λειτουργία:</b> τα δεδομένα αποθηκεύονται μόνο σε αυτόν τον browser. "+(FB_OK?"Συνδέσου με Google (μενού αριστερά) για κρυπτογραφημένους φακέλους ασθενών που ανοίγουν από κάθε συσκευή.":""):"Η τοπική αποθήκευση δεν είναι διαθέσιμη. Οι αλλαγές θα χαθούν όταν κλείσει η σελίδα."}</p></div>`;
+  return `<div class="callout acc"><p><b>Κρυπτογραφημένοι φάκελοι:</b> τα δεδομένα κρυπτογραφούνται σε αυτή τη συσκευή με το συνθηματικό σου πριν σταλούν στο Firebase (ΕΕ, Φρανκφούρτη). Κανείς άλλος, ούτε ο διαχειριστής ούτε η Google, δεν μπορεί να τα διαβάσει. <span class="muted" id="syncMsg">${esc(SYNC)}</span></p></div>`;
+}
 function pageTracker(){
-  if(!DB.patients.length&&!DB._loaded){}
+  if(MODE==="cloud-wait") return `<h1>Φάκελοι ασθενών</h1><p class="muted">Σύνδεση…</p>`;
+  if(MODE==="cloud-locked") return `<h1>Φάκελοι ασθενών</h1>${USERMETA?unlockHTML():setupHTML()}`;
   const p=DB.patients.find(x=>x.id===CUR)||DB.patients[0]; if(p) CUR=p.id;
-  return `<h1>Καρτέλα παρακολούθησης</h1>
-  <div class="callout ${STORAGE_OK?"":"crit"}"><p>${STORAGE_OK?"Τα δεδομένα αποθηκεύονται <b>μόνο σε αυτόν τον browser, σε αυτή τη συσκευή</b>. Δεν στέλνονται πουθενά. Χρησιμοποίησε κωδικό αντί για ονοματεπώνυμο και κράτα αντίγραφο ασφαλείας.":"Η τοπική αποθήκευση δεν είναι διαθέσιμη σε αυτό το περιβάλλον. Οι αλλαγές θα χαθούν όταν κλείσει η σελίδα· κράτα αντίγραφο ασφαλείας."}</p></div>
+  const localImport=MODE==="cloud"?(readLocal()||{patients:[]}).patients.filter(x=>!x.example):[];
+  return `<h1>Φάκελοι ασθενών</h1>${trackerBanner()}
+  ${localImport.length?`<div class="callout warn"><p>Βρέθηκαν <b>${localImport.length}</b> φάκελοι αποθηκευμένοι μόνο σε αυτή τη συσκευή. <button class="btn sm" id="impLocal">Μεταφορά στον λογαριασμό μου</button></p></div>`:""}
   <div class="trk">
    <div>
-    <div class="row" style="margin-bottom:10px"><button class="btn pri" id="newPt">+ Νέος κύκλος</button><button class="btn" id="cfgBtn">Όρια</button></div>
-    <div class="pt-list">${DB.patients.map(x=>`<button class="pt${x.id===CUR?" on":""}" data-pt="${x.id}"><span><b>${esc(x.code||"χωρίς κωδικό")}</b><br><span class="small muted">${esc((PROTO_OPTS.find(o=>o[0]===x.proto)||[])[1]||"")}</span></span><span class="pill-n">${x.visits.length} επισκ.</span></button>`).join("")||`<p class="muted small">Δεν υπάρχουν κύκλοι.</p>`}</div>
+    <div class="row" style="margin-bottom:10px"><button class="btn pri" id="newPt">+ Νέα ασθενής</button><button class="btn" id="cfgBtn">Όρια</button></div>
+    <input id="ptSearch" placeholder="Αναζήτηση κωδικού" style="width:100%;margin-bottom:8px" aria-label="Αναζήτηση κωδικού ασθενούς">
+    <div class="pt-list" id="ptList">${ptListHTML("")}</div>
     <div class="row" style="margin-top:14px"><button class="btn sm" id="bkCopy">Αντιγραφή αντιγράφου</button><button class="btn sm" id="bkRestore">Επαναφορά</button></div>
     <p class="small muted" id="bkMsg"></p>
    </div>
-   <div id="ptPane">${p?ptPane(p):`<p>Πάτησε «Νέος κύκλος».</p>`}</div>
+   <div id="ptPane">${p?ptPane(p):`<div class="card"><h3>Δεν υπάρχουν φάκελοι ακόμη</h3><p class="small">Πάτησε «Νέα ασθενής» για να δημιουργήσεις τον πρώτο φάκελο. Χρησιμοποίησε κωδικό αντί για ονοματεπώνυμο.</p></div>`}</div>
   </div>`;
 }
+function ptListHTML(q){
+  const L=DB.patients.filter(x=>!q||(x.code||"").toLowerCase().includes(q.toLowerCase()));
+  return L.map(x=>{const c=x.cycles[x.cycles.length-1];return `<button class="pt${x.id===CUR?" on":""}" data-pt="${x.id}"><span><b>${esc(x.code||"χωρίς κωδικό")}</b><br><span class="small muted">${esc(c?((PROTO_OPTS.find(o=>o[0]===c.proto)||[])[1]||""):"")}</span></span><span class="pill-n">${x.cycles.length} κύκλ.</span></button>`;}).join("")||`<p class="muted small">Κανένας φάκελος.</p>`;
+}
+function setupHTML(){
+  return `<div class="card" style="max-width:560px"><h3>Δημιουργία συνθηματικού κρυπτογράφησης</h3>
+  <p class="small">Οι φάκελοι των ασθενών σου κρυπτογραφούνται με αυτό το συνθηματικό πριν φύγουν από τη συσκευή. Δεν αποθηκεύεται πουθενά.</p>
+  <div class="callout crit"><p class="small"><b>Αν το ξεχάσεις, τα δεδομένα δεν ανακτώνται με κανέναν τρόπο.</b> Φύλαξέ το σε διαχειριστή κωδικών.</p></div>
+  <div class="form" style="grid-template-columns:1fr"><label class="f" for="pw1">Συνθηματικό (τουλάχιστον 10 χαρακτήρες)<input id="pw1" type="password" autocomplete="new-password"></label>
+  <label class="f" for="pw2">Επανάληψη<input id="pw2" type="password" autocomplete="new-password"></label></div>
+  <p class="small" id="pwMsg" style="color:var(--crit)"></p><button class="btn pri" id="pwGo">Δημιουργία και ξεκλείδωμα</button></div>`;
+}
+function unlockHTML(){
+  return `<div class="card" style="max-width:520px"><h3>Ξεκλείδωμα φακέλων</h3><p class="small">Συνδεδεμένος ως <b>${esc(USER.email||"")}</b>. Γράψε το συνθηματικό κρυπτογράφησης.</p>
+  <label class="f" for="pwU">Συνθηματικό<input id="pwU" type="password" autocomplete="current-password"></label>
+  <p class="small" id="pwMsg" style="color:var(--crit)"></p><button class="btn pri" id="pwGo">Ξεκλείδωμα</button>${SYNC.startsWith("Σφάλμα")?`<p class="small" style="color:var(--crit)">${esc(SYNC)}</p>`:""}</div>`;
+}
 function ptPane(p){
-  const al=alertsFor(p), pos=poseidon(p), vs=[...p.visits].sort((a,b)=>a.date.localeCompare(b.date)), last=vs[vs.length-1];
+  const c=p.cycles.find(x=>x.id===CURC)||p.cycles[p.cycles.length-1]; if(c) CURC=c.id;
+  const pos=poseidon(p);
   const f=(id,l,val,type="text",extra="")=>`<label class="f" for="f_${id}">${l}<input id="f_${id}" data-f="${id}" type="${type}" value="${esc(val??"")}" ${extra}></label>`;
   return `${p.example?`<div class="callout warn"><p>Αυτό είναι <b>παράδειγμα</b> για επίδειξη.</p></div>`:""}
-  <h2 style="margin-top:0">${esc(p.code||"Νέος κύκλος")}</h2>
-  <div class="card"><h3>Στοιχεία κύκλου</h3><div class="form">
+  <h2 style="margin-top:0">Φάκελος: ${esc(p.code||"νέα ασθενής")}</h2>
+  <div class="card"><h3>Στοιχεία ασθενούς</h3><div class="form">
    ${f("code","Κωδικός ασθενούς",p.code)}${f("age","Ηλικία",p.age,"number",'min="16" max="55"')}${f("bmi","ΔΜΣ (kg/m²)",p.bmi,"number",'step="0.1"')}
    ${f("amh","AMH (ng/mL)",p.amh,"number",'step="0.01"')}${f("afc","AFC",p.afc,"number")}${f("prevOoc","Ωάρια προηγ. κύκλου",p.prevOoc,"number")}
-   <label class="f" for="f_proto">Πρωτόκολλο<select id="f_proto" data-f="proto">${PROTO_OPTS.map(o=>`<option value="${o[0]}"${p.proto===o[0]?" selected":""}>${o[1]}</option>`).join("")}</select></label>
-   ${f("start",p.proto==="fet-hrt"?"1η ημέρα κύκλου":"Ημέρα 1 διέγερσης",p.start,"date")}${f("fsh",p.proto==="fet-hrt"?"Σχήμα E2 / P4":"Γοναδοτροπίνη και δόση",p.fsh)}
-   ${f("trig","Trigger (ημ/νία, ώρα)",p.trig,"datetime-local")}
    <label class="f wide" for="f_dx">Διάγνωση / ένδειξη<input id="f_dx" data-f="dx" value="${esc(p.dx||"")}"></label>
    <label class="f wide" for="f_notes">Σημειώσεις<input id="f_notes" data-f="notes" value="${esc(p.notes||"")}"></label>
-  </div>
-  <p class="small" style="margin-bottom:0"><b>POSEIDON:</b> <span class="chip acc">${esc(pos.g)}</span> ${esc(pos.t)} ${cite("{{poseidon16}}")}</p></div>
+  </div><p class="small" style="margin-bottom:0"><b>POSEIDON:</b> <span class="chip acc">${esc(pos.g)}</span> ${esc(pos.t)} ${cite("{{poseidon16}}")}</p></div>
+  <div class="tabs">${p.cycles.map(x=>`<button class="tab${x.id===CURC?" on":""}" data-cyc="${x.id}">${esc(x.label||"Κύκλος")}</button>`).join("")}<button class="tab" id="addCyc">+ Νέος κύκλος</button></div>
+  ${c?cyclePane(p,c):`<p class="muted">Δεν υπάρχει κύκλος. Πάτησε «+ Νέος κύκλος».</p>`}
+  <div class="row" style="margin-top:18px"><button class="btn danger" id="delPt">Διαγραφή φακέλου</button></div>`;
+}
+function cyclePane(p,c){
+  const ctx={...p,...c}, al=alertsFor(ctx), vs=[...c.visits].sort((a,b)=>a.date.localeCompare(b.date)), last=vs[vs.length-1];
+  const g=(id,l,val,type="text",extra="")=>`<label class="f" for="c_${id}">${l}<input id="c_${id}" data-cy="${id}" type="${type}" value="${esc(val??"")}" ${extra}></label>`;
+  return `<div class="card"><h3>Στοιχεία κύκλου</h3><div class="form">
+   ${g("label","Όνομα κύκλου",c.label)}
+   <label class="f" for="c_proto">Πρωτόκολλο<select id="c_proto" data-cy="proto">${PROTO_OPTS.map(o=>`<option value="${o[0]}"${c.proto===o[0]?" selected":""}>${o[1]}</option>`).join("")}</select></label>
+   ${g("start",c.proto==="fet-hrt"?"1η ημέρα κύκλου":"Ημέρα 1 διέγερσης",c.start,"date")}${g("fsh",c.proto==="fet-hrt"?"Σχήμα E2 / P4":"Γοναδοτροπίνη και δόση",c.fsh)}
+   ${g("trig","Trigger (ημ/νία, ώρα)",c.trig,"datetime-local")}</div></div>
   <h3>Ειδοποιήσεις</h3>
   ${al.map(([k,t,d])=>`<div class="alert ${k}"><span class="dot"></span><div><b>${esc(t)}</b><span class="small">${esc(d)}</span></div></div>`).join("")}
   <p class="small muted">Οι ειδοποιήσεις βασίζονται στην τελευταία επίσκεψη και στα όρια που ορίζεις στο «Όρια». Είναι υποστήριξη απόφασης, όχι οδηγία.</p>
-  ${last?`<div class="kpis"><div class="kpi"><div class="v">${dayOf(p,last)}</div><div class="l">${p.proto==="fet-hrt"?"Ημέρα κύκλου":"Ημέρα διέγερσης"}</div></div><div class="kpi"><div class="v">${sizes(last).length?Math.max(...sizes(last)):"–"}</div><div class="l">Ηγετικό (mm)</div></div><div class="kpi"><div class="v">${sizes(last).filter(x=>x>=DB.cfg.ohssSize).length}</div><div class="l">Ωοθυλάκια ≥ ${DB.cfg.ohssSize} mm</div></div><div class="kpi"><div class="v">${last.e2||"–"}</div><div class="l">E2 (pg/mL)</div></div><div class="kpi"><div class="v">${last.endo||"–"}</div><div class="l">Ενδομήτριο (mm)</div></div></div><div>${binsRow(last)}</div>`:""}
-  <h3>Γράφημα</h3>${chartSVG(p)}
+  ${last?`<div class="kpis"><div class="kpi"><div class="v">${dayOf(ctx,last)}</div><div class="l">${c.proto==="fet-hrt"?"Ημέρα κύκλου":"Ημέρα διέγερσης"}</div></div><div class="kpi"><div class="v">${sizes(last).length?Math.max(...sizes(last)):"–"}</div><div class="l">Ηγετικό (mm)</div></div><div class="kpi"><div class="v">${sizes(last).filter(x=>x>=DB.cfg.ohssSize).length}</div><div class="l">Ωοθυλάκια ≥ ${DB.cfg.ohssSize} mm</div></div><div class="kpi"><div class="v">${esc(last.e2)||"–"}</div><div class="l">E2 (pg/mL)</div></div><div class="kpi"><div class="v">${esc(last.endo)||"–"}</div><div class="l">Ενδομήτριο (mm)</div></div></div><div>${binsRow(last)}</div>`:""}
+  <h3>Γράφημα</h3>${chartSVG(ctx)}
   <h3>Επισκέψεις</h3>
   <div class="tblwrap"><table><thead><tr><th>Ημ/νία</th><th>Ημέρα</th><th>Τύπος</th><th>Δεξιά (mm)</th><th>Αριστερή (mm)</th><th>E2</th><th>LH</th><th>P4</th><th>Ενδομ.</th><th>Φάρμακα</th><th></th></tr></thead><tbody>
-  ${vs.map(v=>`<tr><td class="mono">${esc(v.date)}</td><td class="mono">${dayOf(p,v)}</td><td>${esc((VTYPES.find(t=>t[0]===v.type)||[])[1]||"")}</td><td class="mono">${esc(v.R)}</td><td class="mono">${esc(v.L)}</td><td class="mono">${esc(v.e2)}</td><td class="mono">${esc(v.lh)}</td><td class="mono">${esc(v.p4)}</td><td class="mono">${esc(v.endo)}${v.pat?`<div class="small muted">${esc(v.pat)}</div>`:""}</td><td class="small">${esc(v.drugs)}</td><td><button class="btn sm" data-ev="${v.id}">Επεξ.</button></td></tr>`).join("")||`<tr><td colspan="11" class="muted">Καμία επίσκεψη.</td></tr>`}
+  ${vs.map(v=>`<tr><td class="mono">${esc(v.date)}</td><td class="mono">${dayOf(ctx,v)}</td><td>${esc((VTYPES.find(t=>t[0]===v.type)||[])[1]||"")}</td><td class="mono">${esc(v.R)}</td><td class="mono">${esc(v.L)}</td><td class="mono">${esc(v.e2)}</td><td class="mono">${esc(v.lh)}</td><td class="mono">${esc(v.p4)}</td><td class="mono">${esc(v.endo)}${v.pat?`<div class="small muted">${esc(v.pat)}</div>`:""}</td><td class="small">${esc(v.drugs)}</td><td><button class="btn sm" data-ev="${v.id}">Επεξ.</button></td></tr>`).join("")||`<tr><td colspan="11" class="muted">Καμία επίσκεψη.</td></tr>`}
   </tbody></table></div>
-  <div class="row" style="margin-top:10px"><button class="btn pri" id="addV">+ Νέα επίσκεψη</button><button class="btn danger" id="delPt">Διαγραφή κύκλου</button></div>`;
+  <div class="row" style="margin-top:10px"><button class="btn pri" id="addV">+ Νέα επίσκεψη</button>${(p.cycles.length>1)?`<button class="btn danger" id="delCyc">Διαγραφή κύκλου</button>`:""}</div>`;
+}
+function refreshTracker(){$("#view").innerHTML=pageTracker();bindTracker();}
+function bindTracker(){
+  const go=$("#pwGo");
+  if(MODE==="cloud-locked"&&go){
+    const msg=t=>$("#pwMsg").textContent=t;
+    go.onclick=async()=>{
+      go.disabled=true;
+      try{
+        if(USERMETA){msg("Έλεγχος…");const ok=await unlock($("#pwU").value);if(!ok){msg("Λάθος συνθηματικό.");go.disabled=false;}}
+        else{const a=$("#pw1").value,b=$("#pw2").value;if(a.length<10){msg("Χρειάζονται τουλάχιστον 10 χαρακτήρες.");go.disabled=false;return;}if(a!==b){msg("Τα δύο συνθηματικά δεν ταιριάζουν.");go.disabled=false;return;}msg("Δημιουργία…");await setupPass(a);}
+      }catch(e){msg("Σφάλμα: "+(e.code||e.message));go.disabled=false;}
+    };
+    document.querySelectorAll("#pwU,#pw2").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go.click();}));
+    return;
+  }
+  if(!$("#newPt")) return;
+  const imp=$("#impLocal"); if(imp) imp.onclick=()=>{const L=(readLocal()||{patients:[]}).patients.filter(x=>!x.example);const have=new Set(DB.patients.map(x=>x.id));L.forEach(x=>{if(have.has(x.id))x.id=uid();DB.patients.push(x);});save();refreshTracker();};
+  document.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{CUR=b.dataset.pt;CURC=null;refreshTracker();});
+  $("#ptSearch").oninput=e=>{$("#ptList").innerHTML=ptListHTML(e.target.value);document.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{CUR=b.dataset.pt;CURC=null;refreshTracker();});};
+  $("#newPt").onclick=()=>{const c=newCycle(1);const n={id:uid(),code:"",age:"",bmi:"",amh:"",afc:"",prevOoc:"",dx:"",notes:"",cycles:[c]};DB.patients.unshift(n);CUR=n.id;CURC=c.id;save();refreshTracker();setTimeout(()=>{const e=$("#f_code");e&&e.focus();},30);};
+  $("#cfgBtn").onclick=cfgForm;
+  $("#bkCopy").onclick=async()=>{const t=JSON.stringify(DB);try{await navigator.clipboard.writeText(t);$("#bkMsg").textContent="Αντιγράφηκε (μη κρυπτογραφημένο). Φύλαξέ το σε ασφαλές σημείο.";}catch(e){openDlg(`<h3 style="margin-top:0">Αντίγραφο ασφαλείας</h3><p class="small">Επίλεξε και αντίγραψε το κείμενο. Δεν είναι κρυπτογραφημένο.</p><textarea readonly>${esc(t)}</textarea><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" onclick="closeDlg()">Κλείσιμο</button></div>`);}};
+  $("#bkRestore").onclick=()=>{openDlg(`<h3 style="margin-top:0">Επαναφορά</h3><p class="small">Επικόλλησε το αντίγραφο ή διάλεξε αρχείο .json/.txt. Οι φάκελοι του αντιγράφου θα αντικαταστήσουν τους τρέχοντες.</p><input type="file" id="rsFile" accept=".json,.txt"><textarea id="rsTxt" style="margin-top:8px"></textarea><p class="small" id="rsMsg" style="color:var(--crit)"></p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeDlg()">Ακύρωση</button><button class="btn pri" id="rsGo">Επαναφορά</button></div>`);
+    $("#rsFile").onchange=e=>{const fl=e.target.files[0];if(fl)fl.text().then(t=>$("#rsTxt").value=t);};
+    $("#rsGo").onclick=()=>{try{const d=JSON.parse($("#rsTxt").value);if(!Array.isArray(d.patients))throw 0;DB={patients:d.patients.map(normPatient),cfg:{...DEFCFG,...(d.cfg||{})}};save();CUR=null;CURC=null;closeDlg();refreshTracker();}catch(e){$("#rsMsg").textContent="Το κείμενο δεν είναι έγκυρο αντίγραφο της εφαρμογής.";}};};
+  const p=DB.patients.find(x=>x.id===CUR); if(!p) return;
+  const c=p.cycles.find(x=>x.id===CURC);
+  document.querySelectorAll("[data-f]").forEach(el=>el.onchange=()=>{p[el.dataset.f]=el.value.trim();if(el.dataset.f==="code")p.example=false;save();refreshTracker();});
+  document.querySelectorAll("[data-cyc]").forEach(b=>b.onclick=()=>{CURC=b.dataset.cyc;refreshTracker();});
+  $("#addCyc").onclick=()=>{const n=newCycle(p.cycles.length+1);p.cycles.push(n);CURC=n.id;save();refreshTracker();};
+  $("#delPt").onclick=()=>{openDlg(`<h3 style="margin-top:0">Διαγραφή φακέλου</h3><p>Να διαγραφεί οριστικά ο φάκελος <b>${esc(p.code||"χωρίς κωδικό")}</b> με όλους τους κύκλους και τις επισκέψεις;</p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeDlg()">Ακύρωση</button><button class="btn pri" id="dGo">Διαγραφή</button></div>`);$("#dGo").onclick=()=>{DB.patients=DB.patients.filter(x=>x.id!==p.id);CUR=null;CURC=null;save();closeDlg();refreshTracker();};};
+  if(!c) return;
+  document.querySelectorAll("[data-cy]").forEach(el=>el.onchange=()=>{c[el.dataset.cy]=el.value.trim();save();refreshTracker();});
+  $("#addV").onclick=()=>visitForm(c);
+  document.querySelectorAll("[data-ev]").forEach(b=>b.onclick=()=>visitForm(c,c.visits.find(v=>v.id===b.dataset.ev)));
+  const dc=$("#delCyc"); if(dc) dc.onclick=()=>{openDlg(`<h3 style="margin-top:0">Διαγραφή κύκλου</h3><p>Να διαγραφεί οριστικά ο «${esc(c.label)}» και οι επισκέψεις του;</p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeDlg()">Ακύρωση</button><button class="btn pri" id="dGo">Διαγραφή</button></div>`);$("#dGo").onclick=()=>{p.cycles=p.cycles.filter(x=>x.id!==c.id);CURC=null;save();closeDlg();refreshTracker();};};
 }
 function visitForm(p,v){
   v=v||{id:"",date:new Date().toISOString().slice(0,10),type:"mon",e2:"",lh:"",p4:"",endo:"",pat:"",R:"",L:"",drugs:""};
@@ -664,24 +842,10 @@ function cfgForm(){
 }
 function openDlg(h){$("#dlgBox").innerHTML=h;$("#dlg").classList.add("on");const f=$("#dlgBox input,#dlgBox select,#dlgBox button");f&&f.focus();}
 function closeDlg(){$("#dlg").classList.remove("on");}
-function refreshTracker(){$("#view").innerHTML=pageTracker();bindTracker();}
-function bindTracker(){
-  document.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{CUR=b.dataset.pt;refreshTracker();});
-  $("#newPt").onclick=()=>{const n={id:uid(),code:"",age:"",bmi:"",amh:"",afc:"",prevOoc:"",dx:"",proto:"antagonist",start:new Date().toISOString().slice(0,10),fsh:"",trig:"",notes:"",visits:[]};DB.patients.unshift(n);CUR=n.id;save();refreshTracker();setTimeout(()=>{const e=$("#f_code");e&&e.focus();},30);};
-  $("#cfgBtn").onclick=cfgForm;
-  $("#bkCopy").onclick=async()=>{const t=JSON.stringify(DB);try{await navigator.clipboard.writeText(t);$("#bkMsg").textContent="Αντιγράφηκε. Επικόλλησέ το σε ασφαλές αρχείο.";}catch(e){openDlg(`<h3 style="margin-top:0">Αντίγραφο ασφαλείας</h3><p class="small">Επίλεξε και αντίγραψε το κείμενο.</p><textarea readonly>${esc(t)}</textarea><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" onclick="closeDlg()">Κλείσιμο</button></div>`);}};
-  $("#bkRestore").onclick=()=>{openDlg(`<h3 style="margin-top:0">Επαναφορά</h3><p class="small">Επικόλλησε το αντίγραφο ή διάλεξε αρχείο .json/.txt. Τα τρέχοντα δεδομένα θα αντικατασταθούν.</p><input type="file" id="rsFile" accept=".json,.txt"><textarea id="rsTxt" style="margin-top:8px"></textarea><p class="small" id="rsMsg" style="color:var(--crit)"></p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeDlg()">Ακύρωση</button><button class="btn pri" id="rsGo">Επαναφορά</button></div>`);
-    $("#rsFile").onchange=e=>{const fl=e.target.files[0];if(fl)fl.text().then(t=>$("#rsTxt").value=t);};
-    $("#rsGo").onclick=()=>{try{const d=JSON.parse($("#rsTxt").value);if(!Array.isArray(d.patients))throw 0;DB={patients:d.patients,cfg:{...DEFCFG,...(d.cfg||{})}};save();CUR=null;closeDlg();refreshTracker();}catch(e){$("#rsMsg").textContent="Το κείμενο δεν είναι έγκυρο αντίγραφο της εφαρμογής.";}};};
-  const p=DB.patients.find(x=>x.id===CUR); if(!p) return;
-  document.querySelectorAll("[data-f]").forEach(el=>el.onchange=()=>{p[el.dataset.f]=el.value.trim(); if(el.dataset.f!=="notes"&&el.dataset.f!=="dx")p.example=p.example&&el.dataset.f!=="code"; save(); refreshTracker();});
-  $("#addV").onclick=()=>visitForm(p);
-  document.querySelectorAll("[data-ev]").forEach(b=>b.onclick=()=>visitForm(p,p.visits.find(v=>v.id===b.dataset.ev)));
-  $("#delPt").onclick=()=>{openDlg(`<h3 style="margin-top:0">Διαγραφή κύκλου</h3><p>Να διαγραφεί οριστικά ο κύκλος <b>${esc(p.code||"χωρίς κωδικό")}</b> και όλες οι επισκέψεις του;</p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeDlg()">Ακύρωση</button><button class="btn pri" id="dGo">Διαγραφή</button></div>`);$("#dGo").onclick=()=>{DB.patients=DB.patients.filter(x=>x.id!==p.id);CUR=null;save();closeDlg();refreshTracker();};};
-}
-
 /* ================= ΕΚΚΙΝΗΣΗ ================= */
-load();
+loadLocal();
+renderAcct();
+initFirebase();
 $("#dlg").addEventListener("click",e=>{if(e.target.id==="dlg")closeDlg();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDlg();});
 $("#menuBtn").onclick=()=>$("#side").classList.toggle("open");
