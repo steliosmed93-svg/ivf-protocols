@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Πρωτόκολλα Εξωσωματικής</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20role%3D%22img%22%20aria-label%3D%22%CE%9B%CE%BF%CE%B3%CF%8C%CF%84%CF%85%CF%80%CE%BF%20%CE%A0%CF%81%CF%89%CF%84%CF%8C%CE%BA%CE%BF%CE%BB%CE%BB%CE%B1%20%CE%95%CE%BE%CF%89%CF%83%CF%89%CE%BC%CE%B1%CF%84%CE%B9%CE%BA%CE%AE%CF%82%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2215%22%20fill%3D%22%237a2e5c%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%2222.5%22%20fill%3D%22none%22%20stroke%3D%22%23f4c9df%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20stroke-dasharray%3D%220.1%205.2%22%20opacity%3D%22.9%22/%3E%3Cpath%20d%3D%22M32%209.5%20A22.5%2022.5%200%200%201%2054.5%2032%22%20fill%3D%22none%22%20stroke%3D%22%237fd3d9%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22/%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%2216%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%223.4%22/%3E%3Ccircle%20cx%3D%2231%22%20cy%3D%2233%22%20r%3D%2210.2%22%20fill%3D%22%23f4c9df%22/%3E%3Ccircle%20cx%3D%2228.4%22%20cy%3D%2230.6%22%20r%3D%223.1%22%20fill%3D%22%237a2e5c%22%20opacity%3D%22.5%22/%3E%3Ccircle%20cx%3D%2240.4%22%20cy%3D%2223.6%22%20r%3D%221.9%22%20fill%3D%22%237fd3d9%22/%3E%3C/svg%3E">
+<meta name="theme-color" content="#7a2e5c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Literata:opsz,wght@7..72,500;7..72,650&family=JetBrains+Mono:wght@400;600&display=swap&subset=greek" rel="stylesheet">
@@ -35,6 +37,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .app{display:grid;grid-template-columns:260px 1fr;min-height:100%}
 nav.side{background:var(--card);border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;overflow-y:auto}
 .brand{font-family:var(--f-display);font-weight:650;font-size:20px;line-height:1.2;margin:0 6px 4px}
+/*brand*/
+.brandlink{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit;margin:0 6px 8px}
+.brandlink .mark{width:46px;height:46px;flex:0 0 46px;border-radius:12px;box-shadow:0 2px 8px rgba(122,46,92,.25)}
+.brandlink .brand{display:block;margin:0;font-size:21px;line-height:1.1}
+.brand-kicker{display:block;font:600 10.5px/1.4 var(--f-body);letter-spacing:.22em;color:var(--teal);margin-top:2px}
+.brandlink.sm{margin:0}.brandlink.sm .mark{width:32px;height:32px;flex-basis:32px;border-radius:8px}.brandlink.sm .brand{font-size:17px}.brandlink.sm .brand-kicker{font-size:9px}
 .brand-sub{color:var(--ink-3);font-size:12.5px;margin:0 6px 18px}
 .navgrp{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:16px 8px 6px}
 .navlink{display:block;padding:7px 10px;border-radius:6px;color:var(--ink-2);text-decoration:none;font-size:14.5px}
@@ -129,11 +137,11 @@ details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 </style>
 </head>
 <body>
-<div class="topbar"><button class="btn sm" id="menuBtn" aria-label="Άνοιγμα μενού">☰ Μενού</button><b style="font-family:var(--f-display)">Πρωτόκολλα Εξωσωματικής</b></div>
+<div class="topbar"><button class="btn sm" id="menuBtn" aria-label="Άνοιγμα μενού">☰ Μενού</button><a class="brandlink sm" href="#home"><svg class="mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Λογότυπο Πρωτόκολλα Εξωσωματικής"><rect width="64" height="64" rx="15" fill="#7a2e5c"/><circle cx="32" cy="32" r="22.5" fill="none" stroke="#f4c9df" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.1 5.2" opacity=".9"/><path d="M32 9.5 A22.5 22.5 0 0 1 54.5 32" fill="none" stroke="#7fd3d9" stroke-width="2.6" stroke-linecap="round"/><circle cx="32" cy="32" r="16" fill="none" stroke="#ffffff" stroke-width="3.4"/><circle cx="31" cy="33" r="10.2" fill="#f4c9df"/><circle cx="28.4" cy="30.6" r="3.1" fill="#7a2e5c" opacity=".5"/><circle cx="40.4" cy="23.6" r="1.9" fill="#7fd3d9"/></svg><span><span class="brand">Πρωτόκολλα</span><span class="brand-kicker">ΕΞΩΣΩΜΑΤΙΚΗΣ</span></span></a></div>
 <div class="app">
 <nav class="side" id="side">
-  <div class="brand">Πρωτόκολλα Εξωσωματικής</div>
-  <div class="brand-sub">Εκπαιδευτικός οδηγός και καρτέλα κύκλου για γυναικολόγους</div>
+  <a class="brandlink" href="#home" aria-label="Αρχική"><svg class="mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Λογότυπο Πρωτόκολλα Εξωσωματικής"><rect width="64" height="64" rx="15" fill="#7a2e5c"/><circle cx="32" cy="32" r="22.5" fill="none" stroke="#f4c9df" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.1 5.2" opacity=".9"/><path d="M32 9.5 A22.5 22.5 0 0 1 54.5 32" fill="none" stroke="#7fd3d9" stroke-width="2.6" stroke-linecap="round"/><circle cx="32" cy="32" r="16" fill="none" stroke="#ffffff" stroke-width="3.4"/><circle cx="31" cy="33" r="10.2" fill="#f4c9df"/><circle cx="28.4" cy="30.6" r="3.1" fill="#7a2e5c" opacity=".5"/><circle cx="40.4" cy="23.6" r="1.9" fill="#7fd3d9"/></svg><span><span class="brand">Πρωτόκολλα</span><span class="brand-kicker">ΕΞΩΣΩΜΑΤΙΚΗΣ</span></span></a>
+  <div class="brand-sub">Εκπαιδευτικός οδηγός και φάκελοι ασθενών για γυναικολόγους</div>
   <div id="navlinks"></div>
   <div id="acct"></div>
 </nav>
