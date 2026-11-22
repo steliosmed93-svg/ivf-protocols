@@ -43,6 +43,7 @@ nav.side{background:var(--card);border-right:1px solid var(--line);padding:20px 
 .brandlink .brand{display:block;margin:0;font-size:21px;line-height:1.1}
 .brand-kicker{display:block;font:600 10.5px/1.4 var(--f-body);letter-spacing:.22em;color:var(--teal);margin-top:2px}
 .brandlink.sm{margin:0}.brandlink.sm .mark{width:32px;height:32px;flex-basis:32px;border-radius:8px}.brandlink.sm .brand{font-size:17px}.brandlink.sm .brand-kicker{font-size:9px}
+.langsw{margin:-8px 6px 14px}.langsw a{font-size:13px;font-weight:600;color:var(--teal);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px}.langsw a:hover{border-color:var(--teal)}
 .brand-sub{color:var(--ink-3);font-size:12.5px;margin:0 6px 18px}
 .navgrp{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:16px 8px 6px}
 .navlink{display:block;padding:7px 10px;border-radius:6px;color:var(--ink-2);text-decoration:none;font-size:14.5px}
@@ -151,6 +152,7 @@ details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 <nav class="side" id="side">
   <a class="brandlink" href="#home" aria-label="Αρχική"><svg class="mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Λογότυπο Πρωτόκολλα Εξωσωματικής"><rect width="64" height="64" rx="15" fill="#7a2e5c"/><circle cx="32" cy="32" r="22.5" fill="none" stroke="#f4c9df" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.1 5.2" opacity=".9"/><path d="M32 9.5 A22.5 22.5 0 0 1 54.5 32" fill="none" stroke="#7fd3d9" stroke-width="2.6" stroke-linecap="round"/><circle cx="32" cy="32" r="16" fill="none" stroke="#ffffff" stroke-width="3.4"/><circle cx="31" cy="33" r="10.2" fill="#f4c9df"/><circle cx="28.4" cy="30.6" r="3.1" fill="#7a2e5c" opacity=".5"/><circle cx="40.4" cy="23.6" r="1.9" fill="#7fd3d9"/></svg><span><span class="brand">Πρωτόκολλα</span><span class="brand-kicker">ΕΞΩΣΩΜΑΤΙΚΗΣ</span></span></a>
   <div class="brand-sub">Εκπαιδευτικός οδηγός και φάκελοι ασθενών για γυναικολόγους</div>
+  <div class="langsw"><a href="en/" hreflang="en" lang="en">🌐 English</a></div>
   <div id="navlinks"></div>
   <div id="acct"></div>
 </nav>
@@ -832,6 +834,119 @@ const QUIZ=[
  {p:"tools",q:"Τι έδειξε η Cochrane για την εξατομίκευση της δόσης FSH με βάση AMH/AFC;",o:["Περισσότερες γεννήσεις","Παρόμοιες γεννήσεις με τα 150 IU, λιγότερος OHSS σε υψηλές απαντήτριες με μικρότερη δόση","Λιγότερες γεννήσεις","Όφελος από αύξηση δόσης σε χαμηλές"],a:1,ex:"Δεν τεκμηριώνεται αύξηση πάνω από 150 IU· η μείωση δόσης σε υψηλές απαντήτριες μειώνει τον OHSS."}
 ];
 
+/* ================= ΕΙΔΙΚΕΣ ΚΑΤΑΣΤΑΣΕΙΣ ================= */
+Object.assign(REFS,{
+ becker22:{cite:"Becker et al., 2022",apa:"Becker, C. M., Bokor, A., Heikinheimo, O., Horne, A., Jansen, F., Kiesel, L., King, K., Kvaskoff, M., Nap, A., Petersen, K., Saridogan, E., Tomassetti, C., van Hanegem, N., Vulliemoz, N., Vermeulen, N., & ESHRE Endometriosis Guideline Group. (2022). ESHRE guideline: Endometriosis. <i>Human Reproduction Open, 2022</i>(2), Article hoac009.",doi:"10.1093/hropen/hoac009"},
+ melo20:{cite:"Melo et al., 2020",apa:"Melo, P., Georgiou, E. X., Johnson, N., van Voorst, S. F., Strandell, A., Mol, B. W. J., Becker, C., & Granne, I. E. (2020). Surgical treatment for tubal disease in women due to undergo in vitro fertilisation. <i>Cochrane Database of Systematic Reviews, 2020</i>(10), Article CD002125.",doi:"10.1002/14651858.CD002125.pub4"},
+ cimadomo23:{cite:"ESHRE Working Group on Recurrent Implantation Failure et al., 2023",apa:"ESHRE Working Group on Recurrent Implantation Failure, Cimadomo, D., de Los Santos, M. J., Griesinger, G., Lainas, G., Le Clef, N., McLernon, D. J., Montjean, D., Toth, B., Vermeulen, N., & Macklon, N. (2023). ESHRE good practice recommendations on recurrent implantation failure. <i>Human Reproduction Open, 2023</i>(3), Article hoad023.",doi:"10.1093/hropen/hoad023"},
+ akhtar13:{cite:"Akhtar et al., 2013",apa:"Akhtar, M. A., Sur, S., Raine-Fenning, N., Jayaprakasan, K., Thornton, J. G., & Quenby, S. (2013). Heparin for assisted reproduction. <i>Cochrane Database of Systematic Reviews, 2013</i>(8), Article CD009452.",doi:"10.1002/14651858.CD009452.pub2"},
+ khoo24:{cite:"Khoo et al., 2024",apa:"Khoo, C. C., Cayetano-Alcaraz, A. A., Rashid, R., Tharakan, T., Yap, T., Sofikitis, N., Salonia, A., Corona, G., Giwercman, A., Jayasena, C. N., & Minhas, S. (2024). Does testicular sperm improve intracytoplasmic sperm injection outcomes for nonazoospermic infertile men with elevated sperm DNA fragmentation? A systematic review and meta-analysis. <i>European Urology Focus, 10</i>(3), 410–420.",doi:"10.1016/j.euf.2023.08.008"}
+});
+
+PROTOCOLS.push(
+{
+ id:"sp-endo", cat:"special", name:"Ενδομητρίωση και ενδομητρίωμα", en:"Endometriosis and endometrioma",
+ tags:["Χειρουργείο ή IVF;","Ωοθηκική εφεδρεία","Χωρίς ρουτίνα υπερ-μακρύ"],
+ summary:"Πώς σχεδιάζουμε την IVF σε γυναίκες με ενδομητρίωση: πότε χειρουργούμε, ποιο πρωτόκολλο επιλέγουμε και τι κάνουμε με τα ενδομητριώματα.",
+ principle:[
+  "Η κατευθυντήρια οδηγία της ESHRE για την ενδομητρίωση θεωρεί τόσο τη χειρουργική όσο και την υποβοηθούμενη αναπαραγωγή εφικτές επιλογές για την υπογονιμότητα, χωρίς ένα σχήμα που να ταιριάζει σε όλες {{becker22}}.",
+  "Η μακροχρόνια καταστολή με αγωνιστή πριν από την IVF δεν έχει αποδεδειγμένο όφελος στις ζώσες γεννήσεις {{georgiou19}}, και η ESHRE αντέστρεψε την παλαιότερη σύσταση για ρουτίνα χρήση {{michaeli22}}.",
+  "Η απόφαση για χειρουργείο ενδομητριώματος πριν από την IVF εξατομικεύεται: σταθμίζονται ο πόνος, η πρόσβαση στις ωοθήκες για ωοληψία, η υποψία κακοήθειας και ο κίνδυνος μείωσης της ωοθηκικής εφεδρείας από την κυστεκτομία {{becker22}}."
+ ],
+ indications:["Υπογονιμότητα με ενδομητρίωση οποιουδήποτε σταδίου","Ενδομητρίωμα με προγραμματισμένη IVF"],
+ cautions:["Επαναλαμβανόμενες κυστεκτομίες: σημαντική απώλεια εφεδρείας· μέτρησε AMH πριν από οποιοδήποτε χειρουργείο","Ωοληψία μέσα από ενδομητρίωμα: κίνδυνος λοίμωξης· χορήγησε αντιβίωση κατά το πρωτόκολλο του κέντρου","Διερεύνησε για αδενομύωση, που επηρεάζει τη μεταφορά"],
+ table:[
+  {when:"Αρχική εκτίμηση",drug:"AMH, AFC, υπερηχογράφημα για ενδομητριώματα και αδενομύωση",dose:"",why:"Καθορίζει αν προηγείται χειρουργείο ή IVF {{becker22}}.",expect:""},
+  {when:"Πόνος ή μεγάλο ενδομητρίωμα",drug:"Συζήτηση χειρουργείου",dose:"",why:"Για τα συμπτώματα, την πρόσβαση στην ωοληψία ή την ιστολογική διάγνωση.",expect:"Επανέλεγχος AMH μετά"},
+  {when:"Επιλογή πρωτοκόλλου",drug:"Ανταγωνιστής ή αγωνιστής",dose:"",why:"Δεν υπάρχει αποδεδειγμένα καλύτερο πρωτόκολλο· ο υπερ-μακρύς δεν συνιστάται ως ρουτίνα {{georgiou19;michaeli22}}.",expect:""},
+  {when:"Μεταφορά",drug:"Freeze-all και FET (εξατομικευμένα)",dose:"",why:"Πολλά κέντρα προτιμούν FET σε HRT κύκλο με προηγούμενη καταστολή όταν συνυπάρχει αδενομύωση.",expect:""}
+ ],
+ pearls:["Δες και τα πρωτόκολλα «Υπερ-μακρύ αγωνιστή» και «HRT κύκλος».","Η απόφαση για χειρουργείο πρέπει να λαμβάνει υπόψη την ηλικία και την εφεδρεία, όχι μόνο το μέγεθος της κύστης."],
+ refs:["becker22","georgiou19","michaeli22"]
+},
+{
+ id:"sp-hydro", cat:"special", name:"Υδροσάλπιγγα πριν από IVF", en:"Hydrosalpinx before IVF",
+ tags:["Σαλπιγγεκτομή","Απόφραξη σάλπιγγας","Διπλάσια κύηση"],
+ summary:"Το υγρό της υδροσάλπιγγας μειώνει την εμφύτευση. Η χειρουργική αντιμετώπιση πριν από την IVF αυξάνει την κλινική κύηση.",
+ principle:[
+  "Στην ανασκόπηση Cochrane, η σαλπιγγεκτομή πιθανώς αυξάνει την κλινική κύηση σε σύγκριση με την απουσία χειρουργείου (RR 2,02· μέτρια ποιότητα). Η εγγύς απόφραξη της σάλπιγγας μπορεί επίσης να την αυξάνει (RR 3,21· χαμηλή ποιότητα) {{melo20}}.",
+  "Η διακολπική αναρρόφηση του υγρού έχει πιο αβέβαιο όφελος (RR 1,67· πολύ χαμηλή ποιότητα). Η σύγκριση απόφραξης και σαλπιγγεκτομής δεν έδειξε σαφή διαφορά {{melo20}}."
+ ],
+ indications:["Υδροσάλπιγγα ορατή στο υπερηχογράφημα πριν από IVF","Επαναλαμβανόμενη αποτυχία εμφύτευσης με υδροσάλπιγγα"],
+ cautions:["Η σαλπιγγεκτομή μπορεί να επηρεάσει την αιμάτωση της ωοθήκης: προσεκτική τεχνική κοντά στο μεσοσαλπίγγιο","Σε δύσκολες συμφύσεις, η εγγύς απόφραξη είναι εναλλακτική"],
+ table:[
+  {when:"Πριν από τη διέγερση",drug:"Λαπαροσκοπική σαλπιγγεκτομή",dose:"",why:"Πιθανή αύξηση κλινικής κύησης (RR 2,02) {{melo20}}.",expect:""},
+  {when:"Αν η σαλπιγγεκτομή είναι δύσκολη",drug:"Εγγύς απόφραξη σάλπιγγας",dose:"",why:"Εναλλακτική με παρόμοιο αποτέλεσμα {{melo20}}.",expect:""},
+  {when:"Υγρό που εμφανίζεται κατά τη διέγερση",drug:"Αναρρόφηση στην ωοληψία και freeze-all",dose:"",why:"Το όφελος της αναρρόφησης είναι αβέβαιο· η μεταφορά αναβάλλεται μέχρι την οριστική αντιμετώπιση.",expect:""}
+ ],
+ pearls:["Κανένα RCT δεν ανέφερε ζώσες γεννήσεις για τη σύγκριση σαλπιγγεκτομής με απουσία χειρουργείου· το όφελος αφορά την κλινική κύηση {{melo20}}."],
+ refs:["melo20"]
+},
+{
+ id:"sp-rif", cat:"special", name:"Επαναλαμβανόμενη αποτυχία εμφύτευσης (RIF)", en:"Recurrent implantation failure",
+ tags:["Ορισμός ESHRE 60%","Στοχευμένος έλεγχος","Όχι add-ons ρουτίνας"],
+ summary:"Πότε μιλάμε για RIF, ποιος έλεγχος έχει νόημα και ποιες παρεμβάσεις δεν πρέπει να προσφέρονται ως ρουτίνα.",
+ principle:[
+  "Η ομάδα εργασίας της ESHRE ορίζει τη RIF ως την κατάσταση όπου η μεταφορά εμβρύων που θεωρούνται βιώσιμα έχει αποτύχει αρκετές φορές ώστε να δικαιολογείται περαιτέρω διερεύνηση. Το όριο είναι η αθροιστική προβλεπόμενη πιθανότητα εμφύτευσης 60% για τη συγκεκριμένη ασθενή {{cimadomo23}}.",
+  "Η ESHRE διατύπωσε 19 συστάσεις για τον έλεγχο και 13 για τις παρεμβάσεις, χωρισμένες σε «συνιστάται», «να εξεταστεί» και «δεν συνιστάται ως ρουτίνα». Ο έλεγχος και η θεραπεία πρέπει να περιορίζονται σε όσα έχουν σαφές σκεπτικό και στοιχεία πιθανού οφέλους {{cimadomo23}}.",
+  "Παραδείγματα add-ons χωρίς όφελος σε RCT: το τεστ υποδεκτικότητας ενδομητρίου {{doyle22}} και το time-lapse {{bhide24}}. Το endometrial scratching έδειξε μικρό πιθανό όφελος (OR 1,29) {{vanhoog23}}."
+ ],
+ indications:["Αποτυχία μεταφορών με βιώσιμα έμβρυα, όταν η αθροιστική πιθανότητα εμφύτευσης ξεπερνά το 60%"],
+ cautions:["Αποφυγή πολλαπλών αναπόδεικτων παρεμβάσεων ταυτόχρονα","Για τη χρωματική κατάταξη κάθε εξέτασης και παρέμβασης, συμβουλέψου το πλήρες κείμενο της ESHRE {{cimadomo23}}"],
+ table:[
+  {when:"Επανεκτίμηση",drug:"Υπολογισμός αθροιστικής πιθανότητας εμφύτευσης",dose:"Ηλικία, ποιότητα και ευπλοειδία εμβρύων, αριθμός μεταφορών",why:"Επιβεβαίωση ότι πρόκειται για RIF {{cimadomo23}}.",expect:""},
+  {when:"Μήτρα",drug:"Αξιολόγηση κοιλότητας και σαλπίγγων",dose:"Υστεροσκόπηση ή 3D υπερηχογράφημα· έλεγχος για υδροσάλπιγγα",why:"Διορθώσιμα ανατομικά αίτια {{melo20}}.",expect:""},
+  {when:"Έμβρυα",drug:"Αξιολόγηση της ποιότητας και, κατά περίπτωση, PGT-A",dose:"",why:"Η PGT-A μειώνει τις απώλειες κύησης χωρίς αύξηση των αθροιστικών γεννήσεων {{lin25;yan21}}.",expect:""},
+  {when:"Μεταφορά",drug:"Βελτιστοποίηση πρωτοκόλλου μεταφοράς",dose:"Π.χ. έλεγχος P4 ορού την ημέρα της ET σε HRT",why:"Η χαμηλή P4 είναι διορθώσιμη {{labarta22}}.",expect:""}
+ ],
+ pearls:["Δες και «Θρομβοφιλία και ηπαρίνη» και «Ανδρικός παράγοντας και ICSI»."],
+ refs:["cimadomo23","doyle22","bhide24","vanhoog23","melo20","lin25","yan21","labarta22"]
+},
+{
+ id:"sp-male", cat:"special", name:"Ανδρικός παράγοντας και ICSI", en:"Male factor and ICSI",
+ tags:["ICSI μόνο με ένδειξη","Θραύση DNA","Σπέρμα όρχεως"],
+ summary:"Πότε χρειάζεται ICSI, τι σημαίνει η αυξημένη θραύση DNA του σπέρματος και πότε εξετάζεται σπέρμα από τον όρχι.",
+ principle:[
+  "Σε ζευγάρια με φυσιολογικό αριθμό και κινητικότητα σπερματοζωαρίων, η ICSI δεν αύξησε σημαντικά τις ζώσες γεννήσεις σε σύγκριση με την κλασική IVF (35% έναντι 31%) {{dang21}}.",
+  "Σε σοβαρή ανδρική υπογονιμότητα, η PGT-A δεν αύξησε τις αθροιστικές γεννήσεις αλλά μείωσε τις απώλειες κύησης μετά την πρώτη μεταφορά (5,8% έναντι 19,1%) {{lin25}}.",
+  "Σε άνδρες χωρίς αζωοσπερμία με αυξημένη θραύση DNA, η χρήση σπέρματος από τον όρχι συνδέθηκε με περισσότερες κυήσεις και γεννήσεις, αλλά τα στοιχεία είναι χαμηλής ποιότητας και δεν επαρκούν για σύσταση ρουτίνας {{khoo24}}."
+ ],
+ indications:["ICSI: σοβαρός ανδρικός παράγοντας, χειρουργικά ληφθέν σπέρμα, προηγούμενη αποτυχία γονιμοποίησης","Εξέταση θραύσης DNA: επαναλαμβανόμενες αποτυχίες ή αποβολές, κατά την κρίση του κέντρου"],
+ cautions:["Η ICSI ρουτίνας χωρίς ανδρικό παράγοντα αυξάνει το κόστος χωρίς σαφές όφελος {{dang21}}","Σπέρμα όρχεως σε μη αζωοσπερμικούς: επεμβατική πράξη με περιορισμένα στοιχεία {{khoo24}}"],
+ table:[
+  {when:"Πριν από τον κύκλο",drug:"Σπερμοδιάγραμμα και ουρολογική εκτίμηση",dose:"",why:"Αναγνώριση διορθώσιμων αιτίων.",expect:""},
+  {when:"Φυσιολογικό σπέρμα",drug:"Κλασική IVF",dose:"",why:"Ίδιες γεννήσεις με την ICSI {{dang21}}.",expect:""},
+  {when:"Σοβαρός ανδρικός παράγοντας",drug:"ICSI ± PGT-A",dose:"",why:"Η PGT-A μειώνει τις αποβολές χωρίς να αυξάνει τις γεννήσεις {{lin25}}.",expect:""},
+  {when:"Υψηλή θραύση DNA με αποτυχίες",drug:"Συζήτηση για σπέρμα όρχεως",dose:"",why:"Πιθανό όφελος, στοιχεία χαμηλής ποιότητας {{khoo24}}.",expect:""}
+ ],
+ pearls:["Η απόφαση για ICSI πρέπει να καταγράφεται με την ένδειξή της."],
+ refs:["dang21","lin25","khoo24"]
+},
+{
+ id:"sp-thromb", cat:"special", name:"Θρομβοφιλία και ηπαρίνη στην IVF", en:"Thrombophilia and heparin in IVF",
+ tags:["Χαμηλή ποιότητα στοιχείων","Όχι ρουτίνα LMWH","Θρομβοπροφύλαξη OHSS"],
+ summary:"Η ηπαρίνη χαμηλού μοριακού βάρους (LMWH) χρησιμοποιείται συχνά στην IVF, αλλά το όφελος στις γεννήσεις είναι αβέβαιο. Χρειάζεται διάκριση ανάμεσα στη θεραπευτική ένδειξη και στην εμπειρική χρήση.",
+ principle:[
+  "Στην ανασκόπηση Cochrane, η LMWH στην περίοδο της εμφύτευσης συνδέθηκε με περισσότερες ζώσες γεννήσεις (OR 1,77), αλλά το εύρημα ήταν πολύ χαμηλής ποιότητας και έπαυε να είναι σημαντικό με μοντέλο τυχαίων επιδράσεων {{akhtar13}}.",
+  "Η ομάδα εργασίας της ESHRE για τη RIF ζητά οι παρεμβάσεις να περιορίζονται σε όσες έχουν σαφές σκεπτικό και στοιχεία οφέλους. Για την κατάταξη του ελέγχου θρομβοφιλίας και της ηπαρίνης, συμβουλέψου το πλήρες κείμενο {{cimadomo23}}."
+ ],
+ indications:["Θεραπευτική ή προφυλακτική LMWH σε ασθενή με τεκμηριωμένη ένδειξη (π.χ. ιστορικό θρόμβωσης, αντιφωσφολιπιδικό σύνδρομο), σε συνεργασία με αιματολόγο","Θρομβοπροφύλαξη σε μέτριο ή σοβαρό OHSS"],
+ cautions:["Εμπειρική LMWH χωρίς ένδειξη: αβέβαιο όφελος {{akhtar13}}","Οι ενέσεις και το κόστος επιβαρύνουν την ασθενή"],
+ table:[
+  {when:"Πριν από τη θεραπεία",drug:"Ιστορικό θρόμβωσης και οικογενειακό ιστορικό",dose:"",why:"Εντοπίζει ασθενείς με πραγματική ένδειξη.",expect:""},
+  {when:"Τεκμηριωμένη ένδειξη",drug:"LMWH (π.χ. ενοξαπαρίνη)",dose:"Δόση κατά βάρος και ένδειξη, με τον αιματολόγο",why:"Πρόληψη θρομβοεμβολής.",expect:""},
+  {when:"Χωρίς ένδειξη",drug:"Όχι ρουτίνα LMWH",dose:"",why:"Πολύ χαμηλής ποιότητας στοιχεία για όφελος {{akhtar13}}.",expect:""}
+ ],
+ pearls:["Τα οιστρογόνα του HRT κύκλου αυξάνουν τον θρομβοεμβολικό κίνδυνο· αξιολόγησέ τον πριν από την έναρξη (δες «Οιστραδιόλη» στη φαρμακολογία)."],
+ refs:["akhtar13","cimadomo23"]
+}
+);
+STUDIES.push(
+ {ref:"melo20",yr:2020,type:"Ανασκόπηση Cochrane",tags:["sp-hydro"],title:"Χειρουργική αντιμετώπιση υδροσάλπιγγας πριν από IVF",pico:"11 RCT, 1.386 συμμετέχουσες.",find:"Η σαλπιγγεκτομή πιθανώς αυξάνει την κλινική κύηση (RR 2,02), και η απόφραξη μπορεί επίσης να την αυξάνει (RR 3,21).",impact:"Στηρίζει τη χειρουργική αντιμετώπιση πριν από την IVF.",crit:"Δεν αναφέρθηκαν ζώσες γεννήσεις στη βασική σύγκριση."},
+ {ref:"cimadomo23",yr:2023,type:"Συστάσεις ESHRE",tags:["sp-rif"],title:"Συστάσεις καλής πρακτικής για τη RIF",pico:"Ορισμός, έλεγχος και παρεμβάσεις στη RIF.",find:"Όριο 60% αθροιστικής πιθανότητας εμφύτευσης· 19 συστάσεις για έλεγχο και 13 για παρεμβάσεις, χωρισμένες σε τρεις κατηγορίες.",impact:"Δίνει κοινό ορισμό και περιορίζει τις αναπόδεικτες παρεμβάσεις.",crit:"Συστάσεις ομάδας ειδικών, όχι συστηματική κατευθυντήρια οδηγία."},
+ {ref:"khoo24",yr:2024,type:"Μετα-ανάλυση",tags:["sp-male"],title:"Σπέρμα όρχεως σε υψηλή θραύση DNA",pico:"9 μελέτες σε μη αζωοσπερμικούς άνδρες με αυξημένη θραύση DNA.",find:"Περισσότερες κυήσεις (OR 2,51) και γεννήσεις (OR 2,59) με σπέρμα όρχεως, χωρίς διαφορά σε γονιμοποίηση ή αποβολές.",impact:"Πιθανή επιλογή σε επιλεγμένα ζευγάρια, όχι ρουτίνα.",crit:"Μελέτες χαμηλής ποιότητας· χρειάζονται RCT."}
+);
+
 /* ================= ΒΟΗΘΗΤΙΚΑ ================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -853,12 +968,12 @@ function navHTML(h){
   const grp=(cat,title)=>{const items=PROTOCOLS.filter(p=>p.cat===cat);const open=(cur&&cur.cat===cat)||NAVOPEN[cat]===true;
     return `<details class="navdd" data-dd="${cat}"${open?" open":""}><summary>${title}<span class="pill-n">${items.length}</span></summary>${items.map(p=>L("p-"+p.id,navName(p),1)).join("")}</details>`;};
   return `<div class="navgrp">Οδηγός</div>${L("home","Αρχική")}${L("protocols","Όλα τα πρωτόκολλα")}
-   ${grp("stim","Διέγερση")}${grp("strategy","Στρατηγικές")}${grp("fet","Κατεψυγμένη μεταφορά")}
+   ${grp("stim","Διέγερση")}${grp("strategy","Στρατηγικές")}${grp("fet","Κατεψυγμένη μεταφορά")}${grp("special","Ειδικές καταστάσεις")}
    ${L("drugs","Φαρμακολογία")}${L("studies","Νέες μελέτες")}
    <div class="navgrp">Κλινική</div>${L("tracker","Φάκελοι ασθενών")}${L("tools","Εργαλεία")}${L("quiz","Quiz")}
-   <div class="navgrp">Πληροφορίες</div>${L("refs","Βιβλιογραφία")}${L("about","Μεθοδολογία και επόμενα βήματα")}${L("terms","Όροι χρήσης και απόρρητο")}`;
+   <div class="navgrp">Πληροφορίες</div>${L("author","Σχετικά")}${L("refs","Βιβλιογραφία")}${L("about","Μεθοδολογία και επόμενα βήματα")}${L("terms","Όροι χρήσης και απόρρητο")}`;
 }
-const NAVN={"antagonist":"Ανταγωνιστής GnRH","long-agonist":"Μακρύς αγωνιστής","flare":"Βραχύ (flare)","ultra-long":"Υπερ-μακρύ","ppos":"PPOS","mild":"Ήπια / φυσικός IVF","duostim":"DuoStim","fp-random":"Διατήρηση γονιμότητας","ivm":"IVM","poseidon":"Χαμηλές απαντήτριες","ohss":"Υψηλές απαντήτριες / OHSS","fet-hrt":"HRT κύκλος","fet-nc":"Φυσικός κύκλος","fet-letrozole":"Λετροζόλη","fet-donor":"Λήπτρια ωαρίων"};
+const NAVN={"antagonist":"Ανταγωνιστής GnRH","long-agonist":"Μακρύς αγωνιστής","flare":"Βραχύ (flare)","ultra-long":"Υπερ-μακρύ","ppos":"PPOS","mild":"Ήπια / φυσικός IVF","duostim":"DuoStim","fp-random":"Διατήρηση γονιμότητας","ivm":"IVM","poseidon":"Χαμηλές απαντήτριες","ohss":"Υψηλές απαντήτριες / OHSS","fet-hrt":"HRT κύκλος","fet-nc":"Φυσικός κύκλος","fet-letrozole":"Λετροζόλη","fet-donor":"Λήπτρια ωαρίων","sp-endo":"Ενδομητρίωση","sp-hydro":"Υδροσάλπιγγα","sp-rif":"Αποτυχία εμφύτευσης (RIF)","sp-male":"Ανδρικός παράγοντας / ICSI","sp-thromb":"Θρομβοφιλία / ηπαρίνη"};
 function navName(p){return NAVN[p.id]||p.name;}
 function route(){
   const h=(location.hash||"#home").slice(1);
@@ -876,6 +991,7 @@ function route(){
   else if(h==="tools") {v.innerHTML=pageTools(); bindTools();}
   else if(h==="quiz") {v.innerHTML=pageQuiz(); bindQuiz();}
   else if(h==="terms") v.innerHTML=pageTerms();
+  else if(h==="author") v.innerHTML=pageAuthor();
   else v.innerHTML=pageHome();
   window.scrollTo(0,0);
 }
@@ -899,9 +1015,9 @@ function pageProtocols(){
   const grp=(cat,title)=>`<h2>${title}</h2><div class="grid g2">${PROTOCOLS.filter(p=>p.cat===cat).map(p=>`<a class="card" href="#p-${p.id}"><h3>${esc(p.name)}</h3><div>${p.tags.map(t=>`<span class="chip acc">${esc(t)}</span>`).join("")}</div><p class="small">${esc(p.summary)}</p></a>`).join("")}</div>`;
   return `<h1>Πρωτόκολλα</h1><p class="lede">${PROTOCOLS.length} πρωτόκολλα και στρατηγικές. Σύγκριση με μια ματιά· πάτησε ένα για την πλήρη ανάλυση.</p>
   <div class="tblwrap"><table><thead><tr><th>Πρωτόκολλο</th><th>Καταστολή LH</th><th>Διάρκεια</th><th>Κίνδυνος OHSS</th><th>Trigger με αγωνιστή</th><th>Φρέσκια ET</th><th>Τυπικές υποψήφιες</th></tr></thead><tbody>
-  ${[...PROTOCOLS].sort((a,b)=>['stim','strategy','fet'].indexOf(a.cat)-['stim','strategy','fet'].indexOf(b.cat)).map(p=>`<tr><td><a href="#p-${p.id}"><b>${esc(p.name)}</b></a><div class="muted small">${esc(p.en)}</div></td><td>${esc(p.snapshot.supp)}</td><td>${esc(p.snapshot.dur)}</td><td>${chipLevel(p.snapshot.ohss)}</td><td>${esc(p.snapshot.ag)}</td><td>${esc(p.snapshot.fresh)}</td><td>${esc(p.snapshot.who)}</td></tr>`).join("")}
+  ${[...PROTOCOLS].filter(p=>p.snapshot).sort((a,b)=>['stim','strategy','fet'].indexOf(a.cat)-['stim','strategy','fet'].indexOf(b.cat)).map(p=>`<tr><td><a href="#p-${p.id}"><b>${esc(p.name)}</b></a><div class="muted small">${esc(p.en)}</div></td><td>${esc(p.snapshot.supp)}</td><td>${esc(p.snapshot.dur)}</td><td>${chipLevel(p.snapshot.ohss)}</td><td>${esc(p.snapshot.ag)}</td><td>${esc(p.snapshot.fresh)}</td><td>${esc(p.snapshot.who)}</td></tr>`).join("")}
   </tbody></table></div>
-  ${grp("stim","Πρωτόκολλα διέγερσης")}${grp("strategy","Στρατηγικές για ειδικές ομάδες")}${grp("fet","Κατεψυγμένη μεταφορά εμβρύων")}
+  ${grp("stim","Πρωτόκολλα διέγερσης")}${grp("strategy","Στρατηγικές για ειδικές ομάδες")}${grp("fet","Κατεψυγμένη μεταφορά εμβρύων")}${grp("special","Ειδικές καταστάσεις")}
   `;
 }
 function chipLevel(v){const m={"Χαμηλός":"ok","Πολύ χαμηλός":"ok","Ελαχιστοποιημένος":"ok","Χαμηλός (με trigger αγωνιστή)":"ok","Χαμηλός έως μέτριος":"warn","Υψηλότερος":"warn","Κανένας":"ok"};return `<span class="chip ${m[v]||""}">${esc(v)}</span>`;}
@@ -928,19 +1044,19 @@ function timelineSVG(tl){
   return s;
 }
 function pageProtocol(p){
-  return `<p class="small muted"><a href="#protocols">Πρωτόκολλα</a> / ${esc(p.en)}</p>
+  return `<p class="small muted"><a href="#protocols">Πρωτόκολλα</a> / ${esc(p.en||p.name)}</p>
   <h1>${esc(p.name)}</h1><div>${p.tags.map(t=>`<span class="chip acc">${esc(t)}</span>`).join("")}</div>
   <p class="lede" style="margin-top:10px">${esc(p.summary)}</p>
-  <div class="kpis">
+  ${p.snapshot?`<div class="kpis">
    <div class="kpi"><div class="l">Καταστολή LH</div><div class="small"><b>${esc(p.snapshot.supp)}</b></div></div>
    <div class="kpi"><div class="l">Διάρκεια</div><div class="small"><b>${esc(p.snapshot.dur)}</b></div></div>
    <div class="kpi"><div class="l">Κίνδυνος OHSS</div><div>${chipLevel(p.snapshot.ohss)}</div></div>
    <div class="kpi"><div class="l">Trigger αγωνιστή / Φρέσκια ET</div><div class="small"><b>${esc(p.snapshot.ag)} / ${esc(p.snapshot.fresh)}</b></div></div>
-  </div>
+  </div>`:""}
   ${p.timeline?`<h2>Χρονοδιάγραμμα</h2><div class="timeline">${timelineSVG(p.timeline)}</div>
   <p class="muted small">Κύκλοι: επισκέψεις παρακολούθησης· ρόμβοι: trigger, ωοληψία, μεταφορά· διακεκομμένη γραμμή: ευέλικτη έναρξη.</p>`:""}
   <h2>Πώς λειτουργεί</h2>${p.principle.map(t=>`<p>${cite(esc(t).replace(/\{\{/g,"{{"))}</p>`).join("")}
-  <h2>Πίνακας φαρμάκων και παρακολούθησης</h2>
+  <h2>${p.cat==="special"?"Βήματα διαχείρισης":"Πίνακας φαρμάκων και παρακολούθησης"}</h2>
   <div class="tblwrap"><table><thead><tr><th>Πότε</th><th>Τι δίνουμε / κάνουμε</th><th>Δόση</th><th>Γιατί</th><th>Τι περιμένουμε να δούμε</th></tr></thead><tbody>
   ${p.table.map(r=>`<tr><td class="when">${esc(r.when)}</td><td><span class="drug">${esc(r.drug)}</span></td><td>${esc(r.dose)}</td><td>${cite(esc(r.why))}</td><td>${cite(esc(r.expect))}</td></tr>`).join("")}
   </tbody></table></div>
@@ -948,10 +1064,10 @@ function pageProtocol(p){
    <div class="card"><h3>Ενδείξεις</h3><ul>${p.indications.map(t=>`<li>${cite(esc(t))}</li>`).join("")}</ul></div>
    <div class="card"><h3>Προσοχή</h3><ul>${p.cautions.map(t=>`<li>${cite(esc(t))}</li>`).join("")}</ul></div>
   </div>
-  <h2>Τελική ωρίμανση (trigger)</h2>${p.trigger.map(t=>`<p>${cite(t)}</p>`).join("")}
-  <div class="callout crit"><p><b>OHSS:</b> ${cite(esc(p.ohss))}</p></div>
+  ${p.trigger?`<h2>Τελική ωρίμανση (trigger)</h2>${p.trigger.map(t=>`<p>${cite(t)}</p>`).join("")}`:""}
+  ${p.ohss?`<div class="callout crit"><p><b>OHSS:</b> ${cite(esc(p.ohss))}</p></div>`:""}
   <h2>Κλινικά σημεία</h2><ul>${p.pearls.map(t=>`<li>${cite(esc(t))}</li>`).join("")}</ul>
-  <h2>Φάρμακα του πρωτοκόλλου</h2><div>${DRUGS.filter(d=>d.use.includes(p.id)).map(d=>`<a class="chip teal" href="#drugs" style="text-decoration:none">${esc(d.name)}</a>`).join("")}</div>
+  ${DRUGS.some(d=>d.use.includes(p.id))?`<h2>Φάρμακα του πρωτοκόλλου</h2><div>${DRUGS.filter(d=>d.use.includes(p.id)).map(d=>`<a class="chip teal" href="#drugs" style="text-decoration:none">${esc(d.name)}</a>`).join("")}</div>`:""}
   <h2>Βιβλιογραφία</h2><ul class="reflist">${sortedRefKeys(p.refs).map(refItem).join("")}</ul>`;
 }
 function pageDrugs(){
@@ -1088,6 +1204,27 @@ function pageTerms(){
   <h2>5. Διαγραφή δεδομένων</h2><p>Μπορείς να διαγράψεις οποιονδήποτε φάκελο από την εφαρμογή. Η διαγραφή αφαιρεί το κρυπτογραφημένο έγγραφο από το Firestore. Για πλήρη διαγραφή του λογαριασμού, επικοινώνησε μέσω του αποθετηρίου του έργου.</p>
   <h2>6. Επικοινωνία</h2><p>Για ερωτήσεις ή αιτήματα: <a href="https://github.com/steliosmed93-svg/ivf-protocols/issues" target="_blank" rel="noopener">github.com/steliosmed93-svg/ivf-protocols/issues</a></p>
   <div class="callout warn"><p class="small">Το κείμενο αυτό είναι γενική ενημέρωση και όχι νομική συμβουλή. Πριν από ευρεία χρήση με πραγματικά δεδομένα ασθενών, συνιστάται έλεγχος από νομικό ή υπεύθυνο προστασίας δεδομένων.</p></div>`;
+}
+
+/* ================= ΣΧΕΤΙΚΑ ΜΕ ΤΟΝ ΔΗΜΙΟΥΡΓΟ ================= */
+function pageAuthor(){
+  return `<h1>Σχετικά</h1><p class="lede">Ο οδηγός δημιουργήθηκε για να συγκεντρώσει σε ένα σημείο τα πρωτόκολλα της εξωσωματικής, τον λόγο ύπαρξης κάθε φαρμάκου και τα πιο πρόσφατα στοιχεία, με εργαλεία για την καθημερινή κλινική πράξη.</p>
+  <div class="card" style="max-width:760px"><div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+   <div style="width:64px;height:64px;border-radius:14px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font:650 24px var(--f-display);flex:0 0 64px">ΣΧ</div>
+   <div style="flex:1;min-width:240px"><h2 style="margin:0 0 4px">Στυλιανός-Σέργιος Χατζηιωάννου</h2><p class="muted" style="margin:0 0 10px">MD, MBA, MSc · Ιατρός Μαιευτικής-Γυναικολογίας</p>
+   <p>Ειδικεύεται στη Μαιευτική και Γυναικολογία, με κύριο ενδιαφέρον την εξωσωματική γονιμοποίηση, την αναπαραγωγική ενδοκρινολογία και την καλοήθη γυναικολογία. Εκπονεί διδακτορική διατριβή στην εξωσωματική γονιμοποίηση και μεταπτυχιακό στην Εμβρυομητρική Ιατρική.</p>
+   <p>Ασχολείται με συστηματικές ανασκοπήσεις και μετα-αναλύσεις, την ιατρική εκπαίδευση και την επιστημονική αρθρογραφία, και είναι κριτής σε επιστημονικά περιοδικά, όπως το <i>Journal of Ovarian Research</i>.</p></div></div>
+   <h3>Συνεργασίες</h3><ul>
+    <li>Α΄ Μαιευτική και Γυναικολογική Κλινική, Μαιευτήριο «Έλενα Βενιζέλου», Αθήνα</li>
+    <li>Ιατρική Σχολή, Ευρωπαϊκό Πανεπιστήμιο Κύπρου</li>
+    <li>Κέντρο Τεκμηριωμένης Φροντίδας Υγείας JBI, Πανεπιστήμιο Δυτικής Αττικής</li></ul>
+   <h3>Ακαδημαϊκά προφίλ</h3><div class="row">
+    <a class="btn" href="https://orcid.org/0009-0008-6394-1891" target="_blank" rel="noopener">ORCID</a>
+    <a class="btn" href="https://scholar.google.com/citations?user=KsW4EogAAAAJ" target="_blank" rel="noopener">Google Scholar</a>
+    <a class="btn" href="https://www.researchgate.net/profile/Stylianos-Chatziioannou-2" target="_blank" rel="noopener">ResearchGate</a></div>
+  </div>
+  <h2>Πώς ενημερώνεται ο οδηγός</h2><p>Κάθε μήνα γίνεται αναζήτηση στο PubMed για νέα RCT, μετα-αναλύσεις και κατευθυντήριες οδηγίες. Οι μελέτες με κλινικό αντίκτυπο αξιολογούνται και προστίθενται, μαζί με τις αλλαγές που επιφέρουν στα πρωτόκολλα. Δες και τη σελίδα <a href="#about">Μεθοδολογία</a>.</p>
+  <h2>Σχόλια και διορθώσεις</h2><p>Αν εντοπίσεις λάθος ή θέλεις να προτείνεις μελέτη: <a href="https://github.com/steliosmed93-svg/ivf-protocols/issues" target="_blank" rel="noopener">github.com/steliosmed93-svg/ivf-protocols/issues</a></p>`;
 }
 /* ================= ΚΑΡΤΕΛΑ ΠΑΡΑΚΟΛΟΥΘΗΣΗΣ: ΚΑΤΑΣΤΑΣΗ, ΤΟΠΙΚΗ ΚΑΙ CLOUD ΑΠΟΘΗΚΕΥΣΗ ================= */
 const KEY="ivfprot.v1";
