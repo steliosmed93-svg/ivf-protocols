@@ -48,6 +48,14 @@ nav.side{background:var(--card);border-right:1px solid var(--line);padding:20px 
 .navlink{display:block;padding:7px 10px;border-radius:6px;color:var(--ink-2);text-decoration:none;font-size:14.5px}
 .navlink:hover{background:var(--tint);color:var(--ink)}
 .navlink.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+details.navdd{margin:2px 0}
+details.navdd>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:6px;cursor:pointer;color:var(--ink-2);font-size:14.5px;margin-left:12px}
+details.navdd>summary::-webkit-details-marker{display:none}
+details.navdd>summary::before{content:"▸";font-size:11px;margin-right:8px;color:var(--ink-3);transition:transform .15s}
+details.navdd[open]>summary::before{transform:rotate(90deg)}
+details.navdd>summary:hover{background:var(--tint);color:var(--ink)}
+details.navdd>summary .pill-n{margin-left:auto}
+details.navdd .navlink.sub{padding-left:34px}
 .navsub{font-size:11.5px;color:var(--ink-3);margin:8px 10px 2px 22px;font-weight:600}
 .navlink.sub{padding-left:22px;font-size:14px}
 main{padding:28px clamp(16px,4vw,48px) 80px;max-width:1180px;width:100%}
@@ -838,12 +846,14 @@ function sortedRefKeys(keys){return [...new Set(keys)].sort((a,b)=>REFS[a].apa.r
 const PROTO_BY_ID = Object.fromEntries(PROTOCOLS.map(p=>[p.id,p]));
 
 /* ================= ΠΛΟΗΓΗΣΗ ================= */
-function navHTML(cur){
-  const L=(h,t,sub)=>`<a class="navlink${sub?" sub":""}${cur===h?" on":""}" href="#${h}">${t}</a>`;
-  return `<div class="navgrp">Οδηγός</div>${L("home","Αρχική")}${L("protocols","Πρωτόκολλα")}
-   <div class="navsub">Διέγερση</div>${PROTOCOLS.filter(p=>p.cat==="stim").map(p=>L("p-"+p.id,navName(p),1)).join("")}
-   <div class="navsub">Στρατηγικές</div>${PROTOCOLS.filter(p=>p.cat==="strategy").map(p=>L("p-"+p.id,navName(p),1)).join("")}
-   <div class="navsub">Κατεψυγμένη μεταφορά</div>${PROTOCOLS.filter(p=>p.cat==="fet").map(p=>L("p-"+p.id,navName(p),1)).join("")}
+const NAVOPEN={};
+function navHTML(h){
+  const L=(x,t,sub)=>`<a class="navlink${sub?" sub":""}${h===x?" on":""}" href="#${x}">${t}</a>`;
+  const cur=PROTO_BY_ID[(h||"").replace(/^p-/,"")];
+  const grp=(cat,title)=>{const items=PROTOCOLS.filter(p=>p.cat===cat);const open=(cur&&cur.cat===cat)||NAVOPEN[cat]===true;
+    return `<details class="navdd" data-dd="${cat}"${open?" open":""}><summary>${title}<span class="pill-n">${items.length}</span></summary>${items.map(p=>L("p-"+p.id,navName(p),1)).join("")}</details>`;};
+  return `<div class="navgrp">Οδηγός</div>${L("home","Αρχική")}${L("protocols","Όλα τα πρωτόκολλα")}
+   ${grp("stim","Διέγερση")}${grp("strategy","Στρατηγικές")}${grp("fet","Κατεψυγμένη μεταφορά")}
    ${L("drugs","Φαρμακολογία")}${L("studies","Νέες μελέτες")}
    <div class="navgrp">Κλινική</div>${L("tracker","Φάκελοι ασθενών")}${L("tools","Εργαλεία")}${L("quiz","Quiz")}
    <div class="navgrp">Πληροφορίες</div>${L("refs","Βιβλιογραφία")}${L("about","Μεθοδολογία και επόμενα βήματα")}${L("terms","Όροι χρήσης και απόρρητο")}`;
@@ -852,7 +862,8 @@ const NAVN={"antagonist":"Ανταγωνιστής GnRH","long-agonist":"Μακ�
 function navName(p){return NAVN[p.id]||p.name;}
 function route(){
   const h=(location.hash||"#home").slice(1);
-  $("#navlinks").innerHTML=navHTML(h.startsWith("p-")?h:h);
+  $("#navlinks").innerHTML=navHTML(h);
+  document.querySelectorAll("details.navdd").forEach(d=>d.addEventListener("toggle",()=>{NAVOPEN[d.dataset.dd]=d.open;}));
   $("#side").classList.remove("open");
   const v=$("#view");
   if(h==="protocols") v.innerHTML=pageProtocols();
