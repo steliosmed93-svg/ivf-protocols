@@ -159,6 +159,7 @@ details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 <main id="view" tabindex="-1"></main>
 </div>
 <div class="dialog-bg" id="dlg"><div class="dialog" role="dialog" aria-modal="true" id="dlgBox"></div></div>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1288,12 +1289,36 @@ async function onAuth(u){
   catch(e){USERMETA=null;MODE="cloud-locked";SYNC="Σφάλμα ανάγνωσης: "+(e.code||e.message);}
   renderAcct(); afterModeChange();
 }
-function authErr(e){if(!e)return;const m={"auth/popup-closed-by-user":"Το παράθυρο σύνδεσης έκλεισε.","auth/unauthorized-domain":"Το domain δεν είναι εξουσιοδοτημένο στο Firebase.","auth/network-request-failed":"Πρόβλημα δικτύου. Δοκίμασε ξανά."};const t=m[e.code]||("Η σύνδεση απέτυχε ("+(e.code||e.message)+").");["#acctMsg","#acctMsg2"].forEach(id=>{const el=$(id);if(el)el.textContent=t;});}
+function authErr(e){if(!e)return;const m={"auth/popup-closed-by-user":"Το παράθυρο σύνδεσης έκλεισε.","auth/unauthorized-domain":"Το domain δεν είναι εξουσιοδοτημένο στο Firebase.","auth/network-request-failed":"Πρόβλημα δικτύου. Δοκίμασε ξανά.","gis":"Η σύνδεση Google δεν ολοκληρώθηκε. Δοκίμασε ξανά."};const t=m[e.code]||("Η σύνδεση απέτυχε ("+(e.code||e.message)+").");["#acctMsg","#acctMsg2"].forEach(id=>{const el=$(id);if(el)el.textContent=t;});}
 async function signIn(){
   if(!FB_OK){const el=$("#acctMsg");if(el)el.textContent="Η σύνδεση δεν είναι διαθέσιμη σε αυτή την προβολή. Άνοιξε το site από το GitHub.";return;}
   const prov=new firebase.auth.GoogleAuthProvider(); prov.setCustomParameters({prompt:"select_account"});
-  try{await AUTH.signInWithPopup(prov);}catch(e){if(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment"){AUTH.signInWithRedirect(prov);}else authErr(e);}
+  try{await AUTH.signInWithPopup(prov);}catch(e){if(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment"||e.code==="auth/web-storage-unsupported"){AUTH.signInWithRedirect(prov);}else authErr(e);}
 }
+/* Google Identity Services: sign-in without the firebaseapp.com popup (works with blocked third-party storage) */
+const GIS_CID="662020211580-buggbt8t9a5lo7td870qj5u70ak2oo5c.apps.googleusercontent.com";
+let GIS_READY=false;
+function gisInit(){
+  if(GIS_READY) return true;
+  if(!(window.google&&google.accounts&&google.accounts.id)) return false;
+  google.accounts.id.initialize({client_id:GIS_CID,callback:gisCb,auto_select:false,cancel_on_tap_outside:true,itp_support:true,use_fedcm_for_button:true});
+  GIS_READY=true; return true;
+}
+async function gisCb(resp){
+  if(!FB_OK||!resp||!resp.credential){authErr({code:"gis"});return;}
+  try{await AUTH.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(resp.credential));}catch(e){authErr(e);}
+}
+function gisMount(){
+  if(!FB_OK||USER||!gisInit()) return;
+  document.querySelectorAll(".gisbtn:not([data-done])").forEach(el=>{
+    el.dataset.done="1"; el.innerHTML="";
+    const w=Math.max(200,Math.min(320,Math.floor(el.clientWidth||220)));
+    google.accounts.id.renderButton(el,{type:"standard",theme:"filled_blue",size:"large",text:"signin_with",shape:"pill",logo_alignment:"left",width:w,locale:document.documentElement.lang||"el"});
+  });
+}
+new MutationObserver(()=>{if(!USER&&document.querySelector(".gisbtn:not([data-done])"))gisMount();}).observe(document.documentElement,{childList:true,subtree:true});
+window.addEventListener("load",()=>{let n=0;const t=setInterval(()=>{gisMount();if(GIS_READY||++n>40)clearInterval(t);},250);});
+function gisHTML(id){return `<div class="gisbtn" id="${id}" style="min-height:44px"></div><a href="javascript:void 0" class="small muted" onclick="signIn()" style="display:inline-block;margin-top:4px">Εναλλακτική σύνδεση (αναδυόμενο παράθυρο)</a>`;}
 function signOut(){CKEY=null;if(AUTH)AUTH.signOut();}
 function lockNow(){CKEY=null;DB={patients:[],cfg:{...DEFCFG}};LAST={};MODE="cloud-locked";renderAcct();afterModeChange();}
 
@@ -1338,7 +1363,7 @@ window.addEventListener("beforeunload",e=>{if(MODE==="cloud"&&(cloudBusy||cloudT
 
 function renderAcct(){
   const el=$("#acct"); if(!el) return;
-  if(!USER){el.innerHTML=`<div class="navgrp">Λογαριασμός</div><div style="padding:0 8px"><button class="btn sm pri" id="btnIn" style="width:100%">Σύνδεση με Google</button><p class="small muted" style="margin:6px 0 0">Χωρίς σύνδεση, η καρτέλα αποθηκεύεται μόνο σε αυτή τη συσκευή.</p><p class="small" id="acctMsg" style="color:var(--crit);margin:4px 0 0"></p></div>`;$("#btnIn").onclick=signIn;return;}
+  if(!USER){el.innerHTML=`<div class="navgrp">Λογαριασμός</div><div style="padding:0 8px">${gisHTML("gisAcct")}<p class="small muted" style="margin:6px 0 0">Χωρίς σύνδεση, η καρτέλα αποθηκεύεται μόνο σε αυτή τη συσκευή.</p><p class="small" id="acctMsg" style="color:var(--crit);margin:4px 0 0"></p></div>`;gisMount();return;}
   el.innerHTML=`<div class="navgrp">Λογαριασμός</div><div style="padding:0 8px"><div class="small"><b>${esc(USER.displayName||"")}</b><br><span class="muted">${esc(USER.email||"")}</span></div>
    <div class="small" style="margin:4px 0">${MODE==="cloud"?'<span class="chip ok">Ξεκλείδωτο</span>':'<span class="chip warn">Κλειδωμένο</span>'}</div>
    <div class="row">${MODE==="cloud"?'<button class="btn sm" id="btnLock">Κλείδωμα</button>':""}<button class="btn sm" id="btnOut">Αποσύνδεση</button></div><p class="small muted" style="margin:6px 0 0">Αυτόματο κλείδωμα μετά από 15 λεπτά αδράνειας.</p><p class="small" id="acctMsg" style="color:var(--crit);margin:4px 0 0"></p></div>`;
@@ -1441,7 +1466,7 @@ function binsRow(v){
   return b.map(([l,f])=>`<span class="chip">${l}: <b class="mono">${s.filter(f).length}</b></span>`).join("");
 }
 function trackerBanner(){
-  if(MODE==="local") return `<div class="callout ${STORAGE_OK?"":"crit"}"><p>${STORAGE_OK?"<b>Τοπική λειτουργία:</b> τα δεδομένα αποθηκεύονται μόνο σε αυτόν τον browser. "+(FB_OK?"Για κρυπτογραφημένους φακέλους που ανοίγουν από κάθε συσκευή, συνδέσου με Google.</p><p style=\"margin-top:8px\"><button class=\"btn pri\" onclick=\"signIn()\">Σύνδεση με Google</button> <span class=\"small\" id=\"acctMsg2\" style=\"color:var(--crit)\"></span>":""):"Η τοπική αποθήκευση δεν είναι διαθέσιμη. Οι αλλαγές θα χαθούν όταν κλείσει η σελίδα."}</p></div>`;
+  if(MODE==="local") return `<div class="callout ${STORAGE_OK?"":"crit"}"><p>${STORAGE_OK?"<b>Τοπική λειτουργία:</b> τα δεδομένα αποθηκεύονται μόνο σε αυτόν τον browser. "+(FB_OK?"Για κρυπτογραφημένους φακέλους που ανοίγουν από κάθε συσκευή, συνδέσου με Google.</p><p style=\"margin-top:8px\"><div style=\"max-width:320px\">"+gisHTML("gisTrk")+"</div><span class=\"small\" id=\"acctMsg2\" style=\"color:var(--crit)\"></span>":""):"Η τοπική αποθήκευση δεν είναι διαθέσιμη. Οι αλλαγές θα χαθούν όταν κλείσει η σελίδα."}</p></div>`;
   return `<div class="callout acc"><p><b>Κρυπτογραφημένοι φάκελοι:</b> τα δεδομένα κρυπτογραφούνται σε αυτή τη συσκευή με το συνθηματικό σου πριν σταλούν στο Firebase (ΕΕ, Φρανκφούρτη). Κανείς άλλος, ούτε ο διαχειριστής ούτε η Google, δεν μπορεί να τα διαβάσει. <span class="muted" id="syncMsg">${esc(SYNC)}</span></p></div>`;
 }
 function pageTracker(){
@@ -1608,6 +1633,5 @@ $("#menuBtn").onclick=()=>$("#side").classList.toggle("open");
 window.addEventListener("hashchange",route);
 route();
 </script>
-<a href="https://steliosmed93-svg.github.io/baby-oclock/doctor.html" target="_blank" rel="noopener" id="bo-portal" style="position:fixed;right:16px;bottom:16px;z-index:9999;display:flex;align-items:center;gap:8px;background:#2f7f7a;color:#fff;text-decoration:none;font-weight:600;padding:12px 16px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.2);font-family:inherit">👩‍⚕️ Πύλη ασθενών · Baby O’Clock</a>
 </body>
 </html>
