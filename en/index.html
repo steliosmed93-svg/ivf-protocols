@@ -1953,7 +1953,7 @@ async function onAuth(u){
   catch(e){USERMETA=null;MODE="cloud-locked";SYNC="Read error: "+(e.code||e.message);}
   renderAcct(); afterModeChange();
 }
-function authErr(e){if(!e)return;const m={"auth/popup-closed-by-user":"The sign-in window was closed.","auth/unauthorized-domain":"This domain is not authorised in Firebase.","auth/network-request-failed":"Network problem. Try again.","gis":"Google sign-in did not complete. Please try again."};const t=m[e.code]||("Sign-in failed ("+(e.code||e.message)+").");["#acctMsg","#acctMsg2"].forEach(id=>{const el=$(id);if(el)el.textContent=t;});}
+function authErr(e){if(!e)return;const m={"auth/popup-closed-by-user":"The sign-in window was closed.","auth/unauthorized-domain":"This domain is not authorised in Firebase.","auth/network-request-failed":"Network problem. Try again.","gis":"Google sign-in did not complete. Please try again.","fb-off":"Sign-in is not available in this view.","auth/invalid-credential":"Wrong email or password.","auth/wrong-password":"Wrong email or password.","auth/user-not-found":"Wrong email or password.","auth/invalid-email":"Enter a valid email.","auth/missing-password":"Enter email and password.","auth/email-already-in-use":"An account with this email already exists. Press “Sign in”.","auth/weak-password":"The account password must have at least 8 characters.","auth/too-many-requests":"Too many attempts. Wait a little and try again.","auth/account-exists-with-different-credential":"This email is already used with another sign-in method (e.g. Google)."};const t=m[e.code]||("Sign-in failed ("+(e.code||e.message)+").");["#acctMsg","#acctMsg2"].forEach(id=>{const el=$(id);if(el){el.textContent=t;el.style.color="var(--crit)";}});}
 async function signIn(){
   if(!FB_OK){const el=$("#acctMsg");if(el)el.textContent="Sign-in is not available in this view. Open the site from GitHub.";return;}
   const prov=new firebase.auth.GoogleAuthProvider(); prov.setCustomParameters({prompt:"select_account"});
@@ -1983,6 +1983,33 @@ function gisMount(){
 new MutationObserver(()=>{if(!USER&&document.querySelector(".gisbtn:not([data-done])"))gisMount();}).observe(document.documentElement,{childList:true,subtree:true});
 window.addEventListener("load",()=>{let n=0;const t=setInterval(()=>{gisMount();if(GIS_READY||++n>40)clearInterval(t);},250);});
 function gisHTML(id){return `<div class="gisbtn" id="${id}" style="min-height:44px"></div><a href="javascript:void 0" class="small muted" onclick="signIn()" style="display:inline-block;margin-top:4px">Alternative sign-in (pop-up window)</a>`;}
+/* Email / password */
+function authOk(t){["#acctMsg","#acctMsg2"].forEach(id=>{const el=$(id);if(el){el.textContent=t;el.style.color="var(--ok)";}});}
+function emVals(x){const e=($("#em_"+x)||{}).value||"",p=($("#pw_"+x)||{}).value||"";return [e.trim(),p];}
+async function emailIn(x){
+  if(!FB_OK){authErr({code:"fb-off"});return;}
+  const [e,p]=emVals(x); if(!e||!p){authErr({code:"auth/missing-password"});return;}
+  try{await AUTH.signInWithEmailAndPassword(e,p);}catch(err){authErr(err);}
+}
+async function emailUp(x){
+  if(!FB_OK){authErr({code:"fb-off"});return;}
+  const [e,p]=emVals(x); if(!e){authErr({code:"auth/invalid-email"});return;}
+  if(p.length<8){authErr({code:"auth/weak-password"});return;}
+  try{const c=await AUTH.createUserWithEmailAndPassword(e,p);try{AUTH.languageCode=document.documentElement.lang||"el";await c.user.sendEmailVerification();}catch(_){}}catch(err){authErr(err);}
+}
+async function emailReset(x){
+  if(!FB_OK){authErr({code:"fb-off"});return;}
+  const [e]=emVals(x); if(!e){authErr({code:"auth/invalid-email"});return;}
+  try{AUTH.languageCode=document.documentElement.lang||"el";await AUTH.sendPasswordResetEmail(e);authOk("A password reset email was sent to "+e+" (check your spam folder too).");}catch(err){authErr(err);}
+}
+function emailHTML(x){return `<details class="emauth" style="margin-top:8px"><summary class="small" style="cursor:pointer">Sign in with email and password</summary>
+ <div style="display:grid;gap:6px;margin-top:6px">
+  <input type="email" id="em_${x}" placeholder="Email" autocomplete="username" style="width:100%">
+  <input type="password" id="pw_${x}" placeholder="Account password (at least 8 characters)" autocomplete="current-password" style="width:100%" onkeydown="if(event.key==='Enter')emailIn('${x}')">
+  <div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm pri" onclick="emailIn('${x}')">Sign in</button><button class="btn sm" onclick="emailUp('${x}')">Create account</button></div>
+  <a href="javascript:void 0" class="small muted" onclick="emailReset('${x}')">Forgot account password</a>
+  <p class="small muted" style="margin:0">Your account password is different from the folder encryption passphrase.</p>
+ </div></details>`;}
 function signOut(){CKEY=null;if(AUTH)AUTH.signOut();}
 function lockNow(){CKEY=null;DB={patients:[],cfg:{...DEFCFG}};LAST={};MODE="cloud-locked";renderAcct();afterModeChange();}
 
@@ -2027,7 +2054,7 @@ window.addEventListener("beforeunload",e=>{if(MODE==="cloud"&&(cloudBusy||cloudT
 
 function renderAcct(){
   const el=$("#acct"); if(!el) return;
-  if(!USER){el.innerHTML=`<div class="navgrp">Account</div><div style="padding:0 8px">${gisHTML("gisAcct")}<p class="small muted" style="margin:6px 0 0">Without sign-in, records are saved only on this device.</p><p class="small" id="acctMsg" style="color:var(--crit);margin:4px 0 0"></p></div>`;gisMount();return;}
+  if(!USER){el.innerHTML=`<div class="navgrp">Account</div><div style="padding:0 8px">${gisHTML("gisAcct")}${emailHTML("a")}<p class="small muted" style="margin:6px 0 0">Without sign-in, records are saved only on this device.</p><p class="small" id="acctMsg" style="color:var(--crit);margin:4px 0 0"></p></div>`;gisMount();return;}
   el.innerHTML=`<div class="navgrp">Account</div><div style="padding:0 8px"><div class="small"><b>${esc(USER.displayName||"")}</b><br><span class="muted">${esc(USER.email||"")}</span></div>
    <div class="small" style="margin:4px 0">${MODE==="cloud"?'<span class="chip ok">Unlocked</span>':'<span class="chip warn">Locked</span>'}</div>
    <div class="row">${MODE==="cloud"?'<button class="btn sm" id="btnLock">Lock</button>':""}<button class="btn sm" id="btnOut">Sign out</button></div><p class="small muted" style="margin:6px 0 0">Auto-lock after 15 minutes of inactivity.</p><p class="small" id="acctMsg" style="color:var(--crit);margin:4px 0 0"></p></div>`;
@@ -2130,7 +2157,7 @@ function binsRow(v){
   return b.map(([l,f])=>`<span class="chip">${l}: <b class="mono">${s.filter(f).length}</b></span>`).join("");
 }
 function trackerBanner(){
-  if(MODE==="local") return `<div class="callout ${STORAGE_OK?"":"crit"}"><p>${STORAGE_OK?"<b>Local mode:</b> data are stored only in this browser. "+(FB_OK?"For encrypted folders you can open on any device, sign in with Google.</p><p style=\"margin-top:8px\"><div style=\"max-width:320px\">"+gisHTML("gisTrk")+"</div><span class=\"small\" id=\"acctMsg2\" style=\"color:var(--crit)\"></span>":""):"Local storage is not available. Changes will be lost when the page closes."}</p></div>`;
+  if(MODE==="local") return `<div class="callout ${STORAGE_OK?"":"crit"}"><p>${STORAGE_OK?"<b>Local mode:</b> data are stored only in this browser. "+(FB_OK?"For encrypted folders you can open on any device, sign in with Google.</p><p style=\"margin-top:8px\"><div style=\"max-width:320px\">"+gisHTML("gisTrk")+emailHTML("t")+"</div><span class=\"small\" id=\"acctMsg2\" style=\"color:var(--crit)\"></span>":""):"Local storage is not available. Changes will be lost when the page closes."}</p></div>`;
   return `<div class="callout acc"><p><b>Encrypted folders:</b> data are encrypted on this device with your passphrase before being sent to Firebase (EU, Frankfurt). No one else, neither the administrator nor Google, can read them. <span class="muted" id="syncMsg">${esc(SYNC)}</span></p></div>`;
 }
 function pageTracker(){
