@@ -1635,7 +1635,7 @@ function navHTML(h){
   return `<div class="navgrp">Guide</div>${L("home","Home")}${L("protocols","All protocols")}
    ${grp("stim","Stimulation")}${grp("strategy","Strategies")}${grp("fet","Frozen transfer")}${grp("special","Special situations")}
    ${L("drugs","Pharmacology")}${L("studies","New studies")}
-   <div class="navgrp">Clinic</div>${L("tracker","Patient folders")}${L("tools","Tools")}${L("quiz","Quiz")}
+   <div class="navgrp">Clinic</div>${L("tracker","Patient folders")}${typeof pagePreg==="function"?L("preg","Pregnancy records"):""}${L("tools","Tools")}${L("quiz","Quiz")}
    <div class="navgrp">Information</div>${L("author","About")}${L("refs","References")}${L("about","Methodology and roadmap")}${L("terms","Terms and privacy")}`;
 }
 const NAVN={"antagonist":"GnRH antagonist","long-agonist":"Long agonist","flare":"Short (flare)","ultra-long":"Ultra-long","ppos":"PPOS","mild":"Mild / natural IVF","duostim":"DuoStim","fp-random":"Fertility preservation","ivm":"IVM","poseidon":"Low responders","ohss":"High responders / OHSS","fet-hrt":"HRT cycle","fet-nc":"Natural cycle","fet-letrozole":"Letrozole","fet-donor":"Oocyte recipient","sp-endo":"Endometriosis","sp-hydro":"Hydrosalpinx","sp-rif":"Implantation failure (RIF)","sp-male":"Male factor / ICSI","sp-thromb":"Thrombophilia / heparin"};
@@ -1651,6 +1651,7 @@ function route(){
   else if(h==="drugs") v.innerHTML=pageDrugs();
   else if(h==="studies") v.innerHTML=pageStudies("all");
   else if(h==="tracker") {v.innerHTML=pageTracker(); bindTracker();}
+  else if((h==="preg"||h.startsWith("k-"))&&typeof pagePreg==="function") {v.innerHTML=pagePreg(); pgBind();}
   else if(h==="refs") v.innerHTML=pageRefs();
   else if(h==="about") v.innerHTML=pageAbout();
   else if(h==="tools") {v.innerHTML=pageTools(); bindTools();}
@@ -1670,6 +1671,7 @@ function pageHome(){
    <a class="card" href="#drugs"><h3>Pharmacology</h3><p class="muted small">${DRUGS.length} drug cards: mechanism, pharmacokinetics, doses, brands.</p></a>
    <a class="card" href="#studies"><h3>New studies</h3><p class="muted small">${STUDIES.length} studies with PICO, findings, impact and appraisal.</p></a>
    <a class="card" href="#tracker"><h3>Patient folders</h3><p class="muted small">A folder per patient with cycles, follicles per ovary, hormones and alerts for trigger, OHSS, P4 and retrieval time. Google sign-in and on-device encryption.</p></a>
+   ${typeof pagePreg==="function"?`<a class="card" href="#preg"><h3>Pregnancy records</h3><p class="muted small">Pregnancy follow-up based on the Greek HSOG guideline schedule (Greek version only).</p></a>`:""}
    <a class="card" href="#tools"><h3>Tools</h3><p class="muted small">FSH starting dose, FORT/FOI, transfer dates and unit conversion.</p></a>
    <a class="card" href="#quiz"><h3>Quiz</h3><p class="muted small">${QUIZ.length} questions with explanations, by protocol.</p></a>
   </div>
@@ -1896,7 +1898,7 @@ const KEY="ivfprot.v1";
 const DEFCFG={trigN:3,trigSize:17,ohssN:18,ohssSize:11,e2Ohss:3500,p4Trig:1.5,lhSurge:10,antFix:5,antFlex:14,endoMin:7,p4ET:9.2,opuH:35};
 const FB_CONFIG={apiKey:"AIzaSyBylP1Guq3c0Opr8lrBY5PaiQxpPoNzfv0",authDomain:"ivf-protocols.firebaseapp.com",projectId:"ivf-protocols",storageBucket:"ivf-protocols.firebasestorage.app",messagingSenderId:"662020211580",appId:"1:662020211580:web:2b6ffda0f000545aabdaf9"};
 const KDF_ITER=310000;
-let DB={patients:[],cfg:{...DEFCFG}}, CUR=null, CURC=null, STORAGE_OK=true;
+let DB={patients:[],preg:[],cfg:{...DEFCFG}}, CUR=null, CURC=null, STORAGE_OK=true;
 /* MODE: local | cloud-wait | cloud-locked | cloud */
 let MODE="local", USER=null, USERMETA=null, CKEY=null, LAST={}, LASTCFG="", SYNC="", FB_OK=false, AUTH=null, FS=null;
 
@@ -1918,8 +1920,8 @@ function examplePatient(){
     {id:uid(),date:isoAdd(s,6),type:"mon",e2:1150,lh:1.8,p4:0.7,endo:8.6,pat:"trilaminar",R:"15,14,13,12,11,10",L:"14,13,12,11,10",drugs:"rFSH 150 + ganirelix 0.25"},
     {id:uid(),date:isoAdd(s,8),type:"mon",e2:2350,lh:1.5,p4:0.9,endo:9.8,pat:"trilaminar",R:"18,17,16,15,13,12",L:"17,16,15,14,12",drugs:"rFSH 150 + ganirelix 0.25"}]}]};
 }
-function readLocal(){try{const r=localStorage.getItem(KEY);if(!r)return null;const d=JSON.parse(r);return {patients:(d.patients||[]).map(normPatient),cfg:{...DEFCFG,...(d.cfg||{})}};}catch(e){STORAGE_OK=false;return null;}}
-function loadLocal(){const d=readLocal();DB=d||{patients:[examplePatient()],cfg:{...DEFCFG}};}
+function readLocal(){try{const r=localStorage.getItem(KEY);if(!r)return null;const d=JSON.parse(r);return {patients:(d.patients||[]).map(normPatient),preg:Array.isArray(d.preg)?d.preg:[],cfg:{...DEFCFG,...(d.cfg||{})}};}catch(e){STORAGE_OK=false;return null;}}
+function loadLocal(){const d=readLocal();DB=d||{patients:[examplePatient()],preg:[],cfg:{...DEFCFG}};}
 function save(){
   if(MODE==="local"){try{localStorage.setItem(KEY,JSON.stringify(DB));STORAGE_OK=true;}catch(e){STORAGE_OK=false;}}
   else if(MODE==="cloud") queueCloud();
@@ -1948,7 +1950,7 @@ function initFirebase(){
 async function onAuth(u){
   USER=u; CKEY=null; LAST={}; LASTCFG="";
   if(!u){MODE="local";loadLocal();USERMETA=null;renderAcct();afterModeChange();return;}
-  MODE="cloud-wait"; DB={patients:[],cfg:{...DEFCFG}}; renderAcct(); afterModeChange();
+  MODE="cloud-wait"; DB={patients:[],preg:[],cfg:{...DEFCFG}}; renderAcct(); afterModeChange();
   try{const snap=await FS.collection("users").doc(u.uid).get();USERMETA=snap.exists?snap.data():null;MODE="cloud-locked";}
   catch(e){USERMETA=null;MODE="cloud-locked";SYNC="Read error: "+(e.code||e.message);}
   renderAcct(); afterModeChange();
@@ -2011,7 +2013,7 @@ function emailHTML(x){return `<details class="emauth" style="margin-top:8px"><su
   <p class="small muted" style="margin:0">Your account password is different from the folder encryption passphrase.</p>
  </div></details>`;}
 function signOut(){CKEY=null;if(AUTH)AUTH.signOut();}
-function lockNow(){CKEY=null;DB={patients:[],cfg:{...DEFCFG}};LAST={};MODE="cloud-locked";renderAcct();afterModeChange();}
+function lockNow(){CKEY=null;DB={patients:[],preg:[],cfg:{...DEFCFG}};LAST={};MODE="cloud-locked";renderAcct();afterModeChange();}
 
 async function setupPass(p1){
   const salt=crypto.getRandomValues(new Uint8Array(16));
@@ -2028,13 +2030,13 @@ async function unlock(pass){
   CKEY=key; await loadCloud(); return true;
 }
 async function loadCloud(){
-  SYNC="Loading…"; const pats=[]; LAST={};
+  SYNC="Loading…"; const pats=[], preg=[]; LAST={};
   const qs=await FS.collection("users").doc(USER.uid).collection("patients").get();
-  for(const d of qs.docs){try{const p=normPatient(await decObj(d.data()));p.id=d.id;pats.push(p);LAST[d.id]=JSON.stringify(p);}catch(e){console.warn("decrypt",d.id);}}
+  for(const d of qs.docs){try{const o=await decObj(d.data());LAST[d.id]=JSON.stringify(o);if(o&&o._k==="preg"){const q={...o};delete q._k;q.id=d.id;preg.push(q);}else{const p=normPatient(o);p.id=d.id;pats.push(p);LAST[d.id]=JSON.stringify(p);}}catch(e){console.warn("decrypt",d.id);}}
   let cfg={...DEFCFG}; try{if(USERMETA.cfgEnc)cfg={...DEFCFG,...(await decObj(USERMETA.cfgEnc))};}catch(e){}
   LASTCFG=JSON.stringify(cfg);
   pats.sort((a,b)=>(a.code||"").localeCompare(b.code||"","en"));
-  DB={patients:pats,cfg}; CUR=null; CURC=null; MODE="cloud"; SYNC="Synced"; renderAcct(); afterModeChange();
+  DB={patients:pats,preg,cfg}; CUR=null; CURC=null; MODE="cloud"; SYNC="Synced"; renderAcct(); afterModeChange();
 }
 let cloudTimer=null, cloudBusy=false, cloudAgain=false;
 function queueCloud(){SYNC="Saving…";setSync();clearTimeout(cloudTimer);cloudTimer=setTimeout(flushCloud,400);}
@@ -2042,7 +2044,7 @@ async function flushCloud(){
   if(cloudBusy){cloudAgain=true;return;} cloudBusy=true;
   try{
     const col=FS.collection("users").doc(USER.uid).collection("patients"); const ids=new Set();
-    for(const p of DB.patients){ids.add(p.id);const s=JSON.stringify(p);if(LAST[p.id]!==s){const e=await encObj(p);await col.doc(p.id).set({...e,updated:firebase.firestore.FieldValue.serverTimestamp()});LAST[p.id]=s;}}
+    for(const p of [...DB.patients,...(DB.preg||[]).map(x=>({...x,_k:"preg"}))]){ids.add(p.id);const s=JSON.stringify(p);if(LAST[p.id]!==s){const e=await encObj(p);await col.doc(p.id).set({...e,updated:firebase.firestore.FieldValue.serverTimestamp()});LAST[p.id]=s;}}
     for(const id of Object.keys(LAST)) if(!ids.has(id)){await col.doc(id).delete();delete LAST[id];}
     const cs=JSON.stringify(DB.cfg); if(cs!==LASTCFG){const e=await encObj(DB.cfg);await FS.collection("users").doc(USER.uid).update({cfgEnc:e});LASTCFG=cs;}
     SYNC="Saved "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
@@ -2060,7 +2062,7 @@ function renderAcct(){
    <div class="row">${MODE==="cloud"?'<button class="btn sm" id="btnLock">Lock</button>':""}<button class="btn sm" id="btnOut">Sign out</button></div><p class="small muted" style="margin:6px 0 0">Auto-lock after 15 minutes of inactivity.</p><p class="small" id="acctMsg" style="color:var(--crit);margin:4px 0 0"></p></div>`;
   $("#btnOut").onclick=signOut; const l=$("#btnLock"); if(l) l.onclick=lockNow;
 }
-function afterModeChange(){if((location.hash||"").slice(1)==="tracker")refreshTracker();}
+function afterModeChange(){const h=(location.hash||"").slice(1);if(h==="tracker")refreshTracker();else if((h==="preg"||h.startsWith("k-"))&&typeof pgRender==="function")pgRender();}
 
 /* ---------- Auto-lock after inactivity ---------- */
 const AUTOLOCK_MIN=15; let LASTACT=Date.now();
