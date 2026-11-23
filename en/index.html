@@ -132,6 +132,11 @@ main{min-width:0}
 .dialog-bg.on{display:flex}
 .dialog{background:var(--card);border-radius:10px;padding:20px;max-width:520px;width:100%;border:1px solid var(--line)}
 .topbar{display:none}
+.cardbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);margin:0 0 14px}
+.cardbar .cb{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font:inherit;font-size:13.5px;cursor:pointer;color:var(--ink)}
+.cardbar .cb.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.cardbar select{margin-left:auto;font-size:13.5px}
+@media (max-width:600px){.cardbar select{margin-left:0;width:100%}}
 .scrim{display:none;position:fixed;inset:0;background:rgba(10,15,20,.45);z-index:39}
 .navclose{display:none;margin:0 0 12px auto}
 .backrow{margin:0 0 10px}
@@ -2181,9 +2186,9 @@ let TRKF="all";
 const PT_TYPES=()=>[["ivf","IVF"],...(typeof pagePreg==="function"?[["preg","Obstetric"]]:[]),...(typeof pageGyn==="function"?[["gyn","Gynaecological"]]:[])];
 function allPatients(){
   const L=[];
-  DB.patients.forEach(x=>{const c=x.cycles[x.cycles.length-1];L.push({t:"ivf",id:x.id,name:x.code||"no code",sub:c?((PROTO_OPTS.find(o=>o[0]===c.proto)||[])[1]||""):"",n:x.cycles.length+" cycles",d:(c&&c.start)||""});});
-  if(typeof pagePreg==="function")(DB.preg||[]).forEach(x=>{let sub="";try{const ga=gaToday(x);sub=(ga!=null&&ga>=0)?gaTxt(ga)+" wk":"";}catch(e){}L.push({t:"preg",id:x.id,name:(x.info&&x.info.name)||"no name",sub:(x.closed?"Completed":"")+(sub&&!x.closed?String(sub):""),n:"",d:x.created||""});});
-  if(typeof pageGyn==="function")(DB.gyn||[]).forEach(x=>{const lv=gyLastVisit(x);L.push({t:"gyn",id:x.id,name:(x.info&&x.info.name)||"no name",sub:lv?(lv.dx||lv.reason||""):"",n:(x.visits||[]).length+" visits",d:(lv&&lv.d)||x.created||""});});
+  DB.patients.forEach(x=>{const c=x.cycles[x.cycles.length-1];L.push({t:"ivf",id:x.id,pid:x.pid||x.id,r:x,name:x.code||"no code",sub:c?((PROTO_OPTS.find(o=>o[0]===c.proto)||[])[1]||""):"",n:x.cycles.length+" cycles",d:(c&&c.start)||""});});
+  if(typeof pagePreg==="function")(DB.preg||[]).forEach(x=>{let sub="";try{const ga=gaToday(x);sub=(ga!=null&&ga>=0)?gaTxt(ga)+" wk":"";}catch(e){}L.push({t:"preg",id:x.id,pid:x.pid||x.id,r:x,name:(x.info&&x.info.name)||"no name",sub:(x.closed?"Completed":"")+(sub&&!x.closed?String(sub):""),n:"",d:x.created||""});});
+  if(typeof pageGyn==="function")(DB.gyn||[]).forEach(x=>{const lv=gyLastVisit(x);L.push({t:"gyn",id:x.id,pid:x.pid||x.id,r:x,name:(x.info&&x.info.name)||"no name",sub:lv?(lv.dx||lv.reason||""):"",n:(x.visits||[]).length+" visits",d:(lv&&lv.d)||x.created||""});});
   return L;
 }
 const PT_CHIP={ivf:["teal","IVF"],preg:["acc","Obstetric"],gyn:["warn","Gynaecological"]};
@@ -2209,11 +2214,44 @@ function pageTracker(){
    <div id="ptPane">${showPane?ptPane(p):`<div class="card"><h3>Select a patient</h3><p class="small">Pick a patient from the list or press “New patient” and choose a record type: ${PT_TYPES().map(t=>t[1]).join(", ")}.</p></div>`}</div>
   </div>`;
 }
+function ptPrio(x){return x.t==="preg"&&!x.r.closed?0:x.t==="ivf"?1:x.t==="gyn"?2:3;}
 function ptListHTML(q){
-  const qq=(q||"").toLowerCase();
-  const L=allPatients().filter(x=>(TRKF==="all"||x.t===TRKF)&&(!qq||x.name.toLowerCase().includes(qq)));
-  return L.map(x=>`<button class="pt${x.t==="ivf"&&x.id===CUR?" on":""}" data-pt="${x.id}" data-pk="${x.t}"><span><b>${esc(x.name)}</b><br><span class="chip ${PT_CHIP[x.t][0]}" style="font-size:11px;padding:1px 7px">${PT_CHIP[x.t][1]}</span> <span class="small muted">${esc(x.sub||"")}</span></span><span class="pill-n">${esc(x.n)}</span></button>`).join("")||`<p class="muted small">No patients.</p>`;
+  const qq=(q||"").toLowerCase(), G=new Map();
+  allPatients().forEach(x=>{if(!G.has(x.pid))G.set(x.pid,[]);G.get(x.pid).push(x);});
+  const rows=[...G.values()].map(L=>{L.sort((a,b)=>ptPrio(a)-ptPrio(b));return L;})
+    .filter(L=>(TRKF==="all"||L.some(x=>x.t===TRKF))&&(!qq||L.some(x=>x.name.toLowerCase().includes(qq))));
+  return rows.map(L=>{const m=(TRKF!=="all"&&L.find(x=>x.t===TRKF))||L[0];const on=L.some(x=>x.t==="ivf"&&x.id===CUR)&&(location.hash||"").slice(1)==="tracker";
+    return `<button class="pt${on?" on":""}" data-pt="${m.id}" data-pk="${m.t}"><span><b>${esc(m.name)}</b><br>${L.map(x=>`<span class="chip ${PT_CHIP[x.t][0]}" style="font-size:11px;padding:1px 7px;margin-right:3px">${PT_CHIP[x.t][1]}</span>`).join("")} <span class="small muted">${esc(m.sub||"")}</span></span><span class="pill-n">${esc(m.n)}</span></button>`;}).join("")||`<p class="muted small">No patients.</p>`;
 }
+/* ---- Ένας ασθενής, πολλές καρτέλες ---- */
+let PG_PID=null;
+const pidOf=r=>r.pid||r.id;
+function recFind(t,id){return t==="ivf"?DB.patients.find(x=>x.id===id):t==="preg"?(DB.preg||[]).find(x=>x.id===id):(DB.gyn||[]).find(x=>x.id===id);}
+function recName(t,r){return t==="ivf"?(r.code||""):((r.info&&r.info.name)||"");}
+function recsOfPerson(pid){return allPatients().filter(x=>x.pid===pid).sort((a,b)=>ptPrio(a)-ptPrio(b));}
+function openRec(t,id){if(t==="ivf"){CUR=id;CURC=null;if(TRKF!=="all"&&TRKF!=="ivf")TRKF="all";if((location.hash||"").slice(1)==="tracker")refreshTracker();else location.hash="tracker";}else location.hash=(t==="preg"?"k-":"gy-")+id;window.scrollTo(0,0);}
+function cardBarHTML(t,id){
+  const types=PT_TYPES(); if(types.length<2) return "";
+  const r=recFind(t,id); if(!r) return "";
+  const L=recsOfPerson(pidOf(r));
+  const lab=x=>x.t==="ivf"?`IVF · ${x.r.cycles.length} cycles`:x.t==="preg"?("Obstetric"+(x.r.closed?" · completed":(x.sub?" · "+x.sub:""))):("Gynaecological"+(x.r.visits&&x.r.visits.length?` · ${x.r.visits.length} visits`:""));
+  return `<div class="cardbar"><span class="small muted">Patient records:</span>${L.map(x=>`<button class="cb${x.t===t&&x.id===id?" on":""}" data-cbopen="${x.t}:${x.id}">${esc(lab(x))}</button>`).join("")}<select data-cbadd="${t}:${id}" aria-label="Add record"><option value="">+ Add record…</option>${types.map(ty=>`<option value="${ty[0]}">${ty[1]}</option>`).join("")}</select></div>`;
+}
+function addCardFor(t,id,nt){
+  const s=recFind(t,id); if(!s) return; const pid=pidOf(s); s.pid=pid; const nm=recName(t,s), si=s.info||{};
+  if(nt==="ivf"){const c=newCycle(1);const n={id:uid(),pid,code:nm,age:"",bmi:"",amh:"",afc:"",prevOoc:"",dx:"",notes:"",cycles:[c]};DB.patients.unshift(n);CURC=c.id;save();openRec("ivf",n.id);}
+  else if(nt==="gyn"){const n=gyNew(nm);n.pid=pid;["dob","amka","phone"].forEach(k=>{if(si[k])n.info[k]=si[k];});save();openRec("gyn",n.id);}
+  else if(nt==="preg"){
+    PREG=DB.preg||(DB.preg=[]);PG_PID=pid;pgBind();shNew();
+    let et="";if(t==="ivf"){const cs=[...s.cycles].reverse();const c=cs.find(c=>c.out&&c.out.etDate);if(c)et=c.out.etDate;}
+    setTimeout(()=>{const e=$("#np_n");if(e)e.value=nm;const ph=$("#np_t");if(ph&&si.phone)ph.value=si.phone;
+      if(et){const b=document.querySelector('[data-npm="lmp"]');if(b)b.click();const l=$("#np_lmp");if(l){l.value=isoAdd(et,-19);}
+        const sub=document.querySelector(".sh-sub");if(sub)sub.textContent="LMP calculated from the transfer on "+et.split("-").reverse().join("/")+" (day-5 blastocyst: transfer − 19 days). Correct it if needed.";}
+    },60);
+  }
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-cbopen]");if(!b)return;e.preventDefault();e.stopPropagation();const [t,id]=b.dataset.cbopen.split(":");openRec(t,id);},true);
+document.addEventListener("change",e=>{const s=e.target.closest("[data-cbadd]");if(!s||!s.value)return;const [t,id]=s.dataset.cbadd.split(":");const nt=s.value;s.value="";addCardFor(t,id,nt);});
 function newPatientDlg(){
   const T=PT_TYPES();
   openDlg(`<h3 style="margin-top:0">New patient</h3><div class="form" style="grid-template-columns:1fr">
@@ -2228,7 +2266,7 @@ function newPatientDlg(){
     const t=$("#npType").value,nm=$("#npName").value.trim();closeDlg();
     if(t==="ivf"){const c=newCycle(1);const n={id:uid(),code:nm,age:"",bmi:"",amh:"",afc:"",prevOoc:"",dx:"",notes:"",cycles:[c]};DB.patients.unshift(n);CUR=n.id;CURC=c.id;if(TRKF!=="all"&&TRKF!=="ivf")TRKF="all";save();refreshTracker();}
     else if(t==="gyn"){const n=gyNew(nm);location.hash="gy-"+n.id;}
-    else if(t==="preg"){PREG=DB.preg||(DB.preg=[]);pgBind();shNew();setTimeout(()=>{const e=$("#np_n");if(e){e.value=nm;}},60);}
+    else if(t==="preg"){PREG=DB.preg||(DB.preg=[]);PG_PID=null;pgBind();shNew();setTimeout(()=>{const e=$("#np_n");if(e){e.value=nm;}},60);}
   };
 }
 function setupHTML(){
@@ -2248,7 +2286,7 @@ function ptPane(p){
   const c=p.cycles.find(x=>x.id===CURC)||p.cycles[p.cycles.length-1]; if(c) CURC=c.id;
   const pos=poseidon(p);
   const f=(id,l,val,type="text",extra="")=>`<label class="f" for="f_${id}">${l}<input id="f_${id}" data-f="${id}" type="${type}" value="${esc(val??"")}" ${extra}></label>`;
-  return `${p.example?`<div class="callout warn"><p>This is an <b>example</b> for demonstration.</p></div>`:""}
+  return `${cardBarHTML("ivf",p.id)}${p.example?`<div class="callout warn"><p>This is an <b>example</b> for demonstration.</p></div>`:""}
   <h2 style="margin-top:0">Folder: ${esc(p.code||"new patient")}</h2>
   <div class="card"><h3>Patient details</h3><div class="form">
    ${f("code","Patient code",p.code)}${f("age","Age",p.age,"number",'min="16" max="55"')}${f("bmi","BMI (kg/m²)",p.bmi,"number",'step="0.1"')}
