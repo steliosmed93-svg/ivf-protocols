@@ -132,13 +132,22 @@ main{min-width:0}
 .dialog-bg.on{display:flex}
 .dialog{background:var(--card);border-radius:10px;padding:20px;max-width:520px;width:100%;border:1px solid var(--line)}
 .topbar{display:none}
+.scrim{display:none;position:fixed;inset:0;background:rgba(10,15,20,.45);z-index:39}
+.navclose{display:none;margin:0 0 12px auto}
+.backrow{margin:0 0 10px}
+body.athome .backbtn{visibility:hidden}
+body.athome .backrow{display:none}
 details.acc{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0 14px;margin:8px 0}
 details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 .pill-n{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
   nav.side{position:fixed;inset:0 30% 0 0;z-index:40;transform:translateX(-102%);transition:transform .2s;height:100%}
-  nav.side.open{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)}
+  nav.side.open{transform:none;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+  .scrim.on{display:block}
+  .navclose{display:inline-flex}
+  .backrow{display:none}
+  .topbar .brandlink{margin-left:auto}
   .topbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
   .trk{grid-template-columns:1fr}
   .form .wide{grid-column:auto}
@@ -373,17 +382,19 @@ details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 </style>
 </head>
 <body>
-<div class="topbar"><button class="btn sm" id="menuBtn" aria-label="Άνοιγμα μενού">☰ Μενού</button><a class="brandlink sm" href="#home"><svg class="mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Λογότυπο Πρωτόκολλα Εξωσωματικής"><rect width="64" height="64" rx="15" fill="#7a2e5c"/><circle cx="32" cy="32" r="22.5" fill="none" stroke="#f4c9df" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.1 5.2" opacity=".9"/><path d="M32 9.5 A22.5 22.5 0 0 1 54.5 32" fill="none" stroke="#7fd3d9" stroke-width="2.6" stroke-linecap="round"/><circle cx="32" cy="32" r="16" fill="none" stroke="#ffffff" stroke-width="3.4"/><circle cx="31" cy="33" r="10.2" fill="#f4c9df"/><circle cx="28.4" cy="30.6" r="3.1" fill="#7a2e5c" opacity=".5"/><circle cx="40.4" cy="23.6" r="1.9" fill="#7fd3d9"/></svg><span><span class="brand">Πρωτόκολλα</span><span class="brand-kicker">ΕΞΩΣΩΜΑΤΙΚΗΣ</span></span></a></div>
+<div class="topbar"><button class="btn sm" id="menuBtn" aria-label="Άνοιγμα μενού">☰ Μενού</button><button class="btn sm backbtn" id="backBtn" aria-label="Πίσω">‹ Πίσω</button><a class="brandlink sm" href="#home"><svg class="mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Λογότυπο Πρωτόκολλα Εξωσωματικής"><rect width="64" height="64" rx="15" fill="#7a2e5c"/><circle cx="32" cy="32" r="22.5" fill="none" stroke="#f4c9df" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.1 5.2" opacity=".9"/><path d="M32 9.5 A22.5 22.5 0 0 1 54.5 32" fill="none" stroke="#7fd3d9" stroke-width="2.6" stroke-linecap="round"/><circle cx="32" cy="32" r="16" fill="none" stroke="#ffffff" stroke-width="3.4"/><circle cx="31" cy="33" r="10.2" fill="#f4c9df"/><circle cx="28.4" cy="30.6" r="3.1" fill="#7a2e5c" opacity=".5"/><circle cx="40.4" cy="23.6" r="1.9" fill="#7fd3d9"/></svg><span><span class="brand">Πρωτόκολλα</span><span class="brand-kicker">ΕΞΩΣΩΜΑΤΙΚΗΣ</span></span></a></div>
 <div class="app">
 <nav class="side" id="side">
+  <button class="btn sm navclose" id="navClose" aria-label="Κλείσιμο μενού">✕ Κλείσιμο</button>
   <a class="brandlink" href="#home" aria-label="Αρχική"><svg class="mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Λογότυπο Πρωτόκολλα Εξωσωματικής"><rect width="64" height="64" rx="15" fill="#7a2e5c"/><circle cx="32" cy="32" r="22.5" fill="none" stroke="#f4c9df" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.1 5.2" opacity=".9"/><path d="M32 9.5 A22.5 22.5 0 0 1 54.5 32" fill="none" stroke="#7fd3d9" stroke-width="2.6" stroke-linecap="round"/><circle cx="32" cy="32" r="16" fill="none" stroke="#ffffff" stroke-width="3.4"/><circle cx="31" cy="33" r="10.2" fill="#f4c9df"/><circle cx="28.4" cy="30.6" r="3.1" fill="#7a2e5c" opacity=".5"/><circle cx="40.4" cy="23.6" r="1.9" fill="#7fd3d9"/></svg><span><span class="brand">Πρωτόκολλα</span><span class="brand-kicker">ΕΞΩΣΩΜΑΤΙΚΗΣ</span></span></a>
   <div class="brand-sub">Εκπαιδευτικός οδηγός και φάκελοι ασθενών για γυναικολόγους</div>
   <div class="langsw"><a href="en/" hreflang="en" lang="en">🌐 English</a></div>
   <div id="navlinks"></div>
   <div id="acct"></div>
 </nav>
-<main id="view" tabindex="-1"></main>
+<main><div class="backrow"><button class="btn sm backbtn" id="backDesk" aria-label="Πίσω">‹ Πίσω</button></div><div id="view" tabindex="-1"></div></main>
 </div>
+<div class="scrim" id="scrim"></div>
 <div class="dialog-bg" id="dlg"><div class="dialog" role="dialog" aria-modal="true" id="dlgBox"></div></div>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1206,7 +1217,7 @@ function route(){
   const h=(location.hash||"#home").slice(1);
   $("#navlinks").innerHTML=navHTML(h);
   document.querySelectorAll("details.navdd").forEach(d=>d.addEventListener("toggle",()=>{NAVOPEN[d.dataset.dd]=d.open;}));
-  $("#side").classList.remove("open");
+  $("#side").classList.remove("open");{const sc=$("#scrim");if(sc)sc.classList.remove("on");}document.body.style.overflow="";document.body.classList.toggle("athome",h==="home");
   const v=$("#view");
   if(h==="protocols") v.innerHTML=pageProtocols();
   else if(h.startsWith("p-") && PROTO_BY_ID[h.slice(2)]) v.innerHTML=pageProtocol(PROTO_BY_ID[h.slice(2)]);
@@ -1517,7 +1528,7 @@ async function onAuth(u){
   catch(e){USERMETA=null;MODE="cloud-locked";SYNC="Σφάλμα ανάγνωσης: "+(e.code||e.message);}
   renderAcct(); afterModeChange();
 }
-function authErr(e){if(!e)return;const m={"auth/popup-closed-by-user":"Το παράθυρο σύνδεσης έκλεισε.","auth/unauthorized-domain":"Το domain δεν είναι εξουσιοδοτημένο στο Firebase.","auth/network-request-failed":"Πρόβλημα δικτύου. Δοκίμασε ξανά.","gis":"Η σύνδεση Google δεν ολοκληρώθηκε. Δοκίμασε ξανά.","fb-off":"Η σύνδεση δεν είναι διαθέσιμη σε αυτή την προβολή.","auth/invalid-credential":"Λάθος email ή κωδικός.","auth/wrong-password":"Λάθος email ή κωδικός.","auth/user-not-found":"Λάθος email ή κωδικός.","auth/invalid-email":"Συμπλήρωσε ένα έγκυρο email.","auth/missing-password":"Συμπλήρωσε email και κωδικό.","auth/email-already-in-use":"Υπάρχει ήδη λογαριασμός με αυτό το email. Πάτα «Σύνδεση».","auth/weak-password":"Ο κωδικός λογαριασμού πρέπει να έχει τουλάχιστον 8 χαρακτήρες.","auth/too-many-requests":"Πολλές προσπάθειες. Περίμενε λίγο και δοκίμασε ξανά.","auth/account-exists-with-different-credential":"Αυτό το email χρησιμοποιείται ήδη με άλλον τρόπο σύνδεσης (π.χ. Google)."};const t=m[e.code]||("Η σύνδεση απέτυχε ("+(e.code||e.message)+").");["#acctMsg","#acctMsg2"].forEach(id=>{const el=$(id);if(el){el.textContent=t;el.style.color="var(--crit)";}});}
+function authErr(e){if(!e)return;const m={"auth/popup-closed-by-user":"Το παράθυρο σύνδεσης έκλεισε.","auth/unauthorized-domain":"Το domain δεν είναι εξουσιοδοτημένο στο Firebase.","auth/network-request-failed":"Πρόβλημα δικτύου. Δοκίμασε ξανά.","gis":"Η σύνδεση Google δεν ολοκληρώθηκε. Δοκίμασε ξανά.","fb-off":"Η σύνδεση δεν είναι διαθέσιμη σε αυτή την προβολή.","auth/invalid-credential":"Λάθος email ή κωδικός.","auth/wrong-password":"Λάθος email ή κωδικός.","auth/user-not-found":"Λάθος email ή κωδικός.","auth/invalid-email":"Συμπλήρωσε ένα έγκυρο email.","auth/missing-password":"Συμπλήρωσε email και κωδικό.","auth/email-already-in-use":"Υπάρχει ήδη λογαριασμός με αυτό το email. Πάτα «Σύνδεση».","auth/weak-password":"Ο κωδικός λογαριασμού πρέπει να έχει τουλάχιστον 8 χαρακτήρες.","auth/too-many-requests":"Πολλές προσπάθειες. Περίμενε λίγο και δοκίμασε ξανά.","auth/account-exists-with-different-credential":"Αυτό το email χρησιμοποιείται ήδη με άλλον τρόπο σύνδεσης (π.χ. Google)."};const t=m[e.code]||("Η σύνδεση απέτυχε ("+(e.code||e.message)+").");["#acctMsg","#acctMsg2","#acctMsg3"].forEach(id=>{const el=$(id);if(el){el.textContent=t;el.style.color="var(--crit)";}});}
 async function signIn(){
   if(!FB_OK){const el=$("#acctMsg");if(el)el.textContent="Η σύνδεση δεν είναι διαθέσιμη σε αυτή την προβολή. Άνοιξε το site από το GitHub.";return;}
   const prov=new firebase.auth.GoogleAuthProvider(); prov.setCustomParameters({prompt:"select_account"});
@@ -1539,16 +1550,19 @@ async function gisCb(resp){
 function gisMount(){
   if(!FB_OK||USER||!gisInit()) return;
   document.querySelectorAll(".gisbtn:not([data-done])").forEach(el=>{
+    if(!el.offsetParent||el.clientWidth<50) return;
     el.dataset.done="1"; el.innerHTML="";
+    setTimeout(()=>{if(!USER&&el.isConnected&&!el.querySelector("iframe,div[role=button]")){el.innerHTML=GFALL;}},3000);
     const w=Math.max(200,Math.min(320,Math.floor(el.clientWidth||220)));
     google.accounts.id.renderButton(el,{type:"standard",theme:"filled_blue",size:"large",text:"signin_with",shape:"pill",logo_alignment:"left",width:w,locale:document.documentElement.lang||"el"});
   });
 }
 new MutationObserver(()=>{if(!USER&&document.querySelector(".gisbtn:not([data-done])"))gisMount();}).observe(document.documentElement,{childList:true,subtree:true});
 window.addEventListener("load",()=>{let n=0;const t=setInterval(()=>{gisMount();if(GIS_READY||++n>40)clearInterval(t);},250);});
-function gisHTML(id){return `<div class="gisbtn" id="${id}" style="min-height:44px"></div><a href="javascript:void 0" class="small muted" onclick="signIn()" style="display:inline-block;margin-top:4px">Εναλλακτική σύνδεση (αναδυόμενο παράθυρο)</a>`;}
+const GFALL=`<button class="btn pri" onclick="signIn()" style="width:100%;max-width:320px">Σύνδεση με Google</button>`;
+function gisHTML(id){return `<div class="gisbtn" id="${id}" style="min-height:44px">${GFALL}</div><a href="javascript:void 0" class="small muted" onclick="signIn()" style="display:inline-block;margin-top:4px">Εναλλακτική σύνδεση (αναδυόμενο παράθυρο)</a>`;}
 /* Email / password */
-function authOk(t){["#acctMsg","#acctMsg2"].forEach(id=>{const el=$(id);if(el){el.textContent=t;el.style.color="var(--ok)";}});}
+function authOk(t){["#acctMsg","#acctMsg2","#acctMsg3"].forEach(id=>{const el=$(id);if(el){el.textContent=t;el.style.color="var(--ok)";}});}
 function emVals(x){const e=($("#em_"+x)||{}).value||"",p=($("#pw_"+x)||{}).value||"";return [e.trim(),p];}
 async function emailIn(x){
   if(!FB_OK){authErr({code:"fb-off"});return;}
@@ -1945,7 +1959,8 @@ function pagePreg(){
   const r=pgRoute();let html;
   if(r.startsWith("k-")){const p=pById(r.slice(2));html=p?vPreg(p):(pgMigHTML()+vPregList());}
   else html=pgMigHTML()+vPregList();
-  return `<div class="pgw">${html}</div>`;
+  const sign=(MODE==="local"&&FB_OK&&!r.startsWith("k-"))?`<div class="pg-mig" style="display:block"><p style="margin:0 0 8px"><b>Συνδέσου</b> για να δεις τις καρτέλες που έχεις αποθηκεύσει στον λογαριασμό σου, από κάθε συσκευή.</p><div style="max-width:340px">${gisHTML("gisPreg")}${emailHTML("p")}</div><span class="small" id="acctMsg3" style="color:var(--crit)"></span></div>`:"";
+  return `<div class="pgw">${sign}${html}</div>`;
 }
 function pgRender(){const v=$("#view");if(!v)return;const y=window.scrollY;v.innerHTML=pagePreg();pgBind();window.scrollTo(0,y);}
 function pgBind(){
@@ -2219,7 +2234,14 @@ renderAcct();
 initFirebase();
 $("#dlg").addEventListener("click",e=>{if(e.target.id==="dlg")closeDlg();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDlg();});
-$("#menuBtn").onclick=()=>$("#side").classList.toggle("open");
+function setNav(o){$("#side").classList.toggle("open",o);$("#scrim").classList.toggle("on",o);document.body.style.overflow=o?"hidden":"";if(o&&typeof gisMount==="function")setTimeout(gisMount,250);}
+$("#menuBtn").onclick=()=>setNav(!$("#side").classList.contains("open"));
+$("#scrim").onclick=()=>setNav(false);
+$("#navClose").onclick=()=>setNav(false);
+$("#side").addEventListener("click",e=>{if(e.target.closest("a[href^='#']"))setNav(false);});
+let NAVSTACK=0;window.addEventListener("hashchange",()=>{NAVSTACK++;});
+function goBack(){if(NAVSTACK>0&&history.length>1){NAVSTACK-=2;history.back();}else location.hash="home";}
+$("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 </script>
