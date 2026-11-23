@@ -1646,7 +1646,7 @@ function navHTML(h){
   return `<div class="navgrp">Guide</div>${L("home","Home")}${L("protocols","All protocols")}
    ${grp("stim","Stimulation")}${grp("strategy","Strategies")}${grp("fet","Frozen transfer")}${grp("special","Special situations")}
    ${L("drugs","Pharmacology")}${L("studies","New studies")}
-   <div class="navgrp">Clinic</div>${L("tracker","Patient folders")}${typeof pagePreg==="function"?L("preg","Pregnancy records"):""}${L("tools","Tools")}${L("quiz","Quiz")}
+   <div class="navgrp">Clinic</div>${L("tracker","Patients")}${L("tools","Tools")}${L("quiz","Quiz")}
    <div class="navgrp">Information</div>${L("author","About")}${L("refs","References")}${L("about","Methodology and roadmap")}${L("terms","Terms and privacy")}`;
 }
 const NAVN={"antagonist":"GnRH antagonist","long-agonist":"Long agonist","flare":"Short (flare)","ultra-long":"Ultra-long","ppos":"PPOS","mild":"Mild / natural IVF","duostim":"DuoStim","fp-random":"Fertility preservation","ivm":"IVM","poseidon":"Low responders","ohss":"High responders / OHSS","fet-hrt":"HRT cycle","fet-nc":"Natural cycle","fet-letrozole":"Letrozole","fet-donor":"Oocyte recipient","sp-endo":"Endometriosis","sp-hydro":"Hydrosalpinx","sp-rif":"Implantation failure (RIF)","sp-male":"Male factor / ICSI","sp-thromb":"Thrombophilia / heparin"};
@@ -1661,8 +1661,10 @@ function route(){
   else if(h.startsWith("p-") && PROTO_BY_ID[h.slice(2)]) v.innerHTML=pageProtocol(PROTO_BY_ID[h.slice(2)]);
   else if(h==="drugs") v.innerHTML=pageDrugs();
   else if(h==="studies") v.innerHTML=pageStudies("all");
-  else if(h==="tracker") {v.innerHTML=pageTracker(); bindTracker(); bocMount(); bocAuto();}
-  else if((h==="preg"||h.startsWith("k-"))&&typeof pagePreg==="function") {v.innerHTML=pagePreg(); pgBind();}
+  else if(h==="tracker") {v.innerHTML=pageTracker(); bindTracker();}
+  else if(h==="preg") {TRKF=typeof pagePreg==="function"?"preg":"all"; location.replace("#tracker"); return;}
+  else if(h.startsWith("k-")&&typeof pagePreg==="function") {v.innerHTML=pagePreg(); pgBind();}
+  else if(h.startsWith("gy-")&&typeof pageGyn==="function") {v.innerHTML=pageGyn(h.slice(3)); gyBind(h.slice(3));}
   else if(h==="refs") v.innerHTML=pageRefs();
   else if(h==="about") v.innerHTML=pageAbout();
   else if(h==="tools") {v.innerHTML=pageTools(); bindTools();}
@@ -1681,9 +1683,8 @@ function pageHome(){
    <a class="card" href="#protocols"><h3>Protocols</h3><p class="muted small">${PROTOCOLS.length} stimulation and frozen transfer protocols and strategies, with drug tables, timelines and evidence.</p></a>
    <a class="card" href="#drugs"><h3>Pharmacology</h3><p class="muted small">${DRUGS.length} drug cards: mechanism, pharmacokinetics, doses, brands.</p></a>
    <a class="card" href="#studies"><h3>New studies</h3><p class="muted small">${STUDIES.length} studies with PICO, findings, impact and appraisal.</p></a>
-   <a class="card" href="#tracker"><h3>Patient folders</h3><p class="muted small">A folder per patient with cycles, follicles per ovary, hormones and alerts for trigger, OHSS, P4 and retrieval time. Google sign-in and on-device encryption.</p></a>
-   ${typeof pagePreg==="function"?`<a class="card" href="#preg"><h3>Pregnancy records</h3><p class="muted small">Pregnancy follow-up based on the Greek HSOG guideline schedule (Greek version only).</p></a>`:""}
-   <a class="card" href="#tools"><h3>Tools</h3><p class="muted small">FSH starting dose, FORT/FOI, transfer dates and unit conversion.</p></a>
+   <a class="card" href="#tracker"><h3>Patients</h3><p class="muted small">Patient folders with cycles, follicles per ovary, hormones and alerts for trigger and OHSS. Encrypted on the device.</p></a>
+      <a class="card" href="#tools"><h3>Tools</h3><p class="muted small">FSH starting dose, FORT/FOI, transfer dates and unit conversion.</p></a>
    <a class="card" href="#quiz"><h3>Quiz</h3><p class="muted small">${QUIZ.length} questions with explanations, by protocol.</p></a>
   </div>
   <div class="callout acc"><p><b>Last literature check:</b> 21 November 2026, based on the ESHRE 2025 update ${cite("{{eshre25}}")} and recent RCTs and meta-analyses.</p></div>
@@ -1909,7 +1910,7 @@ const KEY="ivfprot.v1";
 const DEFCFG={trigN:3,trigSize:17,ohssN:18,ohssSize:11,e2Ohss:3500,p4Trig:1.5,lhSurge:10,antFix:5,antFlex:14,endoMin:7,p4ET:9.2,opuH:35};
 const FB_CONFIG={apiKey:"AIzaSyBylP1Guq3c0Opr8lrBY5PaiQxpPoNzfv0",authDomain:"ivf-protocols.firebaseapp.com",projectId:"ivf-protocols",storageBucket:"ivf-protocols.firebasestorage.app",messagingSenderId:"662020211580",appId:"1:662020211580:web:2b6ffda0f000545aabdaf9"};
 const KDF_ITER=310000;
-let DB={patients:[],preg:[],cfg:{...DEFCFG}}, CUR=null, CURC=null, STORAGE_OK=true;
+let DB={patients:[],preg:[],gyn:[],cfg:{...DEFCFG}}, CUR=null, CURC=null, STORAGE_OK=true;
 /* MODE: local | cloud-wait | cloud-locked | cloud */
 let MODE="local", USER=null, USERMETA=null, CKEY=null, LAST={}, LASTCFG="", SYNC="", FB_OK=false, AUTH=null, FS=null;
 
@@ -1931,8 +1932,8 @@ function examplePatient(){
     {id:uid(),date:isoAdd(s,6),type:"mon",e2:1150,lh:1.8,p4:0.7,endo:8.6,pat:"trilaminar",R:"15,14,13,12,11,10",L:"14,13,12,11,10",drugs:"rFSH 150 + ganirelix 0.25"},
     {id:uid(),date:isoAdd(s,8),type:"mon",e2:2350,lh:1.5,p4:0.9,endo:9.8,pat:"trilaminar",R:"18,17,16,15,13,12",L:"17,16,15,14,12",drugs:"rFSH 150 + ganirelix 0.25"}]}]};
 }
-function readLocal(){try{const r=localStorage.getItem(KEY);if(!r)return null;const d=JSON.parse(r);return {patients:(d.patients||[]).map(normPatient),preg:Array.isArray(d.preg)?d.preg:[],cfg:{...DEFCFG,...(d.cfg||{})}};}catch(e){STORAGE_OK=false;return null;}}
-function loadLocal(){const d=readLocal();DB=d||{patients:[examplePatient()],preg:[],cfg:{...DEFCFG}};}
+function readLocal(){try{const r=localStorage.getItem(KEY);if(!r)return null;const d=JSON.parse(r);return {patients:(d.patients||[]).map(normPatient),preg:Array.isArray(d.preg)?d.preg:[],gyn:Array.isArray(d.gyn)?d.gyn:[],cfg:{...DEFCFG,...(d.cfg||{})}};}catch(e){STORAGE_OK=false;return null;}}
+function loadLocal(){const d=readLocal();DB=d||{patients:[examplePatient()],preg:[],gyn:[],cfg:{...DEFCFG}};}
 function save(){
   if(MODE==="local"){try{localStorage.setItem(KEY,JSON.stringify(DB));STORAGE_OK=true;}catch(e){STORAGE_OK=false;}}
   else if(MODE==="cloud") queueCloud();
@@ -1961,7 +1962,7 @@ function initFirebase(){
 async function onAuth(u){
   USER=u; CKEY=null; LAST={}; LASTCFG="";
   if(!u){MODE="local";loadLocal();USERMETA=null;renderAcct();afterModeChange();return;}
-  MODE="cloud-wait"; DB={patients:[],preg:[],cfg:{...DEFCFG}}; renderAcct(); afterModeChange();
+  MODE="cloud-wait"; DB={patients:[],preg:[],gyn:[],cfg:{...DEFCFG}}; renderAcct(); afterModeChange();
   try{const snap=await FS.collection("users").doc(u.uid).get();USERMETA=snap.exists?snap.data():null;MODE="cloud-locked";}
   catch(e){USERMETA=null;MODE="cloud-locked";SYNC="Read error: "+(e.code||e.message);}
   renderAcct(); afterModeChange();
@@ -2027,7 +2028,7 @@ function emailHTML(x){return `<details class="emauth" style="margin-top:8px"><su
   <p class="small muted" style="margin:0">Your account password is different from the folder encryption passphrase.</p>
  </div></details>`;}
 function signOut(){CKEY=null;if(AUTH)AUTH.signOut();}
-function lockNow(){CKEY=null;DB={patients:[],preg:[],cfg:{...DEFCFG}};LAST={};MODE="cloud-locked";renderAcct();afterModeChange();}
+function lockNow(){CKEY=null;DB={patients:[],preg:[],gyn:[],cfg:{...DEFCFG}};LAST={};MODE="cloud-locked";renderAcct();afterModeChange();}
 
 async function setupPass(p1){
   const salt=crypto.getRandomValues(new Uint8Array(16));
@@ -2044,13 +2045,13 @@ async function unlock(pass){
   CKEY=key; await loadCloud(); return true;
 }
 async function loadCloud(){
-  SYNC="Loading…"; const pats=[], preg=[]; LAST={};
+  SYNC="Loading…"; const pats=[], preg=[], gyn=[]; LAST={};
   const qs=await FS.collection("users").doc(USER.uid).collection("patients").get();
-  for(const d of qs.docs){try{const o=await decObj(d.data());LAST[d.id]=JSON.stringify(o);if(o&&o._k==="preg"){const q={...o};delete q._k;q.id=d.id;preg.push(q);}else{const p=normPatient(o);p.id=d.id;pats.push(p);LAST[d.id]=JSON.stringify(p);}}catch(e){console.warn("decrypt",d.id);}}
+  for(const d of qs.docs){try{const o=await decObj(d.data());LAST[d.id]=JSON.stringify(o);if(o&&(o._k==="preg"||o._k==="gyn")){const q={...o};delete q._k;q.id=d.id;(o._k==="preg"?preg:gyn).push(q);}else{const p=normPatient(o);p.id=d.id;pats.push(p);LAST[d.id]=JSON.stringify(p);}}catch(e){console.warn("decrypt",d.id);}}
   let cfg={...DEFCFG}; try{if(USERMETA.cfgEnc)cfg={...DEFCFG,...(await decObj(USERMETA.cfgEnc))};}catch(e){}
   LASTCFG=JSON.stringify(cfg);
   pats.sort((a,b)=>(a.code||"").localeCompare(b.code||"","en"));
-  DB={patients:pats,preg,cfg}; CUR=null; CURC=null; MODE="cloud"; SYNC="Synced"; renderAcct(); afterModeChange();
+  DB={patients:pats,preg,gyn,cfg}; CUR=null; CURC=null; MODE="cloud"; SYNC="Synced"; renderAcct(); afterModeChange();
 }
 let cloudTimer=null, cloudBusy=false, cloudAgain=false;
 function queueCloud(){SYNC="Saving…";setSync();clearTimeout(cloudTimer);cloudTimer=setTimeout(flushCloud,400);}
@@ -2058,7 +2059,7 @@ async function flushCloud(){
   if(cloudBusy){cloudAgain=true;return;} cloudBusy=true;
   try{
     const col=FS.collection("users").doc(USER.uid).collection("patients"); const ids=new Set();
-    for(const p of [...DB.patients,...(DB.preg||[]).map(x=>({...x,_k:"preg"}))]){ids.add(p.id);const s=JSON.stringify(p);if(LAST[p.id]!==s){const e=await encObj(p);await col.doc(p.id).set({...e,updated:firebase.firestore.FieldValue.serverTimestamp()});LAST[p.id]=s;}}
+    for(const p of [...DB.patients,...(DB.preg||[]).map(x=>({...x,_k:"preg"})),...(DB.gyn||[]).map(x=>({...x,_k:"gyn"}))]){ids.add(p.id);const s=JSON.stringify(p);if(LAST[p.id]!==s){const e=await encObj(p);await col.doc(p.id).set({...e,updated:firebase.firestore.FieldValue.serverTimestamp()});LAST[p.id]=s;}}
     for(const id of Object.keys(LAST)) if(!ids.has(id)){await col.doc(id).delete();delete LAST[id];}
     const cs=JSON.stringify(DB.cfg); if(cs!==LASTCFG){const e=await encObj(DB.cfg);await FS.collection("users").doc(USER.uid).update({cfgEnc:e});LASTCFG=cs;}
     SYNC="Saved "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
@@ -2076,7 +2077,7 @@ function renderAcct(){
    <div class="row">${MODE==="cloud"?'<button class="btn sm" id="btnLock">Lock</button>':""}<button class="btn sm" id="btnOut">Sign out</button></div><p class="small muted" style="margin:6px 0 0">Auto-lock after 15 minutes of inactivity.</p><p class="small" id="acctMsg" style="color:var(--crit);margin:4px 0 0"></p></div>`;
   $("#btnOut").onclick=signOut; const l=$("#btnLock"); if(l) l.onclick=lockNow;
 }
-function afterModeChange(){const h=(location.hash||"").slice(1);if(h==="tracker")refreshTracker();else if((h==="preg"||h.startsWith("k-"))&&typeof pgRender==="function")pgRender();}
+function afterModeChange(){const h=(location.hash||"").slice(1);if(h==="tracker")refreshTracker();else if(h.startsWith("k-")&&typeof pgRender==="function")pgRender();else if(h.startsWith("gy-")&&typeof gyRender==="function")gyRender();}
 
 /* ---------- Auto-lock after inactivity ---------- */
 const AUTOLOCK_MIN=15; let LASTACT=Date.now();
@@ -2176,27 +2177,59 @@ function trackerBanner(){
   if(MODE==="local") return `<div class="callout ${STORAGE_OK?"":"crit"}"><p>${STORAGE_OK?"<b>Local mode:</b> data are stored only in this browser. "+(FB_OK?"For encrypted folders you can open on any device, sign in with Google.</p><p style=\"margin-top:8px\"><div style=\"max-width:320px\">"+gisHTML("gisTrk")+emailHTML("t")+"</div><span class=\"small\" id=\"acctMsg2\" style=\"color:var(--crit)\"></span>":""):"Local storage is not available. Changes will be lost when the page closes."}</p></div>`;
   return `<div class="callout acc"><p><b>Encrypted folders:</b> data are encrypted on this device with your passphrase before being sent to Firebase (EU, Frankfurt). No one else, neither the administrator nor Google, can read them. <span class="muted" id="syncMsg">${esc(SYNC)}</span></p></div>`;
 }
+let TRKF="all";
+const PT_TYPES=()=>[["ivf","IVF"],...(typeof pagePreg==="function"?[["preg","Obstetric"]]:[]),...(typeof pageGyn==="function"?[["gyn","Gynaecological"]]:[])];
+function allPatients(){
+  const L=[];
+  DB.patients.forEach(x=>{const c=x.cycles[x.cycles.length-1];L.push({t:"ivf",id:x.id,name:x.code||"no code",sub:c?((PROTO_OPTS.find(o=>o[0]===c.proto)||[])[1]||""):"",n:x.cycles.length+" cycles",d:(c&&c.start)||""});});
+  if(typeof pagePreg==="function")(DB.preg||[]).forEach(x=>{let sub="";try{const ga=gaToday(x);sub=(ga!=null&&ga>=0)?gaTxt(ga)+" wk":"";}catch(e){}L.push({t:"preg",id:x.id,name:(x.info&&x.info.name)||"no name",sub:(x.closed?"Completed":"")+(sub&&!x.closed?String(sub):""),n:"",d:x.created||""});});
+  if(typeof pageGyn==="function")(DB.gyn||[]).forEach(x=>{const lv=gyLastVisit(x);L.push({t:"gyn",id:x.id,name:(x.info&&x.info.name)||"no name",sub:lv?(lv.dx||lv.reason||""):"",n:(x.visits||[]).length+" visits",d:(lv&&lv.d)||x.created||""});});
+  return L;
+}
+const PT_CHIP={ivf:["teal","IVF"],preg:["acc","Obstetric"],gyn:["warn","Gynaecological"]};
 function pageTracker(){
-  if(MODE==="cloud-wait") return `<h1>Patient folders</h1><p class="muted">Signing in…</p>`;
-  if(MODE==="cloud-locked") return `<h1>Patient folders</h1>${USERMETA?unlockHTML():setupHTML()}`;
-  const p=DB.patients.find(x=>x.id===CUR)||DB.patients[0]; if(p) CUR=p.id;
+  if(MODE==="cloud-wait") return `<h1>Patients</h1><p class="muted">Signing in…</p>`;
+  if(MODE==="cloud-locked") return `<h1>Patients</h1>${USERMETA?unlockHTML():setupHTML()}`;
+  const p=DB.patients.find(x=>x.id===CUR); 
   const localImport=MODE==="cloud"?(readLocal()||{patients:[]}).patients.filter(x=>!x.example):[];
-  return `<h1>Patient folders</h1>${trackerBanner()}
+  let mig="";if(typeof pgMigSrc==="function"){PREG=DB.preg||(DB.preg=[]);mig=pgMigHTML();}
+  const showPane=p&&(TRKF==="all"||TRKF==="ivf");
+  return `<h1>Patients</h1>${trackerBanner()}
   ${localImport.length?`<div class="callout warn"><p>Found <b>${localImport.length}</b> folders saved only on this device. <button class="btn sm" id="impLocal">Move to my account</button></p></div>`:""}
+  ${mig?`<div class="pgw">${mig}</div>`:""}
   <div class="trk">
    <div>
-    <div class="row" style="margin-bottom:10px"><button class="btn pri" id="newPt">+ New patient</button><button class="btn" onclick="bocImportDlg()">📱 From Baby O’Clock</button><button class="btn" id="cfgBtn">Thresholds</button></div>
-    <input id="ptSearch" placeholder="Search code" style="width:100%;margin-bottom:8px" aria-label="Search patient code">
+    <div class="row" style="margin-bottom:10px"><button class="btn pri" id="newPt">+ New patient</button><button class="btn" id="cfgBtn">Thresholds</button></div>
+    <label class="f" for="ptType" style="margin-bottom:8px">Type<select id="ptType"><option value="all"${TRKF==="all"?" selected":""}>All patients</option>${PT_TYPES().map(t=>`<option value="${t[0]}"${TRKF===t[0]?" selected":""}>${t[1]}</option>`).join("")}</select></label>
+    <input id="ptSearch" placeholder="Search name or code" style="width:100%;margin-bottom:8px" aria-label="Search patient">
     <div class="pt-list" id="ptList">${ptListHTML("")}</div>
     <div class="row" style="margin-top:14px"><button class="btn sm" id="bkCopy">Copy backup</button><button class="btn sm" id="bkRestore">Restore</button></div>
     <p class="small muted" id="bkMsg"></p>
    </div>
-   <div id="ptPane">${p?ptPane(p):`<div class="card"><h3>No folders yet</h3><p class="small">Press “New patient” to create the first folder. Use a code instead of a full name.</p></div>`}</div>
+   <div id="ptPane">${showPane?ptPane(p):`<div class="card"><h3>Select a patient</h3><p class="small">Pick a patient from the list or press “New patient” and choose a record type: ${PT_TYPES().map(t=>t[1]).join(", ")}.</p></div>`}</div>
   </div>`;
 }
 function ptListHTML(q){
-  const L=DB.patients.filter(x=>!q||(x.code||"").toLowerCase().includes(q.toLowerCase()));
-  return L.map(x=>{const c=x.cycles[x.cycles.length-1];return `<button class="pt${x.id===CUR?" on":""}" data-pt="${x.id}"><span><b>${esc(x.code||"no code")}</b><br><span class="small muted">${esc(c?((PROTO_OPTS.find(o=>o[0]===c.proto)||[])[1]||""):"")}</span></span><span class="pill-n">${x.cycles.length} cycles</span></button>`;}).join("")||`<p class="muted small">No folders.</p>`;
+  const qq=(q||"").toLowerCase();
+  const L=allPatients().filter(x=>(TRKF==="all"||x.t===TRKF)&&(!qq||x.name.toLowerCase().includes(qq)));
+  return L.map(x=>`<button class="pt${x.t==="ivf"&&x.id===CUR?" on":""}" data-pt="${x.id}" data-pk="${x.t}"><span><b>${esc(x.name)}</b><br><span class="chip ${PT_CHIP[x.t][0]}" style="font-size:11px;padding:1px 7px">${PT_CHIP[x.t][1]}</span> <span class="small muted">${esc(x.sub||"")}</span></span><span class="pill-n">${esc(x.n)}</span></button>`).join("")||`<p class="muted small">No patients.</p>`;
+}
+function newPatientDlg(){
+  const T=PT_TYPES();
+  openDlg(`<h3 style="margin-top:0">New patient</h3><div class="form" style="grid-template-columns:1fr">
+   <label class="f" for="npType">Record type<select id="npType">${T.map(t=>`<option value="${t[0]}"${TRKF===t[0]?" selected":""}>${t[1]}</option>`).join("")}</select></label>
+   <label class="f" for="npName">Name or code<input id="npName" autocomplete="off"></label></div>
+   <p class="small muted" id="npHint"></p>
+   <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" onclick="closeDlg()">Cancel</button><button class="btn pri" id="npGo">Create</button></div>`);
+  const hint=()=>{const t=$("#npType").value;$("#npHint").textContent=t==="ivf"?"IVF folder with stimulation/transfer cycles, visits and alerts.":t==="preg"?"Obstetric record (Greek version only).":"Gynaecological record (Greek version only).";};
+  $("#npType").onchange=hint;hint();setTimeout(()=>$("#npName").focus(),30);
+  $("#npName").addEventListener("keydown",e=>{if(e.key==="Enter")$("#npGo").click();});
+  $("#npGo").onclick=()=>{
+    const t=$("#npType").value,nm=$("#npName").value.trim();closeDlg();
+    if(t==="ivf"){const c=newCycle(1);const n={id:uid(),code:nm,age:"",bmi:"",amh:"",afc:"",prevOoc:"",dx:"",notes:"",cycles:[c]};DB.patients.unshift(n);CUR=n.id;CURC=c.id;if(TRKF!=="all"&&TRKF!=="ivf")TRKF="all";save();refreshTracker();}
+    else if(t==="gyn"){const n=gyNew(nm);location.hash="gy-"+n.id;}
+    else if(t==="preg"){PREG=DB.preg||(DB.preg=[]);pgBind();shNew();setTimeout(()=>{const e=$("#np_n");if(e){e.value=nm;}},60);}
+  };
 }
 function setupHTML(){
   return `<div class="card" style="max-width:560px"><h3>Create an encryption passphrase</h3>
@@ -2223,7 +2256,6 @@ function ptPane(p){
    <label class="f wide" for="f_dx">Diagnosis / indication<input id="f_dx" data-f="dx" value="${esc(p.dx||"")}"></label>
    <label class="f wide" for="f_notes">Notes<input id="f_notes" data-f="notes" value="${esc(p.notes||"")}"></label>
   </div><p class="small" style="margin-bottom:0"><b>POSEIDON:</b> <span class="chip acc">${esc(pos.g)}</span> ${esc(pos.t)} ${cite("{{poseidon16}}")}</p></div>
-  ${bocCard(p)}
   <div class="tabs">${p.cycles.map(x=>`<button class="tab${x.id===CURC?" on":""}" data-cyc="${x.id}">${esc(x.label||"Cycle")}</button>`).join("")}<button class="tab" id="addCyc">+ New cycle</button></div>
   ${c?cyclePane(p,c):`<p class="muted">No cycle yet. Press “+ New cycle”.</p>`}
   <div class="row" style="margin-top:18px"><button class="btn danger" id="delPt">Delete folder</button></div>`;
@@ -2248,110 +2280,7 @@ function cyclePane(p,c){
   </tbody></table></div>
   <div class="row" style="margin-top:10px"><button class="btn pri" id="addV">+ New visit</button>${(p.cycles.length>1)?`<button class="btn danger" id="delCyc">Delete cycle</button>`:""}</div>`;
 }
-function refreshTracker(){$("#view").innerHTML=pageTracker();bindTracker();bocMount();bocAuto();}
-function bocAuto(){if(BOC_PEND&&$("#newPt")){const c=BOC_PEND;BOC_PEND="";setTimeout(()=>bocImportDlg(c),50);}}
-/* ---------- Link to Baby O’Clock (patient app) ---------- */
-const BOC_CFG={apiKey:"AIzaSyCmuQqxHv1E08iB4q-8VEbJUrOTRgmvZyk",authDomain:"mazi-ivf.firebaseapp.com",projectId:"mazi-ivf",storageBucket:"mazi-ivf.firebasestorage.app",messagingSenderId:"75016649970",appId:"1:75016649970:web:28b404e472eb6f0190a46b"};
-let BOC={app:null,auth:null,db:null,user:null,ready:false,sum:{},sent:{},err:''};
-function bocInit(){if(BOC.app||typeof firebase==="undefined")return;try{BOC.app=firebase.initializeApp(BOC_CFG,"boc");BOC.auth=BOC.app.auth();BOC.db=BOC.app.firestore();BOC.auth.onAuthStateChanged(u=>{BOC.user=u;BOC.ready=true;bocMount();if(BOC.onReady&&$("#biBody"))BOC.onReady();});}catch(e){console.warn("BOC",e);}}
-const BOC_MAP={"antagonist":"antagonist","long-agonist":"long","ultra-long":"long","flare":"long","mild":"mild","fet-hrt":"fet_hrt","fet-donor":"fet_hrt","fet-nc":"fet_nat","fet-letrozole":"fet_nat"};
-const bocP=()=>DB.patients.find(x=>x.id===CUR);
-const bocFmt=s=>{if(!s)return "";const [y,m,d]=String(s).slice(0,10).split("-");return d+"/"+m+"/"+y;};
-function bocCard(p){return `<div class="card" id="bocCard" style="margin-top:14px"><h3>📱 Patient’s Baby O’Clock</h3><p class="small muted">Loading…</p></div>`;}
-async function bocGoogle(){const pr=new firebase.auth.GoogleAuthProvider();pr.setCustomParameters({prompt:"select_account"});try{await BOC.auth.signInWithPopup(pr);}catch(e){BOC.err="Sign-in failed: "+(e.code||"");bocMount();}}
-async function bocEmail(reg){const e=$("#bocEm").value.trim(),pw=$("#bocPw").value;BOC.err="";try{if(reg)await BOC.auth.createUserWithEmailAndPassword(e,pw);else await BOC.auth.signInWithEmailAndPassword(e,pw);}catch(x){BOC.err={"auth/invalid-credential":"Wrong email or password.","auth/email-already-in-use":"An account already exists. Press “Sign in”.","auth/weak-password":"At least 6 characters.","auth/invalid-email":"Invalid email."}[x.code]||("Error: "+(x.code||""));bocMount();}}
-async function bocLink(){const p=bocP();const code=($("#bocCode").value||"").trim().toUpperCase();BOC.err="";
-  if(code.length!==6){BOC.err="The code has 6 characters.";return bocMount();}
-  try{const l=await BOC.db.collection("links").doc(code).get();if(!l.exists){BOC.err="Code not found.";return bocMount();}const d=l.data();if(d.exp<Date.now()){BOC.err="The code has expired. Ask the patient for a new one.";return bocMount();}
-    const me=BOC.user;await BOC.db.collection("care").doc(d.patientUid).collection("doctors").doc(me.uid).set({code,name:me.displayName||"",email:me.email||"",created:Date.now(),via:"ivf-protocols"});
-    await BOC.db.collection("doctors").doc(me.uid).collection("patients").doc(d.patientUid).set({name:d.name||"Patient",since:Date.now(),code:p.code||""});
-    p.boc={pid:d.patientUid,name:d.name||"",since:Date.now()};save();bocMount();
-  }catch(e){console.warn(e);BOC.err="Linking failed ("+(e.code||"")+").";bocMount();}}
-async function bocUnlink(){const p=bocP();if(!p||!p.boc)return;if(!confirm("Unlink this patient from Baby O’Clock;"))return;try{await BOC.db.collection("care").doc(p.boc.pid).collection("doctors").doc(BOC.user.uid).delete();await BOC.db.collection("doctors").doc(BOC.user.uid).collection("patients").doc(p.boc.pid).delete();}catch(e){}delete p.boc;save();bocMount();}
-async function bocSend(item,label){const p=bocP();try{await BOC.db.collection("care").doc(p.boc.pid).collection("inbox").add({...item,from:BOC.user.uid,fromName:BOC.user.displayName||"Your doctor",created:Date.now(),read:false});BOC.flash=(label||"Sent")+" ✓";delete BOC.sent[p.boc.pid];bocMount();}catch(e){BOC.err="Not sent: "+(e.code||"");bocMount();}}
-function bocCyc(){const p=bocP();return p&&(p.cycles.find(x=>x.id===CURC)||p.cycles[p.cycles.length-1]);}
-function bocSendCycle(){const c=bocCyc();if(!c)return;const name=(PROTO_OPTS.find(o=>o[0]===c.proto)||[])[1]||"";const it={type:"plan",protoName:name};const m=BOC_MAP[c.proto];if(m)it.protocol=m;if(c.start)it.start=c.start;if(c.trig)it.trigger=c.trig;
-  if(c.fsh)it.note=c.fsh;bocSend(it,"Cycle sent");}
-function bocSendVisit(){const c=bocCyc();if(!c||!c.visits.length)return;const v=[...c.visits].sort((a,b)=>a.date.localeCompare(b.date)).pop();
-  const extra=[v.lh?"LH "+v.lh:"",v.p4?"P4 "+v.p4:"",v.pat?"endometrium "+v.pat:"",v.drugs?"Medicines: "+v.drugs:""].filter(Boolean).join(" · ");
-  const n=($("#bocNote")&&$("#bocNote").value.trim())||"";bocSend({type:"scan",date:v.date,right:v.R||"",left:v.L||"",endo:v.endo||"",e2:v.e2||"",notes:[extra,n].filter(Boolean).join("\n")},"Scan sent");}
-function bocSendMsg(){const t=$("#bocNote").value.trim();if(!t)return;bocSend({type:"msg",text:t},"Message sent");}
-async function bocLoad(pid){try{const s=await BOC.db.collection("care").doc(pid).get();BOC.sum[pid]=s.exists?s.data():{};const p=DB.patients.find(x=>x.boc&&x.boc.pid===pid);if(p&&BOC.sum[pid].updatedMs&&(!p.bocSnap||p.bocSnap.updatedMs!==BOC.sum[pid].updatedMs)){p.bocSnap=JSON.parse(JSON.stringify(BOC.sum[pid]));save();}}catch(e){BOC.sum[pid]={denied:true};}
-  try{const q=await BOC.db.collection("care").doc(pid).collection("inbox").orderBy("created","desc").limit(5).get();BOC.sent[pid]=q.docs.map(d=>d.data());}catch(e){BOC.sent[pid]=[];}bocMount();}
-function bocSummary(S){if(!S)return `<p class="small muted">Loading…</p>`;if(S.denied)return `<p class="small" style="color:var(--crit)">The patient removed the link or access is not available.</p>`;
-  if(!S.updatedMs)return `<p class="small muted">The patient has not turned on sharing of her records. You can still send to her.</p>`;
-  const P={sevpain:"Severe abdominal pain",sevbloat:"Bloating",breath:"Breathlessness",urine:"Less urine",vomit:"Vomiting",fever:"Fever",bleed:"Heavy bleeding",leg:"Calf pain",faint:"Dizziness"};
-  const logs=S.logs||{},flags=Object.entries(logs).filter(([d,l])=>(l.flags||[]).length).sort().reverse().slice(0,4);
-  const bd=S.body||{},bk=Object.keys(bd).sort().reverse()[0],b=bk?bd[bk]:null;
-  const ps=S.period&&S.period.starts&&S.period.starts.length?S.period.starts[S.period.starts.length-1]:"";
-  const lastLog=Object.keys(logs).sort().reverse()[0];
-  return `<p class="small muted" style="margin:0 0 6px">Updated: ${new Date(S.updatedMs).toLocaleString("en-GB")}${S.phone?` · <a href="tel:${esc(S.phone)}">${esc(S.phone)}</a>`:""}</p>
-  ${flags.length?`<div class="callout warn" style="margin:6px 0"><p class="small"><b>⚠️ Warning signs:</b> ${flags.map(([d,l])=>bocFmt(d)+": "+l.flags.map(f=>P[f]||f).join(", ")).join(" · ")}</p></div>`:""}
-  <p class="small" style="margin:4px 0">${[ps?"Last period <b>"+bocFmt(ps)+"</b>":"",lastLog?`Last entry ${bocFmt(lastLog)}${logs[lastLog].weight?" · "+esc(logs[lastLog].weight)+" kg":""}`:"",(S.meds||[]).length?(S.meds.length+" medicines in her schedule"):"",b?`Recovery ${b.rec??"-"}% · HRV ${b.hrv??"-"} · RHR ${b.rhr??"-"} · sleep ${b.sleepH??"-"} h (${bocFmt(bk)})`:""].filter(Boolean).join(" · ")||"No recent records."}</p>
-  ${S.preg?`<p class="small" style="margin:4px 0">🤰 Pregnancy · LMP ${bocFmt(S.preg.lmp)} · contractions (24 h): <b>${(S.preg.contr||[]).length}</b></p>`:""}`;}
-const BOC_SYM=[['bloat','Bloating'],['mildpain','Mild pain / twinges'],['breast','Breast tenderness'],['headache','Headache'],['fatigue','Fatigue'],['mood','Irritability / tearfulness'],['spotting','Spotting'],['injsite','Injection-site redness'],['nausea','Mild nausea'],['insomnia','Insomnia']];
-
-const BOC_PN={antagonist:'Antagonist',long:'Long agonist',mild:'Mild stimulation',fet_nat:'FET natural cycle',fet_hrt:'FET with HRT'};
-function bocFull(S){if(!S||S.denied||!S.updatedMs)return "";const c=S.cycle||{},logs=S.logs||{},T=(rows)=>`<table class="small" style="width:100%">${rows}</table>`;
-  const sec=(t,b)=>b?`<h4 style="margin:12px 0 4px">${t}</h4>${b}`:"";
-  const cyc=[["Protocol",BOC_PN[c.protocol]||c.protocol],["Start",bocFmt(c.start)],["Trigger",c.trigger?String(c.trigger).replace("T"," "):""],["Retrieval",bocFmt(c.opu)],["Embryo transfer",bocFmt(c.transfer)],["β-hCG",bocFmt(c.beta)]].filter(r=>r[1]);
-  const meds=(S.meds||[]).map(m=>`<tr><td><b>${esc(m.name)}</b> ${esc(m.dose||"")}</td><td>${esc(m.times||"")}</td><td>${bocFmt(m.start)}${m.end?" to "+bocFmt(m.end):""}</td></tr>`).join("");
-  const scans=(S.scans||[]).slice(-8).reverse().map(s=>`<tr><td>${bocFmt(s.date)}</td><td>R: ${esc(s.right||"-")}</td><td>L: ${esc(s.left||"-")}</td><td>Endo. ${esc(s.endo||"-")}</td><td>${s.e2?"E2 "+esc(s.e2):""}</td></tr>`).join("");
-  const sy=Object.entries(logs).sort().reverse().slice(0,10).map(([d,l])=>`<tr><td>${bocFmt(d)}</td><td>${(l.symptoms||[]).map(k=>esc((BOC_SYM.find(x=>x[0]===k)||[k,k])[1])).join(", ")||"-"}${(l.flags||[]).length?' · <b style="color:var(--crit)">'+l.flags.length+" warning signs</b>":""}${l.weight?" · "+esc(l.weight)+" kg":""}${l.notes?" · «"+esc(l.notes)+"»":""}</td></tr>`).join("");
-  const pd=S.period&&S.period.starts&&S.period.starts.length?`<p class="small" style="margin:0">Periods: ${S.period.starts.slice(-6).map(bocFmt).join(", ")}${S.period.avgLen?" · mean cycle "+S.period.avgLen+" d":""}${S.period.avgBleed?" · bleeding "+S.period.avgBleed+" d":""}</p>`:"";
-  const r=S.lab&&S.lab.recs&&S.lab.recs.length?S.lab.recs[S.lab.recs.length-1]:null;
-  const lab=r?`<p class="small" style="margin:0">Retrieval ${bocFmt(r.opu)}: ${[["eggs","Oocytes"],["mii","MII"],["fert","2PN"],["d3","Day 3"],["blast","Blastocysts"],["euploid","Euploid"]].filter(([k])=>r[k]!==""&&r[k]!=null).map(([k,l])=>l+" <b>"+esc(r[k])+"</b>").join(" · ")}</p>`:"";
-  const bd=S.body||{},bk=Object.keys(bd).sort().reverse().slice(0,7);
-  const body=bk.map(d=>{const x=bd[d];return `<tr><td>${bocFmt(d)}</td><td>${x.rec??"-"}%</td><td>${x.hrv??"-"}</td><td>${x.rhr??"-"}</td><td>${x.temp??"-"}</td><td>${x.sleepH??"-"}</td></tr>`}).join("");
-  const pv=S.preg&&(S.preg.vitals||[]).length?S.preg.vitals.slice(-6).reverse().map(v=>`<tr><td>${bocFmt(v.date)}</td><td>${v.sys?esc(v.sys)+"/"+esc(v.dia):""}</td><td>${esc(v.glu||"")}</td><td>${esc(v.w||"")}</td></tr>`).join(""):"";
-  return `<details open style="margin-top:10px"><summary><b>Patient record from Baby O’Clock</b></summary>
-   ${sec("Treatment cycle (as the patient has it)",cyc.length?T(cyc.map(r=>`<tr><th style="text-align:left">${r[0]}</th><td>${esc(r[1])}</td></tr>`).join("")):"")}
-   ${sec("Medicines",meds?T(meds):"")}${sec("Scans she has logged",scans?T(scans):"")}${sec("Symptoms (last 10 entries)",sy?T(sy):"")}
-   ${sec("Menstrual cycle",pd)}${sec("Embryos",lab)}${sec("Body and recovery (7 days)",body?T(`<tr><th>Date</th><th>Rec.</th><th>HRV</th><th>RHR</th><th>Temp.</th><th>Sleep</th></tr>`+body):"")}
-   ${sec("Pregnancy: blood pressure, glucose, weight",pv?T(pv):"")}
-   ${(S.files||[]).length?`<p class="small muted">The patient has ${S.files.length} test files in the app.</p>`:""}</details>`;}
-
-/* Νέος φάκελος απευθείας από Baby O’Clock (κωδικός ασθενούς ή ήδη συνδεδεμένες) */
-let BOC_PEND=(new URLSearchParams(location.search).get("boc")||"").toUpperCase();
-function bocNewFolder(pid,name){let p=DB.patients.find(x=>x.boc&&x.boc.pid===pid);if(!p){const c=newCycle(1);p={id:uid(),code:name||"Baby O’Clock",age:"",bmi:"",amh:"",afc:"",prevOoc:"",dx:"",notes:"",cycles:[c],boc:{pid,name:name||"",since:Date.now()}};DB.patients.unshift(p);}CUR=p.id;CURC=null;save();closeDlg();refreshTracker();}
-async function bocImportDlg(pc){bocInit();const code=typeof pc==="string"?pc:"";
-  const body=()=>{if(!BOC.app)return `<p>An internet connection is needed.</p>`;if(!BOC.ready)return `<p class="small muted">Loading…</p>`;
-    if(!BOC.user)return `<p class="small">Sign in to Baby O’Clock once as a doctor (with the same Google account you use here).</p><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn pri sm" id="biG">Sign in with Google</button></div><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px"><input id="bocEm" type="email" placeholder="email"><input id="bocPw" type="password" placeholder="password"><button class="btn sm" id="biE">Sign in</button><button class="btn sm" id="biR">New account</button></div>`;
-    return `<p class="small">Enter the 6-character code the patient gave you (Baby O’Clock → Άλλα → Ο γιατρός μου). A folder linked to her app is created automatically.</p><div class="row" style="gap:6px"><input id="biCode" maxlength="6" value="${esc(code)}" placeholder="e.g. K7Q2MX" style="text-transform:uppercase;width:140px;letter-spacing:2px"><button class="btn pri sm" id="biGo">Link and create folder</button></div><div id="biList" style="margin-top:12px"></div><p class="small muted" style="margin:10px 0 0">Signed in as ${esc(BOC.user.email||"")}</p>`;};
-  const draw=()=>{const el=$("#biBody");if(!el)return;el.innerHTML=body()+`<p class="small" id="biMsg" style="color:var(--crit)"></p>`;
-    const g=$("#biG");if(g)g.onclick=async()=>{await bocGoogle();setTimeout(draw,400);};const e=$("#biE");if(e)e.onclick=()=>bocEmail(false).then(()=>setTimeout(draw,400));const r=$("#biR");if(r)r.onclick=()=>bocEmail(true).then(()=>setTimeout(draw,400));
-    const go=$("#biGo");if(go){go.onclick=bocImportCode;bocListLinked();}};
-  openDlg(`<h3 style="margin-top:0">📱 Patient from Baby O’Clock</h3><div id="biBody"></div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" onclick="closeDlg()">Close</button></div>`);
-  BOC.onReady=draw;draw();}
-async function bocImportCode(){const code=($("#biCode").value||"").trim().toUpperCase(),msg=t=>{const m=$("#biMsg");if(m)m.textContent=t;};
-  if(code.length!==6)return msg("The code has 6 characters.");
-  try{const l=await BOC.db.collection("links").doc(code).get();if(!l.exists)return msg("Code not found. Check that you typed it correctly.");const d=l.data();if(d.exp<Date.now())return msg("The code has expired. Ask the patient for a new one.");
-    const me=BOC.user;await BOC.db.collection("care").doc(d.patientUid).collection("doctors").doc(me.uid).set({code,name:me.displayName||"",email:me.email||"",created:Date.now(),via:"ivf-protocols"});
-    await BOC.db.collection("doctors").doc(me.uid).collection("patients").doc(d.patientUid).set({name:d.name||"Patient",since:Date.now()});
-    bocNewFolder(d.patientUid,d.name||"");}catch(e){console.warn(e);msg("Linking failed ("+(e.code||"")+").");}}
-async function bocListLinked(){const el=$("#biList");if(!el)return;try{const q=await BOC.db.collection("doctors").doc(BOC.user.uid).collection("patients").get();const L=q.docs.map(d=>({pid:d.id,...d.data()})).filter(x=>!DB.patients.some(p=>p.boc&&p.boc.pid===x.pid));
-    el.innerHTML=L.length?`<p class="small"><b>Already linked patients without a folder:</b></p>`+L.map(x=>`<div class="row" style="justify-content:space-between;gap:8px;margin:4px 0"><span>${esc(x.name||"Patient")}</span><button class="btn sm" data-bpid="${esc(x.pid)}" data-bnm="${esc(x.name||"")}">Create folder</button></div>`).join(""):"";
-    el.querySelectorAll("[data-bpid]").forEach(b=>b.onclick=()=>bocNewFolder(b.dataset.bpid,b.dataset.bnm));}catch(e){}}
-
-function bocMount(){const el=$("#bocCard");if(!el)return;const p=bocP();if(!p)return;bocInit();
-  const h=`<h3>📱 Patient’s Baby O’Clock</h3>`;const err=BOC.err?`<p class="small" style="color:var(--crit)">${esc(BOC.err)}</p>`:"";const fl=BOC.flash?`<p class="small" style="color:var(--teal)">${esc(BOC.flash)}</p>`:"";BOC.flash="";
-  if(!BOC.app){el.innerHTML=h+`<p class="small muted">An internet connection is needed.</p>`;return;}
-  if(!BOC.ready){el.innerHTML=h+`<p class="small muted">Loading…</p>`;return;}
-  if(!BOC.user){el.innerHTML=h+(p.bocSnap?`<p class="small muted">Saved record from Baby O’Clock (${new Date(p.bocSnap.updatedMs).toLocaleString("en-GB")}). Sign in to refresh.</p>`+bocFull(p.bocSnap):"")+`<p class="small">Link this folder to the patient’s app: send her the cycle,, scans and messages, and see her symptoms and records. Sign in to Baby O’Clock once as a doctor.</p>
-   <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn pri sm" onclick="bocGoogle()">Sign in with Google</button></div>
-   <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px"><input id="bocEm" type="email" placeholder="email" autocomplete="email"><input id="bocPw" type="password" placeholder="password" autocomplete="current-password"><button class="btn sm" onclick="bocEmail(false)">Sign in</button><button class="btn sm" onclick="bocEmail(true)">New account</button></div>${err}`;return;}
-  if(!p.boc){el.innerHTML=h+`<p class="small">Ask the patient for her link code: in Baby O’Clock, <b>Άλλα (More) → Ο γιατρός μου (My doctor) → Δημιουργία κωδικού (Create code)</b>.</p>
-   <div class="row" style="gap:6px"><input id="bocCode" maxlength="6" placeholder="e.g. K7Q2MX" style="text-transform:uppercase;width:130px;letter-spacing:2px"><button class="btn pri sm" onclick="bocLink()">Link patient</button></div>${err}
-   <p class="small muted" style="margin:8px 0 0">Signed in as ${esc(BOC.user.email||"")} · <a href="#" onclick="BOC.auth.signOut();return false">sign out</a></p>`;return;}
-  const pid=p.boc.pid;if(!(pid in BOC.sum)){BOC.sum[pid]=null;bocLoad(pid);}const SS=BOC.sum[pid]&&BOC.sum[pid].updatedMs?BOC.sum[pid]:(p.bocSnap||BOC.sum[pid]);
-  const c=bocCyc(),hasV=c&&c.visits.length,sent=BOC.sent[pid]||[];
-  el.innerHTML=h+`<p class="small" style="margin:0 0 6px">Linked: <b>${esc(p.boc.name||"patient")}</b> since ${bocFmt(new Date(p.boc.since).toISOString())}</p>${bocSummary(SS)}${bocFull(SS)}
-   <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn pri sm" onclick="bocSendCycle()" ${c?"":"disabled"}>Send cycle (protocol, start, trigger)</button><button class="btn sm" onclick="bocSendVisit()" ${hasV?"":"disabled"}>Send latest visit</button></div>
-   <textarea id="bocNote" rows="2" placeholder="Instructions or a message to the patient (e.g. continue 150 IU, next scan on Thursday)" style="width:100%;margin-top:8px"></textarea>
-   <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" onclick="bocSendMsg()">Send message</button><a class="btn sm" href="https://steliosmed93-svg.github.io/baby-oclock/doctor.html" target="_blank" rel="noopener">Full view in the portal</a><button class="btn sm" onclick="bocLoad('${pid}')">Refresh</button><button class="btn sm danger" onclick="bocUnlink()">Unlink</button></div>${fl}${err}
-   ${sent.length?`<p class="small muted" style="margin:8px 0 0">Recently sent: ${sent.map(i=>({meds:"💊",scan:"🔍",appt:"📅",plan:"🗓",msg:"✉️",lab:"🧬"}[i.type]||"•")+" "+new Date(i.created).toLocaleDateString("en-GB")+(i.read?" ✓":"")).join(" · ")}</p>`:""}`;BOC.err="";}
-
-
+function refreshTracker(){$("#view").innerHTML=pageTracker();bindTracker();}
 function bindTracker(){
   const go=$("#pwGo");
   if(MODE==="cloud-locked"&&go){
@@ -2368,15 +2297,17 @@ function bindTracker(){
   }
   if(!$("#newPt")) return;
   const imp=$("#impLocal"); if(imp) imp.onclick=()=>{const L=(readLocal()||{patients:[]}).patients.filter(x=>!x.example);const have=new Set(DB.patients.map(x=>x.id));L.forEach(x=>{if(have.has(x.id))x.id=uid();DB.patients.push(x);});save();refreshTracker();};
-  document.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{CUR=b.dataset.pt;CURC=null;refreshTracker();});
-  $("#ptSearch").oninput=e=>{$("#ptList").innerHTML=ptListHTML(e.target.value);document.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{CUR=b.dataset.pt;CURC=null;refreshTracker();});};
-  $("#newPt").onclick=()=>{const c=newCycle(1);const n={id:uid(),code:"",age:"",bmi:"",amh:"",afc:"",prevOoc:"",dx:"",notes:"",cycles:[c]};DB.patients.unshift(n);CUR=n.id;CURC=c.id;save();refreshTracker();setTimeout(()=>{const e=$("#f_code");e&&e.focus();},30);};
+  const ptBind=()=>document.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{const k=b.dataset.pk;if(k==="preg"){location.hash="k-"+b.dataset.pt;return;}if(k==="gyn"){location.hash="gy-"+b.dataset.pt;return;}CUR=b.dataset.pt;CURC=null;refreshTracker();if(innerWidth<860){const pp=$("#ptPane");pp&&pp.scrollIntoView({behavior:"smooth"});}});
+  ptBind();
+  $("#ptSearch").oninput=e=>{$("#ptList").innerHTML=ptListHTML(e.target.value);ptBind();};
+  $("#ptType").onchange=e=>{TRKF=e.target.value;refreshTracker();};
+  $("#newPt").onclick=newPatientDlg;
   $("#cfgBtn").onclick=cfgForm;
   $("#bkCopy").onclick=async()=>{const t=JSON.stringify(DB);try{await navigator.clipboard.writeText(t);$("#bkMsg").textContent="Copied (unencrypted). Keep it somewhere safe.";}catch(e){openDlg(`<h3 style="margin-top:0">Backup</h3><p class="small">Select and copy the text. It is not encrypted.</p><textarea readonly>${esc(t)}</textarea><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" onclick="closeDlg()">Close</button></div>`);}};
   $("#bkRestore").onclick=()=>{openDlg(`<h3 style="margin-top:0">Restore</h3><p class="small">Paste the backup or choose a .json/.txt file. The folders in the backup will replace the current ones.</p><input type="file" id="rsFile" accept=".json,.txt"><textarea id="rsTxt" style="margin-top:8px"></textarea><p class="small" id="rsMsg" style="color:var(--crit)"></p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeDlg()">Cancel</button><button class="btn pri" id="rsGo">Restore</button></div>`);
     $("#rsFile").onchange=e=>{const fl=e.target.files[0];if(fl)fl.text().then(t=>$("#rsTxt").value=t);};
-    $("#rsGo").onclick=()=>{try{const d=JSON.parse($("#rsTxt").value);if(!Array.isArray(d.patients))throw 0;DB={patients:d.patients.map(normPatient),cfg:{...DEFCFG,...(d.cfg||{})}};save();CUR=null;CURC=null;closeDlg();refreshTracker();}catch(e){$("#rsMsg").textContent="The text is not a valid backup of this app.";}};};
-  const p=DB.patients.find(x=>x.id===CUR); if(!p) return;
+    $("#rsGo").onclick=()=>{try{const d=JSON.parse($("#rsTxt").value);if(!Array.isArray(d.patients))throw 0;DB={patients:d.patients.map(normPatient),preg:Array.isArray(d.preg)?d.preg:(DB.preg||[]),gyn:Array.isArray(d.gyn)?d.gyn:(DB.gyn||[]),cfg:{...DEFCFG,...(d.cfg||{})}};save();CUR=null;CURC=null;closeDlg();refreshTracker();}catch(e){$("#rsMsg").textContent="The text is not a valid backup of this app.";}};};
+  const p=DB.patients.find(x=>x.id===CUR); if(!p||!$("#addCyc")) return;
   const c=p.cycles.find(x=>x.id===CURC);
   document.querySelectorAll("[data-f]").forEach(el=>el.onchange=()=>{p[el.dataset.f]=el.value.trim();if(el.dataset.f==="code")p.example=false;save();refreshTracker();});
   document.querySelectorAll("[data-cyc]").forEach(b=>b.onclick=()=>{CURC=b.dataset.cyc;refreshTracker();});
