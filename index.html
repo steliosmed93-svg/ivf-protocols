@@ -1223,7 +1223,7 @@ function route(){
   else if(h.startsWith("p-") && PROTO_BY_ID[h.slice(2)]) v.innerHTML=pageProtocol(PROTO_BY_ID[h.slice(2)]);
   else if(h==="drugs") v.innerHTML=pageDrugs();
   else if(h==="studies") v.innerHTML=pageStudies("all");
-  else if(h==="tracker") {v.innerHTML=pageTracker(); bindTracker(); bocMount();}
+  else if(h==="tracker") {v.innerHTML=pageTracker(); bindTracker(); bocMount(); bocAuto();}
   else if((h==="preg"||h.startsWith("k-"))&&typeof pagePreg==="function") {v.innerHTML=pagePreg(); pgBind();}
   else if(h==="refs") v.innerHTML=pageRefs();
   else if(h==="about") v.innerHTML=pageAbout();
@@ -1747,7 +1747,7 @@ function pageTracker(){
   ${localImport.length?`<div class="callout warn"><p>Βρέθηκαν <b>${localImport.length}</b> φάκελοι αποθηκευμένοι μόνο σε αυτή τη συσκευή. <button class="btn sm" id="impLocal">Μεταφορά στον λογαριασμό μου</button></p></div>`:""}
   <div class="trk">
    <div>
-    <div class="row" style="margin-bottom:10px"><button class="btn pri" id="newPt">+ Νέα ασθενής</button><button class="btn" id="cfgBtn">Όρια</button></div>
+    <div class="row" style="margin-bottom:10px"><button class="btn pri" id="newPt">+ Νέα ασθενής</button><button class="btn" onclick="bocImportDlg()">📱 Από Baby O’Clock</button><button class="btn" id="cfgBtn">Όρια</button></div>
     <input id="ptSearch" placeholder="Αναζήτηση κωδικού" style="width:100%;margin-bottom:8px" aria-label="Αναζήτηση κωδικού ασθενούς">
     <div class="pt-list" id="ptList">${ptListHTML("")}</div>
     <div class="row" style="margin-top:14px"><button class="btn sm" id="bkCopy">Αντιγραφή αντιγράφου</button><button class="btn sm" id="bkRestore">Επαναφορά</button></div>
@@ -1810,11 +1810,12 @@ function cyclePane(p,c){
   </tbody></table></div>
   <div class="row" style="margin-top:10px"><button class="btn pri" id="addV">+ Νέα επίσκεψη</button>${(p.cycles.length>1)?`<button class="btn danger" id="delCyc">Διαγραφή κύκλου</button>`:""}</div>`;
 }
-function refreshTracker(){$("#view").innerHTML=pageTracker();bindTracker();bocMount();}
+function refreshTracker(){$("#view").innerHTML=pageTracker();bindTracker();bocMount();bocAuto();}
+function bocAuto(){if(BOC_PEND&&$("#newPt")){const c=BOC_PEND;BOC_PEND="";setTimeout(()=>bocImportDlg(c),50);}}
 /* ---------- Σύνδεση με Baby O’Clock (εφαρμογή ασθενούς) ---------- */
 const BOC_CFG={apiKey:"AIzaSyCmuQqxHv1E08iB4q-8VEbJUrOTRgmvZyk",authDomain:"mazi-ivf.firebaseapp.com",projectId:"mazi-ivf",storageBucket:"mazi-ivf.firebasestorage.app",messagingSenderId:"75016649970",appId:"1:75016649970:web:28b404e472eb6f0190a46b"};
 let BOC={app:null,auth:null,db:null,user:null,ready:false,sum:{},sent:{},err:''};
-function bocInit(){if(BOC.app||typeof firebase==="undefined")return;try{BOC.app=firebase.initializeApp(BOC_CFG,"boc");BOC.auth=BOC.app.auth();BOC.db=BOC.app.firestore();BOC.auth.onAuthStateChanged(u=>{BOC.user=u;BOC.ready=true;bocMount();});}catch(e){console.warn("BOC",e);}}
+function bocInit(){if(BOC.app||typeof firebase==="undefined")return;try{BOC.app=firebase.initializeApp(BOC_CFG,"boc");BOC.auth=BOC.app.auth();BOC.db=BOC.app.firestore();BOC.auth.onAuthStateChanged(u=>{BOC.user=u;BOC.ready=true;bocMount();if(BOC.onReady&&$("#biBody"))BOC.onReady();});}catch(e){console.warn("BOC",e);}}
 const BOC_MAP={"antagonist":"antagonist","long-agonist":"long","ultra-long":"long","flare":"long","mild":"mild","fet-hrt":"fet_hrt","fet-donor":"fet_hrt","fet-nc":"fet_nat","fet-letrozole":"fet_nat"};
 const bocP=()=>DB.patients.find(x=>x.id===CUR);
 const bocFmt=s=>{if(!s)return "";const [y,m,d]=String(s).slice(0,10).split("-");return d+"/"+m+"/"+y;};
@@ -1871,6 +1872,28 @@ function bocFull(S){if(!S||S.denied||!S.updatedMs)return "";const c=S.cycle||{},
    ${sec("Έμμηνος κύκλος",pd)}${sec("Έμβρυα",lab)}${sec("Σώμα και ανάκαμψη (7 ημέρες)",body?T(`<tr><th>Ημ.</th><th>Ανάκ.</th><th>HRV</th><th>RHR</th><th>Θερμ.</th><th>Ύπνος</th></tr>`+body):"")}
    ${sec("Εγκυμοσύνη: πίεση, σάκχαρο, βάρος",pv?T(pv):"")}
    ${(S.files||[]).length?`<p class="small muted">Η ασθενής έχει ${S.files.length} αρχεία εξετάσεων στην εφαρμογή.</p>`:""}</details>`;}
+
+/* Νέος φάκελος απευθείας από Baby O’Clock (κωδικός ασθενούς ή ήδη συνδεδεμένες) */
+let BOC_PEND=(new URLSearchParams(location.search).get("boc")||"").toUpperCase();
+function bocNewFolder(pid,name){let p=DB.patients.find(x=>x.boc&&x.boc.pid===pid);if(!p){const c=newCycle(1);p={id:uid(),code:name||"Baby O’Clock",age:"",bmi:"",amh:"",afc:"",prevOoc:"",dx:"",notes:"",cycles:[c],boc:{pid,name:name||"",since:Date.now()}};DB.patients.unshift(p);}CUR=p.id;CURC=null;save();closeDlg();refreshTracker();}
+async function bocImportDlg(pc){bocInit();const code=typeof pc==="string"?pc:"";
+  const body=()=>{if(!BOC.app)return `<p>Χρειάζεται σύνδεση στο ίντερνετ.</p>`;if(!BOC.ready)return `<p class="small muted">Φόρτωση…</p>`;
+    if(!BOC.user)return `<p class="small">Συνδέσου μία φορά στο Baby O’Clock ως γιατρός (με τον ίδιο λογαριασμό Google που χρησιμοποιείς εδώ).</p><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn pri sm" id="biG">Σύνδεση με Google</button></div><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px"><input id="bocEm" type="email" placeholder="email"><input id="bocPw" type="password" placeholder="κωδικός"><button class="btn sm" id="biE">Σύνδεση</button><button class="btn sm" id="biR">Νέος λογαριασμός</button></div>`;
+    return `<p class="small">Βάλε τον κωδικό 6 χαρακτήρων που σου έδωσε η ασθενής (Baby O’Clock → Άλλα → Ο γιατρός μου). Δημιουργείται αυτόματα φάκελος συνδεδεμένος με την εφαρμογή της.</p><div class="row" style="gap:6px"><input id="biCode" maxlength="6" value="${esc(code)}" placeholder="π.χ. K7Q2MX" style="text-transform:uppercase;width:140px;letter-spacing:2px"><button class="btn pri sm" id="biGo">Σύνδεση και νέος φάκελος</button></div><div id="biList" style="margin-top:12px"></div><p class="small muted" style="margin:10px 0 0">Συνδεδεμένος ως ${esc(BOC.user.email||"")}</p>`;};
+  const draw=()=>{const el=$("#biBody");if(!el)return;el.innerHTML=body()+`<p class="small" id="biMsg" style="color:var(--crit)"></p>`;
+    const g=$("#biG");if(g)g.onclick=async()=>{await bocGoogle();setTimeout(draw,400);};const e=$("#biE");if(e)e.onclick=()=>bocEmail(false).then(()=>setTimeout(draw,400));const r=$("#biR");if(r)r.onclick=()=>bocEmail(true).then(()=>setTimeout(draw,400));
+    const go=$("#biGo");if(go){go.onclick=bocImportCode;bocListLinked();}};
+  openDlg(`<h3 style="margin-top:0">📱 Ασθενής από Baby O’Clock</h3><div id="biBody"></div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" onclick="closeDlg()">Κλείσιμο</button></div>`);
+  BOC.onReady=draw;draw();}
+async function bocImportCode(){const code=($("#biCode").value||"").trim().toUpperCase(),msg=t=>{const m=$("#biMsg");if(m)m.textContent=t;};
+  if(code.length!==6)return msg("Ο κωδικός έχει 6 χαρακτήρες.");
+  try{const l=await BOC.db.collection("links").doc(code).get();if(!l.exists)return msg("Ο κωδικός δεν βρέθηκε. Έλεγξε ότι τον έγραψες σωστά.");const d=l.data();if(d.exp<Date.now())return msg("Ο κωδικός έχει λήξει. Ζήτησε νέο από την ασθενή.");
+    const me=BOC.user;await BOC.db.collection("care").doc(d.patientUid).collection("doctors").doc(me.uid).set({code,name:me.displayName||"",email:me.email||"",created:Date.now(),via:"ivf-protocols"});
+    await BOC.db.collection("doctors").doc(me.uid).collection("patients").doc(d.patientUid).set({name:d.name||"Ασθενής",since:Date.now()});
+    bocNewFolder(d.patientUid,d.name||"");}catch(e){console.warn(e);msg("Η σύνδεση απέτυχε ("+(e.code||"")+").");}}
+async function bocListLinked(){const el=$("#biList");if(!el)return;try{const q=await BOC.db.collection("doctors").doc(BOC.user.uid).collection("patients").get();const L=q.docs.map(d=>({pid:d.id,...d.data()})).filter(x=>!DB.patients.some(p=>p.boc&&p.boc.pid===x.pid));
+    el.innerHTML=L.length?`<p class="small"><b>Ήδη συνδεδεμένες ασθενείς χωρίς φάκελο:</b></p>`+L.map(x=>`<div class="row" style="justify-content:space-between;gap:8px;margin:4px 0"><span>${esc(x.name||"Ασθενής")}</span><button class="btn sm" data-bpid="${esc(x.pid)}" data-bnm="${esc(x.name||"")}">Δημιουργία φακέλου</button></div>`).join(""):"";
+    el.querySelectorAll("[data-bpid]").forEach(b=>b.onclick=()=>bocNewFolder(b.dataset.bpid,b.dataset.bnm));}catch(e){}}
 
 function bocMount(){const el=$("#bocCard");if(!el)return;const p=bocP();if(!p)return;bocInit();
   const h=`<h3>📱 Baby O’Clock της ασθενούς</h3>`;const err=BOC.err?`<p class="small" style="color:var(--crit)">${esc(BOC.err)}</p>`:"";const fl=BOC.flash?`<p class="small" style="color:var(--teal)">${esc(BOC.flash)}</p>`:"";BOC.flash="";
