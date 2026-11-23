@@ -1886,7 +1886,7 @@ function pageTerms(){
   <li>No advertising cookies or traffic analytics are used.</li></ul>
   <h2>4. Protection recommendations</h2><ul><li>Use a patient code instead of a full name or national ID number.</li><li>Keep your encryption passphrase safe; if it is lost, the data cannot be recovered.</li><li>The app locks automatically after 15 minutes of inactivity; on a shared computer also sign out.</li><li>Inform patients according to your unit's privacy policy.</li></ul>
   <h2>5. Data deletion</h2><p>You can delete any folder from the app. Deletion removes the encrypted document from Firestore. For full account deletion, get in touch through the project repository.</p>
-  <h2>6. Contact</h2><p>For questions or requests: <a href="https://github.com/steliosmed93-svg/ivf-protocols/issues" target="_blank" rel="noopener">github.com/steliosmed93-svg/ivf-protocols/issues</a></p>
+  <h2>6. Contact</h2><p>For questions or requests: <a href="mailto:steliosmed93@gmail.com">steliosmed93@gmail.com</a></p>
   <div class="callout warn"><p class="small">This text is general information and not legal advice. Before wide use with real patient data, review by a lawyer or data protection officer is recommended.</p></div>`;
 }
 
@@ -1908,7 +1908,7 @@ function pageAuthor(){
     <a class="btn" href="https://www.researchgate.net/profile/Stylianos-Chatziioannou-2" target="_blank" rel="noopener">ResearchGate</a></div>
   </div>
   <h2>How the guide is updated</h2><p>Every month PubMed is searched for new RCTs, meta-analyses and guidelines. Studies with clinical impact are appraised and added, together with the changes they bring to the protocols. See also the <a href="#about">Methodology</a>.</p>
-  <h2>Feedback and corrections</h2><p>If you spot an error or want to suggest a study: <a href="https://github.com/steliosmed93-svg/ivf-protocols/issues" target="_blank" rel="noopener">github.com/steliosmed93-svg/ivf-protocols/issues</a></p>`;
+  <h2>Feedback and corrections</h2><p>If you spot an error or want to suggest something (e.g. a study), please email only <a href="mailto:steliosmed93@gmail.com">steliosmed93@gmail.com</a></p>`;
 }
 /* ================= TRACKER: STATE, LOCAL AND CLOUD STORAGE ================= */
 const KEY="ivfprot.v1";
@@ -2420,7 +2420,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* update check */
-const BUILD="1795453448";
+const BUILD="1795453595";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='A new version is available <button class="btn sm" onclick="location.reload()">Refresh</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
