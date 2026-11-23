@@ -1448,7 +1448,7 @@ function pageTerms(){
   <li>Δεν χρησιμοποιούνται cookies διαφήμισης ή εργαλεία ανάλυσης επισκεψιμότητας.</li></ul>
   <h2>4. Συστάσεις προστασίας</h2><ul><li>Χρησιμοποίησε κωδικό ασθενούς αντί για ονοματεπώνυμο ή ΑΜΚΑ.</li><li>Φύλαξε το συνθηματικό κρυπτογράφησης· αν χαθεί, τα δεδομένα δεν ανακτώνται.</li><li>Η εφαρμογή κλειδώνει αυτόματα μετά από 15 λεπτά αδράνειας· σε κοινόχρηστο υπολογιστή κάνε και αποσύνδεση.</li><li>Ενημέρωσε τις ασθενείς σύμφωνα με την πολιτική απορρήτου της δομής σου.</li></ul>
   <h2>5. Διαγραφή δεδομένων</h2><p>Μπορείς να διαγράψεις οποιονδήποτε φάκελο από την εφαρμογή. Η διαγραφή αφαιρεί το κρυπτογραφημένο έγγραφο από το Firestore. Για πλήρη διαγραφή του λογαριασμού, επικοινώνησε μέσω του αποθετηρίου του έργου.</p>
-  <h2>6. Επικοινωνία</h2><p>Για ερωτήσεις ή αιτήματα: <a href="https://github.com/steliosmed93-svg/ivf-protocols/issues" target="_blank" rel="noopener">github.com/steliosmed93-svg/ivf-protocols/issues</a></p>
+  <h2>6. Επικοινωνία</h2><p>Για ερωτήσεις ή αιτήματα: <a href="mailto:steliosmed93@gmail.com">steliosmed93@gmail.com</a></p>
   <div class="callout warn"><p class="small">Το κείμενο αυτό είναι γενική ενημέρωση και όχι νομική συμβουλή. Πριν από ευρεία χρήση με πραγματικά δεδομένα ασθενών, συνιστάται έλεγχος από νομικό ή υπεύθυνο προστασίας δεδομένων.</p></div>`;
 }
 
@@ -1470,7 +1470,7 @@ function pageAuthor(){
     <a class="btn" href="https://www.researchgate.net/profile/Stylianos-Chatziioannou-2" target="_blank" rel="noopener">ResearchGate</a></div>
   </div>
   <h2>Πώς ενημερώνεται ο οδηγός</h2><p>Κάθε μήνα γίνεται αναζήτηση στο PubMed για νέα RCT, μετα-αναλύσεις και κατευθυντήριες οδηγίες. Οι μελέτες με κλινικό αντίκτυπο αξιολογούνται και προστίθενται, μαζί με τις αλλαγές που επιφέρουν στα πρωτόκολλα. Δες και τη σελίδα <a href="#about">Μεθοδολογία</a>.</p>
-  <h2>Σχόλια και διορθώσεις</h2><p>Αν εντοπίσεις λάθος ή θέλεις να προτείνεις μελέτη: <a href="https://github.com/steliosmed93-svg/ivf-protocols/issues" target="_blank" rel="noopener">github.com/steliosmed93-svg/ivf-protocols/issues</a></p>`;
+  <h2>Σχόλια και διορθώσεις</h2><p>Αν εντοπίσεις λάθος ή θέλεις να προτείνεις κάτι (π.χ. μια μελέτη), στείλε email αποκλειστικά στο <a href="mailto:steliosmed93@gmail.com">steliosmed93@gmail.com</a></p>`;
 }
 /* ================= ΚΑΡΤΕΛΑ ΠΑΡΑΚΟΛΟΥΘΗΣΗΣ: ΚΑΤΑΣΤΑΣΗ, ΤΟΠΙΚΗ ΚΑΙ CLOUD ΑΠΟΘΗΚΕΥΣΗ ================= */
 const KEY="ivfprot.v1";
@@ -2396,7 +2396,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* έλεγχος νέας έκδοσης */
-const BUILD="1795453448";
+const BUILD="1795453595";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='Υπάρχει νέα έκδοση <button class="btn sm" onclick="location.reload()">Ανανέωση</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
