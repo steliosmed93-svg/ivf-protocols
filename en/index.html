@@ -142,6 +142,11 @@ main{min-width:0}
 .backrow{margin:0 0 10px}
 body.athome .backbtn{visibility:hidden}
 body.athome .backrow{display:none}
+.mech{margin:6px 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--paper)}
+.mech h4{margin:0 0 8px;font-size:15px;color:var(--accent)}
+.mech figure{margin:0}.mechsvg{width:100%;max-width:640px;height:auto;display:block;margin:0 auto}
+.mech figcaption{font-size:12px;color:var(--ink-3);margin:6px 0 4px;text-align:center}
+.msteps{margin:8px 0 0;padding-left:22px}.msteps li{margin:5px 0;line-height:1.5}
 details.acc{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0 14px;margin:8px 0}
 details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 .pill-n{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
@@ -1185,6 +1190,216 @@ insertProtoAfter("ohss",{
  refs:["hu21","hsia23","sloth22","beebeejaun26","haas14"]
 });
 
+/* ---- Mechanism-of-action diagrams (shared; labels come from MFL, text from MECH) ---- */
+const MFIG=(()=>{
+const AX=[
+ {id:"hyp",x:20,y:18,w:130,h:40,t:"hyp",k:"organ"},
+ {id:"pit",x:20,y:110,w:130,h:40,t:"pit",k:"organ"},
+ {id:"ova",x:20,y:204,w:130,h:40,t:"ova",k:"organ"}];
+const AXE=[{a:"hyp",b:"pit",k:"stim",l:"GnRH"}];
+return {
+agon:{n:[...AX,{id:"d",x:190,y:110,w:120,h:40,t:"$0",k:"drug"},{id:"o",x:350,y:204,w:190,h:44,t:"agon_o",k:"out"}],
+ e:[...AXE,{a:"d",b:"pit",k:"drug",l:"agon_e1",lo:[0,-18]},{a:"pit",b:"ova",k:"stim",l:"agon_e2",lo:[52,0]}],
+ c:{x:350,y:14,w:190,h:150,title:"LH / FSH",xl:"days",s:[{p:[.18,.2,.95,.75,.45,.22,.12,.08,.07,.06,.06],c:"accent"}],ann:[{i:2,t:"flare"},{i:7,t:"down"}]}},
+antag:{n:[...AX,{id:"d",x:190,y:110,w:130,h:40,t:"$0",k:"drug"},{id:"o",x:350,y:204,w:190,h:44,t:"antag_o",k:"out"}],
+ e:[{a:"hyp",b:"pit",k:"block",l:"GnRH"},{a:"d",b:"pit",k:"inh",l:"antag_e1",lo:[0,-12]},{a:"pit",b:"ova",k:"stim",l:"antag_e2",lo:[44,0]}],
+ c:{x:350,y:14,w:190,h:150,title:"LH",xl:"hours",s:[{p:[.62,.6,.64,.6,.2,.1,.08,.07,.07,.07],c:"accent"}],ann:[{i:3,t:"start"}]}},
+fsh:{n:[{id:"d",x:10,y:100,w:150,h:44,t:"$0",k:"drug"},{id:"g",x:205,y:97,w:150,h:50,t:"gran_fshr",k:"cell"},
+ {id:"o1",x:385,y:16,w:160,h:44,t:"fsh_o1",k:"out"},{id:"o2",x:385,y:100,w:160,h:44,t:"fsh_o2",k:"out"},{id:"o3",x:385,y:184,w:160,h:44,t:"fsh_o3",k:"out"}],
+ e:[{a:"d",b:"g",k:"drug",l:"cAMP/PKA",lo:[0,-12]},{a:"g",b:"o1",k:"stim"},{a:"g",b:"o2",k:"stim"},{a:"g",b:"o3",k:"stim"}],fol:{x:30,y:226}},
+twocell:{n:[{id:"d1",x:20,y:36,w:130,h:44,t:"$0",k:"drug"},{id:"d2",x:20,y:172,w:130,h:44,t:"$1",k:"drug"},
+ {id:"th",x:200,y:30,w:150,h:56,t:"theca",k:"cell"},{id:"gr",x:200,y:166,w:150,h:56,t:"gran_fshr",k:"cell"},
+ {id:"o1",x:395,y:36,w:150,h:44,t:"tc_o1",k:"out"},{id:"o2",x:395,y:172,w:150,h:44,t:"tc_o2",k:"out"}],
+ e:[{a:"d1",b:"th",k:"drug"},{a:"d2",b:"gr",k:"drug"},{a:"th",b:"gr",k:"stim",l:"tc_e",lo:[46,0]},{a:"th",b:"o1",k:"stim"},{a:"gr",b:"o2",k:"stim",l:"CYP19A1",lo:[0,-12]}]},
+hcg:{n:[{id:"d",x:20,y:104,w:120,h:44,t:"$0",k:"drug"},{id:"r",x:180,y:99,w:150,h:54,t:"hcg_r",k:"cell"},
+ {id:"o1",x:375,y:10,w:170,h:44,t:"hcg_o1",k:"out"},{id:"o2",x:375,y:72,w:170,h:44,t:"hcg_o2",k:"out"},{id:"o3",x:375,y:134,w:170,h:44,t:"hcg_o3",k:"out"},{id:"o4",x:375,y:200,w:170,h:48,t:"hcg_o4",k:"bad"}],
+ e:[{a:"d",b:"r",k:"drug",l:"LHCGR",lo:[0,-12]},{a:"r",b:"o1",k:"stim"},{a:"r",b:"o2",k:"stim"},{a:"r",b:"o3",k:"stim"},{a:"r",b:"o4",k:"stim"}]},
+cc:{n:[...AX,{id:"d",x:190,y:18,w:140,h:40,t:"$0",k:"drug"},{id:"b",x:370,y:110,w:175,h:44,t:"cc_b",k:"bad"},{id:"o",x:370,y:204,w:175,h:44,t:"cc_o",k:"out"}],
+ e:[{a:"hyp",b:"pit",k:"stim",l:"cc_e1",lo:[34,0]},{a:"d",b:"hyp",k:"inh",l:"cc_e0",lo:[0,-12]},{a:"pit",b:"ova",k:"stim",l:"cc_e2",lo:[40,0]},{a:"d",b:"b",k:"inh"},{a:"ova",b:"o",k:"stim"}]},
+letro:{n:[...AX,{id:"ar",x:195,y:204,w:140,h:44,t:"aro",k:"cell"},{id:"d",x:390,y:204,w:150,h:44,t:"$0",k:"drug"},{id:"o",x:330,y:96,w:215,h:54,t:"letro_o",k:"out"}],
+ e:[{a:"hyp",b:"pit",k:"stim",l:"letro_e1",lo:[34,0]},{a:"pit",b:"ova",k:"stim",l:"letro_e2",lo:[34,0]},{a:"d",b:"ar",k:"inh"},{a:"ova",b:"ar",k:"stim"},
+ {a:"ar",b:"hyp",k:"fb",l:"letro_fb",v:[[265,38]],lo:[48,14]},{a:"pit",b:"o",k:"stim"}]},
+ppos:{n:[...AX,{id:"d",x:200,y:96,w:140,h:40,t:"$0",k:"drug"},{id:"o",x:370,y:204,w:175,h:44,t:"ppos_o",k:"out"},{id:"n",x:370,y:18,w:175,h:44,t:"ppos_n",k:"note"}],
+ e:[...AXE,{a:"ova",b:"hyp",k:"fb",l:"ppos_fb",v:[[170,226],[170,38]],lo:[0,0]},{a:"d",b:"hyp",k:"inh",l:"ppos_e",lo:[46,0]},{a:"pit",b:"o",k:"block",l:"ppos_s",lo:[10,-10]}]},
+prog:{n:[{id:"d",x:20,y:104,w:125,h:44,t:"$0",k:"drug"},{id:"en",x:185,y:96,w:150,h:60,t:"prog_r",k:"cell"},
+ {id:"o1",x:380,y:14,w:165,h:48,t:"prog_o1",k:"out"},{id:"o2",x:380,y:102,w:165,h:48,t:"prog_o2",k:"out"},{id:"o3",x:380,y:190,w:165,h:48,t:"prog_o3",k:"out"}],
+ e:[{a:"d",b:"en",k:"drug"},{a:"en",b:"o1",k:"stim"},{a:"en",b:"o2",k:"stim"},{a:"en",b:"o3",k:"stim"}],endo:{x:190,y:186}},
+e2:{n:[...AX,{id:"d",x:215,y:110,w:130,h:40,t:"$0",k:"drug"},{id:"en",x:375,y:104,w:170,h:52,t:"e2_r",k:"cell"},{id:"o",x:375,y:200,w:170,h:48,t:"e2_o",k:"out"}],
+ e:[...AXE,{a:"d",b:"pit",k:"inh",l:"e2_e1",lo:[0,-20]},{a:"pit",b:"ova",k:"block",l:"e2_e2",lo:[52,0]},{a:"d",b:"en",k:"drug"},{a:"en",b:"o",k:"stim"}]},
+cab:{n:[{id:"v",x:8,y:16,w:172,h:48,t:"cab_v",k:"organ"},{id:"r2",x:215,y:16,w:140,h:48,t:"VEGFR-2",k:"cell"},{id:"bad",x:383,y:16,w:170,h:48,t:"cab_bad",k:"bad"},
+ {id:"d",x:20,y:120,w:150,h:44,t:"$0",k:"drug"},{id:"d2",x:205,y:120,w:150,h:44,t:"cab_d2",k:"cell"},{id:"o",x:395,y:196,w:150,h:48,t:"cab_o",k:"out"}],
+ e:[{a:"v",b:"r2",k:"stim"},{a:"r2",b:"bad",k:"block"},{a:"d",b:"d2",k:"drug"},{a:"d2",b:"r2",k:"inh",l:"cab_e",lo:[54,0]},{a:"d2",b:"o",k:"stim"}]},
+met:{n:[{id:"d",x:20,y:104,w:120,h:44,t:"$0",k:"drug"},{id:"li",x:180,y:14,w:160,h:44,t:"met_li",k:"organ"},{id:"ti",x:180,y:104,w:160,h:44,t:"met_ti",k:"organ"},{id:"in",x:180,y:196,w:160,h:44,t:"met_in",k:"cell"},
+ {id:"th",x:385,y:150,w:160,h:44,t:"met_th",k:"cell"},{id:"o",x:385,y:40,w:160,h:54,t:"met_o",k:"out"}],
+ e:[{a:"d",b:"li",k:"drug"},{a:"d",b:"ti",k:"drug"},{a:"li",b:"in",k:"stim",v:[[358,36],[358,218]]},{a:"ti",b:"in",k:"stim"},{a:"in",b:"th",k:"stim"},{a:"th",b:"o",k:"stim"}]},
+adj:{n:[{id:"d1",x:20,y:28,w:150,h:44,t:"$0",k:"drug"},{id:"d2",x:20,y:180,w:150,h:44,t:"$1",k:"drug"},{id:"ar",x:205,y:28,w:150,h:44,t:"adj_ar",k:"cell"},{id:"ig",x:205,y:180,w:150,h:44,t:"adj_ig",k:"cell"},
+ {id:"f",x:395,y:100,w:150,h:48,t:"adj_f",k:"cell"},{id:"o",x:395,y:196,w:150,h:48,t:"adj_o",k:"out"}],
+ e:[{a:"d1",b:"ar",k:"drug"},{a:"d2",b:"ig",k:"drug"},{a:"ar",b:"f",k:"stim"},{a:"ig",b:"f",k:"stim"},{a:"f",b:"o",k:"stim"}]}
+};})();
+let MFIGN=0;
+function mechSVG(id){
+  const m=(typeof MECH!=="undefined")&&MECH[id]; if(!m) return "";
+  const F=MFIG[m.fig]; if(!F) return "";
+  const u="mf"+(++MFIGN), L=k=>k&&k[0]==="$"?(m.d||[])[+k.slice(1)]||"":(MFL[k]??k);
+  const N={}; F.n.forEach(n=>N[n.id]=n);
+  const ctr=n=>[n.x+n.w/2,n.y+n.h/2];
+  const clip=(n,p)=>{const [cx,cy]=ctr(n),dx=p[0]-cx,dy=p[1]-cy;if(!dx&&!dy)return[cx,cy];
+    const t=Math.min(dx?(n.w/2+5)/Math.abs(dx):1e9,dy?(n.h/2+5)/Math.abs(dy):1e9);return[cx+dx*t,cy+dy*t];};
+  const COL={stim:"var(--teal)",drug:"var(--accent)",inh:"var(--crit)",block:"var(--ink-3)",fb:"var(--warn)"};
+  const MK={stim:"a",drug:"d",inh:"i",block:"a",fb:"f"};
+  const txt=(x,y,s,o={})=>{const lines=String(s).split("\n"),fs=o.fs||12,lh=fs*1.2,y0=y-(lines.length-1)*lh/2;
+    return `<text x="${x}" y="${y0}" text-anchor="${o.a||"middle"}" dominant-baseline="middle" font-size="${fs}" font-weight="${o.fw||500}" fill="${o.c||"var(--ink)"}"${o.halo?` style="paint-order:stroke;stroke:var(--card);stroke-width:4px;stroke-linejoin:round"`:""}>${lines.map((l,i)=>`<tspan x="${x}" dy="${i?lh:0}">${esc(l)}</tspan>`).join("")}</text>`;};
+  let s=`<svg class="mechsvg" viewBox="0 0 560 262" role="img" aria-label="${esc(L("title"))}: ${esc(m.d?m.d[0]:id)}" xmlns="http://www.w3.org/2000/svg"><defs>`;
+  [["a","var(--teal)"],["d","var(--accent)"],["f","var(--warn)"]].forEach(([k,c])=>s+=`<marker id="${u}${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="${c}"/></marker>`);
+  s+=`<marker id="${u}i" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M8,0V10" stroke="var(--crit)" stroke-width="3"/></marker></defs>`;
+  // edges
+  const labs=[];
+  F.e.forEach(e=>{const A=N[e.a],B=N[e.b],v=e.v||[];const pts=[clip(A,v[0]||ctr(B)),...v,clip(B,v.length?v[v.length-1]:ctr(A))];
+    const c=COL[e.k];s+=`<polyline points="${pts.map(p=>p.map(n=>n.toFixed(1)).join(",")).join(" ")}" fill="none" stroke="${c}" stroke-width="${e.k==="drug"?2.6:2}"${e.k==="fb"||e.k==="block"?' stroke-dasharray="5 4"':""} marker-end="url(#${u}${MK[e.k]})"/>`;
+    let bi=0,bl=0;for(let i=0;i<pts.length-1;i++){const l=Math.hypot(pts[i+1][0]-pts[i][0],pts[i+1][1]-pts[i][1]);if(l>bl){bl=l;bi=i;}}
+    const mx=(pts[bi][0]+pts[bi+1][0])/2,my=(pts[bi][1]+pts[bi+1][1])/2;
+    if(e.k==="block") s+=`<g stroke="var(--crit)" stroke-width="3" stroke-linecap="round"><path d="M${mx-7},${my-7}L${mx+7},${my+7}M${mx+7},${my-7}L${mx-7},${my+7}"/></g>`;
+    if(e.l){const lo=e.lo||[0,0];labs.push(txt(mx+lo[0],my+lo[1],L(e.l),{fs:10.5,c:e.k==="inh"?"var(--crit)":e.k==="fb"?"var(--warn)":"var(--ink-2)",fw:600,halo:1}));}
+  });
+  // nodes
+  const ST={organ:["var(--tint)","var(--line)","var(--ink)"],cell:["var(--teal-soft)","var(--teal)","var(--ink)"],drug:["var(--accent-soft)","var(--accent)","var(--accent)"],
+    out:["var(--ok-soft)","var(--ok)","var(--ink)"],bad:["var(--crit-soft)","var(--crit)","var(--ink)"],note:["var(--warn-soft)","var(--warn)","var(--ink)"]};
+  F.n.forEach(n=>{const [f,st,tc]=ST[n.k];const r=n.k==="drug"?n.h/2:9;
+    s+=`<rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="${r}" fill="${f}" stroke="${st}" stroke-width="${n.k==="drug"?2:1.4}"/>`+txt(n.x+n.w/2,n.y+n.h/2,L(n.t),{fs:n.k==="drug"?12.5:11.5,c:tc,fw:n.k==="drug"||n.k==="organ"?700:500});});
+  // curve
+  if(F.c){const c=F.c,x0=c.x+26,y0=c.y+c.h-20,w=c.w-34,h=c.h-46;
+    s+=`<rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="9" fill="var(--card)" stroke="var(--line)"/>`+txt(c.x+10,c.y+13,c.title,{a:"start",fs:11,fw:700,c:"var(--ink-2)"});
+    s+=`<path d="M${x0},${y0-h}V${y0}H${x0+w}" fill="none" stroke="var(--ink-3)" stroke-width="1.2"/>`+txt(x0+w,y0+11,L(c.xl),{a:"end",fs:10,c:"var(--ink-3)"});
+    c.s.forEach(sr=>{const P=sr.p.map((v,i)=>[x0+i*w/(sr.p.length-1),y0-v*h]);
+      s+=`<polyline points="${P.map(p=>p.map(n=>n.toFixed(1)).join(",")).join(" ")}" fill="none" stroke="var(--${sr.c})" stroke-width="2.6" stroke-linejoin="round"/>`;
+      (c.ann||[]).forEach(a=>{const p=P[a.i];s+=`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="var(--${sr.c})"/>`+txt(p[0],Math.max(c.y+30,p[1]-14),L(a.t),{fs:10,fw:700,c:"var(--ink-2)",halo:1});});});}
+  // follicles growing
+  if(F.fol){const {x,y}=F.fol;let cx=x;[5,8,11,15,20].forEach((r,i)=>{cx+=r+(i?10:0);s+=`<circle cx="${cx}" cy="${y}" r="${r}" fill="var(--teal-soft)" stroke="var(--teal)"/><circle cx="${cx+r*.35}" cy="${y-r*.3}" r="${Math.max(1.6,r*.18)}" fill="var(--accent)"/>`;cx+=r;});
+    s+=txt(cx+12,y,L("fol"),{a:"start",fs:10.5,c:"var(--ink-2)",fw:600});}
+  // endometrium strip
+  if(F.endo){const {x,y}=F.endo;s+=`<rect x="${x}" y="${y}" width="140" height="44" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>`;
+    for(let i=0;i<7;i++){const gx=x+12+i*19;s+=`<path d="M${gx},${y+40}c-6,-10 6,-16 0,-26c-4,-6 3,-9 2,-12" fill="none" stroke="var(--accent)" stroke-width="1.6"/>`;}
+    s+=txt(x+70,y+56,L("endo_cap"),{fs:10,c:"var(--ink-2)"});}
+  return s+labs.join("")+`</svg>`;
+}
+function mechHTML(d){
+  const m=(typeof MECH!=="undefined")&&MECH[d.id]; if(!m) return `<p><b>${esc(MFL.title)}:</b> ${esc(d.mech)}</p>`;
+  return `<div class="mech"><h4>${esc(MFL.title)}</h4><figure>${mechSVG(d.id)}<figcaption>${esc(MFL.legend)}</figcaption></figure>
+   ${m.steps.length?`<ol class="msteps">${m.steps.map(t=>`<li>${cite(esc(t))}</li>`).join("")}</ol>`:""}</div>`;
+}
+
+Object.assign(REFS,{
+ hillier94:{cite:"Hillier et al., 1994",apa:"Hillier, S. G., Whitelaw, P. F., & Smyth, C. D. (1994). Follicular oestrogen synthesis: The 'two-cell, two-gonadotrophin' model revisited. Molecular and Cellular Endocrinology, 100(1-2), 51-54.",doi:"10.1016/0303-7207(94)90278-x"},
+ gomez06:{cite:"Gómez et al., 2006",apa:"Gómez, R., González-Izquierdo, M., Zimmermann, R. C., Novella-Maestre, E., Alonso-Muriel, I., Sanchez-Criado, J., Remohí, J., Simón, C., & Pellicer, A. (2006). Low-dose dopamine agonist administration blocks vascular endothelial growth factor (VEGF)-mediated vascular hyperpermeability without altering VEGF receptor 2-dependent luteal angiogenesis in a rat ovarian hyperstimulation model. Endocrinology, 147(11), 5400-5411.",doi:"10.1210/en.2006-0657"},
+ mitwally01:{cite:"Mitwally & Casper, 2001",apa:"Mitwally, M. F., & Casper, R. F. (2001). Use of an aromatase inhibitor for induction of ovulation in patients with an inadequate response to clomiphene citrate. Fertility and Sterility, 75(2), 305-309.",doi:"10.1016/s0015-0282(00)01705-2"},
+ huirne01:{cite:"Huirne & Lambalk, 2001",apa:"Huirne, J. A., & Lambalk, C. B. (2001). Gonadotropin-releasing-hormone-receptor antagonists. The Lancet, 358(9295), 1793-1803.",doi:"10.1016/S0140-6736(01)06797-6"},
+ casarini12:{cite:"Casarini et al., 2012",apa:"Casarini, L., Lispi, M., Longobardi, S., Milosa, F., La Marca, A., Tagliasacchi, D., Pignatti, E., & Simoni, M. (2012). LH and hCG action on the same receptor results in quantitatively and qualitatively different intracellular signalling. PLoS ONE, 7(10), e46682.",doi:"10.1371/journal.pone.0046682"},
+ tournaye17:{cite:"Tournaye et al., 2017",apa:"Tournaye, H., Sukhikh, G. T., Kahler, E., & Griesinger, G. (2017). A Phase III randomized controlled trial comparing the efficacy, safety and tolerability of oral dydrogesterone versus micronized vaginal progesterone for luteal support in in vitro fertilization. Human Reproduction, 32(5), 1019-1027.",doi:"10.1093/humrep/dex023"},
+ vanderlinden15:{cite:"van der Linden et al., 2015",apa:"van der Linden, M., Buckingham, K., Farquhar, C., Kremer, J. A. M., & Metwally, M. (2015). Luteal phase support for assisted reproduction cycles. Cochrane Database of Systematic Reviews, 2015(7), CD009154.",doi:"10.1002/14651858.CD009154.pub3"},
+ tso20:{cite:"Tso et al., 2020",apa:"Tso, L. O., Costello, M. F., Albuquerque, L. E. T., Andriolo, R. B., & Macedo, C. R. (2020). Metformin treatment before and during IVF or ICSI in women with polycystic ovary syndrome. Cochrane Database of Systematic Reviews, 12(12), CD006105.",doi:"10.1002/14651858.CD006105.pub4"},
+ dickey96:{cite:"Dickey & Holtkamp, 1996",apa:"Dickey, R. P., & Holtkamp, D. E. (1996). Development, pharmacology and clinical experience with clomiphene citrate. Human Reproduction Update, 2(6), 483-506.",doi:"10.1093/humupd/2.6.483"}
+});
+var MFL={title:"Μηχανισμός δράσης",legend:"Σχηματική απεικόνιση. Πράσινα βέλη: διέγερση. Κόκκινη γραμμή: αναστολή. Πορτοκαλί διακεκομμένη: παλίνδρομη ρύθμιση. ✕: η οδός διακόπτεται.",
+ hyp:"Υποθάλαμος",pit:"Υπόφυση",ova:"Ωοθήκη",days:"ημέρες",hours:"ώρες",flare:"flare",down:"καταστολή",start:"έναρξη",
+ agon_e1:"συνεχής διέγερση GnRH-R",agon_e2:"↓ FSH/LH\n(μετά 10-14 ημ.)",agon_o:"Απευαισθητοποίηση υπόφυσης,\nχωρίς πρόωρη κορύφωση LH",
+ antag_e1:"ανταγωνιστικός αποκλεισμός",antag_e2:"↓ LH σε ώρες",antag_o:"Άμεση πτώση LH χωρίς flare,\nανάκαμψη μόλις διακοπεί",
+ gran_fshr:"Κοκκιώδη κύτταρα\n(υποδοχέας FSH)",fsh_o1:"Πολλαπλασιασμός\nκοκκιωδών κυττάρων",fsh_o2:"↑ Αρωματάση\n(ανδρογόνα → E2)",fsh_o3:"Εμφάνιση υποδοχέων LH\nστα κυρίαρχα",fol:"πολυθυλακική ανάπτυξη",
+ theca:"Θηκικά κύτταρα\n(υποδοχέας LH)",tc_e:"ανδρογόνα\n(Α4, Τ)",tc_o1:"Χοληστερόλη →\nανδρογόνα (CYP17)",tc_o2:"Οιστραδιόλη (E2)\nστο ωοθυλάκιο",
+ hcg_r:"LHCGR στα κοκκιώδη\nώριμου ωοθυλακίου",hcg_o1:"Επανέναρξη μείωσης\n(MI → MII)",hcg_o2:"Έκπτυξη cumulus,\nωορρηξία σε ~36-40 ώρες",hcg_o3:"Ωχρινοποίηση,\n↑ προγεστερόνη",hcg_o4:"Μακρά t½ ημερών,\n↑ VEGF → κίνδυνος OHSS",
+ cc_e0:"αποκλεισμός ER",cc_e1:"↑ GnRH",cc_e2:"↑ FSH, LH",cc_b:"Αντιοιστρογονική δράση:\nλεπτό ενδομήτριο, τράχηλος",cc_o:"Ανάπτυξη 1-3\nωοθυλακίων",
+ aro:"Αρωματάση\n(ανδρογόνα → E2)",letro_e1:"↑ GnRH",letro_e2:"↑ FSH",letro_fb:"↓ E2: λιγότερη\nαρνητική παλίνδρομη",letro_o:"Συνήθως 1 κυρίαρχο ωοθυλάκιο,\nενδομήτριο χωρίς αποκλεισμό ER\n(t½ ~45 ώρες)",
+ ppos_fb:"E2 (+)",ppos_e:"αναστολή θετικής\nπαλίνδρομης",ppos_s:"κορύφωση LH",ppos_o:"Χωρίς πρόωρη κορύφωση LH\nστη διέγερση (PPOS)",ppos_n:"Το βασικό LH μένει χαμηλό\nαλλά όχι μηδενικό",
+ prog_r:"Ενδομήτριο\n(υποδοχείς PR-A / PR-B)",prog_o1:"Εκκριτική μετατροπή,\nαποφυλλοποίηση στρώματος",prog_o2:"Άνοιγμα παραθύρου\nεμφύτευσης",prog_o3:"Ηρεμία μυομητρίου,\nστήριξη ωχρινικής φάσης",endo_cap:"εκκριτικοί αδένες",
+ e2_e1:"(−) παλίνδρομη: ↓ FSH",e2_e2:"χωρίς κυρίαρχο\nωοθυλάκιο",e2_r:"Ενδομήτριο\n(υποδοχέας ER-α)",e2_o:"Παραγωγική φάση: πάχυνση,\nέκφραση υποδοχέων PR",
+ cab_v:"VEGF από ωχρινοποιημένα\nκοκκιώδη (μετά hCG)",cab_bad:"↑ Αγγειακή διαπερατότητα\n(ασκίτης, OHSS)",cab_d2:"Υποδοχέας D2\n(ενδοθήλιο)",cab_e:"↓ φωσφορυλίωση",cab_o:"↓ Μέτριο / σοβαρό\nπρώιμο OHSS",
+ met_li:"Ήπαρ:\n↓ γλυκονεογένεση",met_ti:"Μύες / λίπος:\n↑ ευαισθησία ινσουλίνης",met_in:"↓ Ινσουλίνη\nστο αίμα",met_th:"Θηκικά κύτταρα:\n↓ ανδρογόνα",met_o:"PCOS: ↓ κίνδυνος OHSS,\nκαλύτερη ωοθυλακιορρηξία",
+ adj_ar:"Υποδοχέας ανδρογόνων\nστα κοκκιώδη",adj_ig:"↑ IGF-1\n(ήπαρ, ωοθήκη)",adj_f:"↑ Έκφραση FSHR,\nευαισθησία στην FSH",adj_o:"Θεωρητικά περισσότερα\nωοθυλάκια (όφελος αβέβαιο)"};
+var MECH={
+ agon:{fig:"agon",d:["Αγωνιστής GnRH"],steps:[
+  "Συνδέεται στον υποδοχέα GnRH της υπόφυσης με μεγαλύτερη συγγένεια και διάρκεια από τη φυσική GnRH.",
+  "Οι πρώτες 1-3 ημέρες προκαλεί απότομη απελευθέρωση FSH και LH (flare). Αυτό αξιοποιείται στα πρωτόκολλα flare και microdose flare.",
+  "Η συνεχής, όχι παλμική, διέγερση οδηγεί σε εσωτερικοποίηση και απευαισθητοποίηση των υποδοχέων: μετά από 10-14 ημέρες η LH και η FSH πέφτουν (καταστολή υπόφυσης) {{huirne01}}.",
+  "Έτσι αποτρέπεται η πρόωρη κορύφωση LH στη διέγερση. Η ωοθυλακική ανάπτυξη στηρίζεται πλέον μόνο στις εξωγενείς γοναδοτροπίνες.",
+  "Επειδή η υπόφυση μένει απευαισθητοποιημένη, ο αγωνιστής δεν μπορεί να χρησιμοποιηθεί ως trigger στο μακρύ πρωτόκολλο. Στο πρωτόκολλο ανταγωνιστή όμως η υπόφυση ανταποκρίνεται και το flare του αγωνιστή γίνεται trigger {{youssef14}}."]},
+ antag:{fig:"antag",d:["Ανταγωνιστής GnRH"],steps:[
+  "Ανταγωνίζεται τη φυσική GnRH για τον υποδοχέα της υπόφυσης, χωρίς να τον ενεργοποιεί.",
+  "Η καταστολή είναι άμεση: η LH πέφτει μέσα σε λίγες ώρες, χωρίς αρχικό flare {{huirne01}}.",
+  "Η δράση είναι δοσοεξαρτώμενη και αναστρέψιμη: μόλις διακοπεί, η υπόφυση ανακάμπτει γρήγορα.",
+  "Επειδή οι υποδοχείς δεν απευαισθητοποιούνται, ένας αγωνιστής GnRH μπορεί να προκαλέσει ενδογενή κορύφωση LH ως trigger, με πολύ μικρότερο κίνδυνο OHSS {{youssef14}}."]},
+ rfsh:{fig:"fsh",d:["Ανασυνδυασμένη FSH"],steps:[
+  "Συνδέεται στον υποδοχέα FSH, που εκφράζεται μόνο στα κοκκιώδη κύτταρα, και ενεργοποιεί την οδό cAMP/PKA {{hillier94}}.",
+  "Προκαλεί πολλαπλασιασμό και διαφοροποίηση των κοκκιωδών κυττάρων και επάγει την αρωματάση (CYP19A1), που μετατρέπει τα θηκικά ανδρογόνα σε οιστραδιόλη.",
+  "Σε υπερφυσιολογικές δόσεις υπερβαίνει το «κατώφλι FSH» για περισσότερα ωοθυλάκια ταυτόχρονα, οπότε δεν επικρατεί ένα μόνο κυρίαρχο: πολυθυλακική ανάπτυξη.",
+  "Στα ωοθυλάκια που ωριμάζουν εμφανίζονται υποδοχείς LH στα κοκκιώδη, ώστε να ανταποκριθούν στο trigger {{hillier94}}."]},
+ fdelta:{fig:"fsh",d:["Follitropin delta"],steps:[
+  "Ίδιος μηχανισμός με κάθε FSH: υποδοχέας FSH στα κοκκιώδη, cAMP/PKA, πολλαπλασιασμός και επαγωγή αρωματάσης {{hillier94}}.",
+  "Παράγεται σε ανθρώπινη κυτταρική σειρά (PER.C6), οπότε έχει διαφορετικό προφίλ γλυκοζυλίωσης και σιαλυλίωσης από τη follitropin alfa ή beta.",
+  "Αυτό αλλάζει τη φαρμακοκινητική: μικρότερη κάθαρση και μεγαλύτερη έκθεση ανά μg. Γι' αυτό η δόση υπολογίζεται σε μg με αλγόριθμο βάσει AMH και βάρους, όχι σε IU."]},
+ cori:{fig:"fsh",d:["Corifollitropin alfa"],steps:[
+  "Είναι FSH με προσθήκη του καρβοξυτελικού πεπτιδίου (CTP) της β-υπομονάδας της hCG. Η τροποποίηση αυτή επιμηκύνει πολύ τον χρόνο ημιζωής.",
+  "Στον υποδοχέα δρα όπως η FSH: cAMP/PKA στα κοκκιώδη, πολυθυλακική ανάπτυξη {{hillier94}}.",
+  "Μία ένεση καλύπτει τις πρώτες 7 ημέρες της διέγερσης. Μετά, αν χρειάζεται, συνεχίζεται καθημερινή FSH έως το trigger."]},
+ hmg:{fig:"twocell",d:["hMG: δράση LH\n(κυρίως από hCG)","hMG: δράση FSH"],steps:[
+  "Περιέχει FSH και δράση LH (στα σύγχρονα σκευάσματα η δράση LH προέρχεται κυρίως από hCG).",
+  "Μοντέλο «δύο κυττάρων, δύο γοναδοτροπινών»: η LH δρα στα θηκικά κύτταρα και αυξάνει τη σύνθεση ανδρογόνων μέσω CYP17. Η FSH δρα στα κοκκιώδη και τα ανδρογόνα μετατρέπονται σε οιστραδιόλη μέσω αρωματάσης {{hillier94}}.",
+  "Έτσι παρέχει και τα δύο σήματα, κάτι χρήσιμο όταν η ενδογενής LH είναι πολύ χαμηλή (π.χ. μετά από βαθιά καταστολή ή σε υπογοναδοτροπικό υπογοναδισμό) {{alviggi18}}."]},
+ lh:{fig:"twocell",d:["LH (r-hLH)","FSH"],steps:[
+  "Η LH συνδέεται στον υποδοχέα LHCGR των θηκικών κυττάρων και αυξάνει τη μετατροπή χοληστερόλης σε ανδρογόνα (CYP17) {{hillier94}}.",
+  "Τα ανδρογόνα περνούν στα κοκκιώδη, όπου η FSH μέσω αρωματάσης τα μετατρέπει σε οιστραδιόλη.",
+  "Στην ύστερη ωοθυλακική φάση και τα κοκκιώδη αποκτούν υποδοχείς LH, οπότε η LH στηρίζει και την τελική ωρίμανση του ωοθυλακίου.",
+  "Αν και LH και hCG δρουν στον ίδιο υποδοχέα, ενεργοποιούν διαφορετικά ενδοκυττάρια μονοπάτια: η hCG δίνει περισσότερο cAMP, η LH περισσότερο ERK/AKT {{casarini12}}."]},
+ hcg:{fig:"hcg",d:["hCG (trigger)"],steps:[
+  "Η hCG συνδέεται στον ίδιο υποδοχέα με την LH (LHCGR) και μιμείται τη μεσοκυκλική κορύφωση LH {{casarini12}}.",
+  "Στο ώριμο ωοθυλάκιο προκαλεί επανέναρξη της μείωσης (από πρόφαση Ι σε μετάφαση ΙΙ), έκπτυξη του cumulus και ωορρηξία σε ~36-40 ώρες. Γι' αυτό η ωοληψία γίνεται ~34-36 ώρες μετά.",
+  "Ωχρινοποιεί τα κοκκιώδη κύτταρα και αυξάνει την παραγωγή προγεστερόνης, στηρίζοντας την ωχρινική φάση.",
+  "Έχει πολύ μεγαλύτερο χρόνο ημιζωής από την LH, οπότε το σήμα διαρκεί ημέρες. Αυτό αυξάνει τον VEGF από τα πολλά ωχρά σωμάτια και είναι ο βασικός λόγος για τον κίνδυνο OHSS {{youssef14}}."]},
+ cc:{fig:"cc",d:["Κιτρική κλομιφαίνη"],steps:[
+  "Είναι εκλεκτικός ρυθμιστής υποδοχέων οιστρογόνων (SERM). Καταλαμβάνει τους υποδοχείς ER στον υποθάλαμο για εβδομάδες {{dickey96}}.",
+  "Ο υποθάλαμος «αντιλαμβάνεται» χαμηλά οιστρογόνα, άρα χάνεται η αρνητική παλίνδρομη ρύθμιση: αυξάνεται η συχνότητα των παλμών GnRH και η έκκριση FSH και LH.",
+  "Η αυξημένη FSH οδηγεί στην ανάπτυξη 1-3 ωοθυλακίων.",
+  "Η αντιοιστρογονική δράση στο ενδομήτριο και στην τραχηλική βλέννη μπορεί να δώσει λεπτό ενδομήτριο, κάτι που δεν συμβαίνει τόσο με τη λετροζόλη {{mitwally01}}."]},
+ letro:{fig:"letro",d:["Λετροζόλη"],steps:[
+  "Αναστέλλει αναστρέψιμα την αρωματάση, το ένζυμο που μετατρέπει τα ανδρογόνα σε οιστρογόνα {{mitwally01}}.",
+  "Τα επίπεδα E2 πέφτουν, άρα μειώνεται η αρνητική παλίνδρομη ρύθμιση: αυξάνονται GnRH και FSH.",
+  "Επειδή δεν αποκλείει τους υποδοχείς οιστρογόνων και έχει σύντομο χρόνο ημιζωής (~45 ώρες), το ενδομήτριο και ο υποθάλαμος ανακτούν την ευαισθησία τους. Συνήθως αναπτύσσεται ένα κυρίαρχο ωοθυλάκιο {{mitwally01}}.",
+  "Τα ενδοωοθυλακικά ανδρογόνα που αυξάνονται παροδικά μπορεί να ενισχύουν την ευαισθησία στην FSH. Στη διατήρηση γονιμότητας σε καρκίνο μαστού κρατά χαμηλά τα E2 κατά τη διέγερση {{oktay05}}."]},
+ mpa:{fig:"ppos",d:["MPA"],steps:[
+  "Η κορύφωση LH απαιτεί θετική παλίνδρομη ρύθμιση από υψηλά E2. Η προγεστερόνη και τα προγεσταγόνα την αναστέλλουν στον υποθάλαμο και στην υπόφυση.",
+  "Με MPA από την αρχή της διέγερσης (PPOS) δεν εμφανίζεται πρόωρη κορύφωση LH, χωρίς ενέσεις ανταγωνιστή {{kuang15}}.",
+  "Η LH δεν καταστέλλεται πλήρως, οπότε το trigger μπορεί να γίνει με αγωνιστή GnRH ή με hCG.",
+  "Επειδή το ενδομήτριο εκτίθεται σε προγεσταγόνο, η εμβρυομεταφορά γίνεται αργότερα σε κύκλο κατεψυγμένων (freeze-all)."]},
+ dyg:{fig:"ppos",d:["Δυδρογεστερόνη"],steps:[
+  "Είναι στερεοϊσομερές της προγεστερόνης με υψηλή εκλεκτικότητα για τον υποδοχέα προγεστερόνης και ελάχιστη ανδρογονική ή γλυκοκορτικοειδή δράση.",
+  "Ως PPOS αναστέλλει τη θετική παλίνδρομη ρύθμιση του E2, άρα αποτρέπει την πρόωρη κορύφωση LH {{kuang15}}.",
+  "Δεν επηρεάζει τη μέτρηση της προγεστερόνης στον ορό, οπότε τα επίπεδα P παραμένουν αξιολογήσιμα.",
+  "Στην ωχρινική στήριξη δρα στο ενδομήτριο όπως η προγεστερόνη, με από του στόματος χορήγηση {{tournaye17}}."]},
+ prog:{fig:"prog",d:["Προγεστερόνη"],steps:[
+  "Συνδέεται στους υποδοχείς PR-A και PR-B του ενδομητρίου, που έχουν αυξηθεί από την προηγούμενη δράση των οιστρογόνων.",
+  "Μετατρέπει το παραγωγικό ενδομήτριο σε εκκριτικό: οι αδένες εκκρίνουν γλυκογόνο και το στρώμα αποφυλλοποιείται.",
+  "Ανοίγει το «παράθυρο εμφύτευσης». Γι' αυτό η μεταφορά βλαστοκύστης συγχρονίζεται με την ημέρα έναρξης της προγεστερόνης (συνήθως 6η ημέρα έκθεσης).",
+  "Χαλαρώνει το μυομήτριο και αντικαθιστά την ελλιπή ωχρινική λειτουργία μετά από διέγερση ή σε κύκλο ορμονικής υποκατάστασης {{vanderlinden15}}."]},
+ e2:{fig:"e2",d:["Οιστραδιόλη"],steps:[
+  "Δρα στους υποδοχείς ER-α του ενδομητρίου: πολλαπλασιασμός αδένων και στρώματος (παραγωγική φάση) και πάχυνση του ενδομητρίου.",
+  "Επάγει την έκφραση υποδοχέων προγεστερόνης, ώστε το ενδομήτριο να ανταποκριθεί αργότερα στην προγεστερόνη.",
+  "Με αρνητική παλίνδρομη ρύθμιση καταστέλλει την FSH, οπότε συνήθως δεν αναπτύσσεται κυρίαρχο ωοθυλάκιο στον κύκλο ορμονικής υποκατάστασης.",
+  "Η προετοιμασία με οιστρογόνο πριν τη διέγερση συγχρονίζει την ομάδα των ωοθυλακίων μειώνοντας την ενδογενή FSH της ωχρινικής φάσης."]},
+ cab:{fig:"cab",d:["Καβεργολίνη"],steps:[
+  "Μετά το trigger με hCG, τα πολλά ωχρινοποιημένα κοκκιώδη κύτταρα παράγουν VEGF, που ενεργοποιεί τον υποδοχέα VEGFR-2 στο ενδοθήλιο.",
+  "Η ενεργοποίηση VEGFR-2 αυξάνει την αγγειακή διαπερατότητα: διαφυγή υγρού στην περιτοναϊκή κοιλότητα, που είναι η βάση του OHSS.",
+  "Η καβεργολίνη, αγωνιστής του υποδοχέα ντοπαμίνης D2, μειώνει τη φωσφορυλίωση του VEGFR-2 και τη διαπερατότητα, χωρίς να βλάπτει την ωχρινική αγγειογένεση {{gomez06}}.",
+  "Κλινικά μειώνει τη συχνότητα του μέτριου και σοβαρού OHSS, χωρίς να μειώνει τις κυήσεις {{tang21}}."]},
+ met:{fig:"met",d:["Μετφορμίνη"],steps:[
+  "Μειώνει την ηπατική γλυκονεογένεση και αυξάνει την ευαισθησία των περιφερικών ιστών στην ινσουλίνη (εν μέρει μέσω AMPK).",
+  "Πέφτουν τα επίπεδα ινσουλίνης. Στο PCOS η ινσουλίνη ενισχύει την παραγωγή ανδρογόνων από τα θηκικά κύτταρα και μειώνει την SHBG.",
+  "Με λιγότερη ινσουλίνη μειώνονται τα ανδρογόνα και βελτιώνεται η ωοθυλακική ανάπτυξη.",
+  "Στην εξωσωματική σε PCOS μειώνει τον κίνδυνο OHSS, χωρίς σαφή αύξηση των γεννήσεων {{tso20}}."]},
+ adj:{fig:"adj",d:["Τεστοστερόνη / DHEA","Αυξητική ορμόνη"],steps:[
+  "Τα ανδρογόνα (διαδερμική τεστοστερόνη ή DHEA) δρουν στους υποδοχείς ανδρογόνων των κοκκιωδών σε μικρά ωοθυλάκια και αυξάνουν την έκφραση του υποδοχέα FSH. Αυτό είναι το σκεπτικό του «androgen priming».",
+  "Η αυξητική ορμόνη αυξάνει τον IGF-1, που ενισχύει τη δράση της FSH στα κοκκιώδη και τη στεροειδογένεση.",
+  "Ο σκοπός και των δύο είναι να ανταποκριθούν περισσότερα ωοθυλάκια στη διέγερση σε γυναίκες με χαμηλή απάντηση.",
+  "Ο μηχανισμός είναι βιολογικά εύλογος, αλλά οι δοκιμές δεν δείχνουν σταθερό όφελος στις γεννήσεις. Το ESHRE δεν συστήνει τη χρήση τους {{eshre19}}."]}
+};
+
 /* ================= ENGLISH CONTENT ================= */
 PROTOCOLS.length=0; DRUGS.length=0; STUDIES.length=0; QUIZ.length=0;
 PROTOCOLS.push(
@@ -2043,6 +2258,26 @@ insertProtoAfter("ohss",{
  refs:["hu21","hsia23","sloth22","beebeejaun26","haas14"]
 });
 
+MFL={title:"Mechanism of action",legend:"Schematic. Green arrows: stimulation. Red bar: inhibition. Orange dashed: feedback. ✕: pathway interrupted.",
+ hyp:"Hypothalamus",pit:"Pituitary",ova:"Ovary",days:"days",hours:"hours",flare:"flare",down:"suppression",start:"start",
+ agon_e1:"continuous GnRH-R stimulation",agon_e2:"↓ FSH/LH\n(after 10-14 d)",agon_o:"Pituitary desensitisation,\nno premature LH surge",
+ antag_e1:"competitive blockade",antag_e2:"↓ LH within hours",antag_o:"Immediate LH fall, no flare,\nrecovery once stopped",
+ gran_fshr:"Granulosa cells\n(FSH receptor)",fsh_o1:"Granulosa cell\nproliferation",fsh_o2:"↑ Aromatase\n(androgens → E2)",fsh_o3:"LH receptors appear\non leading follicles",fol:"multifollicular growth",
+ theca:"Theca cells\n(LH receptor)",tc_e:"androgens\n(A4, T)",tc_o1:"Cholesterol →\nandrogens (CYP17)",tc_o2:"Oestradiol (E2)\nin the follicle",
+ hcg_r:"LHCGR on granulosa\nof mature follicle",hcg_o1:"Meiosis resumes\n(MI → MII)",hcg_o2:"Cumulus expansion,\novulation at ~36-40 h",hcg_o3:"Luteinisation,\n↑ progesterone",hcg_o4:"Long t½ (days),\n↑ VEGF → OHSS risk",
+ cc_e0:"ER blockade",cc_e1:"↑ GnRH",cc_e2:"↑ FSH, LH",cc_b:"Anti-oestrogenic effect:\nthin endometrium, cervix",cc_o:"Growth of 1-3\nfollicles",
+ aro:"Aromatase\n(androgens → E2)",letro_e1:"↑ GnRH",letro_e2:"↑ FSH",letro_fb:"↓ E2: less\nnegative feedback",letro_o:"Usually 1 dominant follicle,\nno ER blockade in endometrium\n(t½ ~45 h)",
+ ppos_fb:"E2 (+)",ppos_e:"blocks positive\nfeedback",ppos_s:"LH surge",ppos_o:"No premature LH surge\nduring stimulation (PPOS)",ppos_n:"Basal LH stays low\nbut not abolished",
+ prog_r:"Endometrium\n(PR-A / PR-B receptors)",prog_o1:"Secretory change,\nstromal decidualisation",prog_o2:"Window of\nimplantation opens",prog_o3:"Myometrial quiescence,\nluteal phase support",endo_cap:"secretory glands",
+ e2_e1:"(−) feedback: ↓ FSH",e2_e2:"no dominant\nfollicle",e2_r:"Endometrium\n(ER-α receptor)",e2_o:"Proliferative phase: thickening,\nPR expression",
+ cab_v:"VEGF from luteinised\ngranulosa (after hCG)",cab_bad:"↑ Vascular permeability\n(ascites, OHSS)",cab_d2:"D2 receptor\n(endothelium)",cab_e:"↓ phosphorylation",cab_o:"↓ Moderate / severe\nearly OHSS",
+ met_li:"Liver:\n↓ gluconeogenesis",met_ti:"Muscle / fat:\n↑ insulin sensitivity",met_in:"↓ Circulating\ninsulin",met_th:"Theca cells:\n↓ androgens",met_o:"PCOS: ↓ OHSS risk,\nbetter ovulation",
+ adj_ar:"Androgen receptor\non granulosa",adj_ig:"↑ IGF-1\n(liver, ovary)",adj_f:"↑ FSHR expression,\nFSH sensitivity",adj_o:"In theory more follicles\n(benefit uncertain)"};
+(function(){const D={agon:["GnRH agonist"],antag:["GnRH antagonist"],rfsh:["Recombinant FSH"],fdelta:["Follitropin delta"],cori:["Corifollitropin alfa"],
+ hmg:["hMG: LH activity\n(mainly hCG)","hMG: FSH activity"],lh:["LH (r-hLH)","FSH"],hcg:["hCG (trigger)"],cc:["Clomiphene citrate"],letro:["Letrozole"],
+ mpa:["MPA"],dyg:["Dydrogesterone"],prog:["Progesterone"],e2:["Oestradiol"],cab:["Cabergoline"],met:["Metformin"],adj:["Testosterone / DHEA","Growth hormone"]};
+ Object.keys(MECH).forEach(k=>{MECH[k].d=D[k]||MECH[k].d;MECH[k].steps=[];});})();
+
 /* ================= HELPERS ================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -2184,7 +2419,7 @@ function pageProtocol(p){
 function pageDrugs(){
   return `<h1>Pharmacology</h1><p class="lede">Why we give each drug: mechanism, pharmacokinetics and how they translate into clinical decisions. Brand names are indicative; check local availability and the SmPC.</p>
   ${DRUGS.map(d=>`<details class="acc"><summary>${esc(d.name)} <span class="chip">${esc(d.cls)}</span></summary>
-   <p><b>Brands:</b> ${esc(d.brands)}</p><p><b>Mechanism:</b> ${esc(d.mech)}</p><p><b>Pharmacokinetics:</b> ${esc(d.pk)}</p>
+   <p><b>Brands:</b> ${esc(d.brands)}</p><p><b>Mechanism:</b> ${esc(d.mech)}</p>${mechHTML(d)}<p><b>Pharmacokinetics:</b> ${esc(d.pk)}</p>
    <p><b>Doses:</b> ${cite(esc(d.dose))}</p><p><b>Note:</b> ${cite(esc(d.note))}</p>
    <p>${d.use.filter(u=>PROTO_BY_ID[u]).map(u=>`<a class="chip acc" style="text-decoration:none" href="#p-${u}">${esc(PROTO_BY_ID[u].name)}</a>`).join("")}</p></details>`).join("")}`;
 }
@@ -2847,7 +3082,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* update check */
-const BUILD="1795525086";
+const BUILD="1795525812";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='A new version is available <button class="btn sm" onclick="location.reload()">Refresh</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
