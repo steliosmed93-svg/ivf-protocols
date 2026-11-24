@@ -116,6 +116,8 @@ textarea{width:100%;min-height:90px;font-family:var(--f-mono);font-size:12.5px}
 .pt-list{display:flex;flex-direction:column;gap:6px}
 .pt{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:9px 11px;border:1px solid var(--line);border-radius:6px;background:var(--card);cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
 .pt.on{border-color:var(--accent);background:var(--accent-soft)}
+.pt.done{border-color:var(--ok);background:var(--ok-soft);border-width:1.5px}.pt.done.on{box-shadow:0 0 0 2px var(--accent)}
+.cb.done{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ok)!important}.cb.done.on{background:var(--ok)!important;color:#fff!important}
 .trk{display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;align-items:start}
 .trk>*{min-width:0}
 main{min-width:0}
@@ -2970,8 +2972,8 @@ function ptListHTML(q){
   allPatients().forEach(x=>{if(!G.has(x.pid))G.set(x.pid,[]);G.get(x.pid).push(x);});
   const rows=[...G.values()].map(L=>{L.sort((a,b)=>ptPrio(a)-ptPrio(b));return L;})
     .filter(L=>(TRKF==="all"||L.some(x=>x.t===TRKF))&&(!qq||L.some(x=>x.name.toLowerCase().includes(qq))));
-  return rows.map(L=>{const m=(TRKF!=="all"&&L.find(x=>x.t===TRKF))||L[0];const on=L.some(x=>x.t==="ivf"&&x.id===CUR)&&(location.hash||"").slice(1)==="tracker";
-    return `<button class="pt${on?" on":""}" data-pt="${m.id}" data-pk="${m.t}"><span><b>${esc(m.name)}</b><br>${L.map(x=>`<span class="chip ${PT_CHIP[x.t][0]}" style="font-size:11px;padding:1px 7px;margin-right:3px">${PT_CHIP[x.t][1]}</span>`).join("")} <span class="small muted">${esc(m.sub||"")}</span></span><span class="pill-n">${esc(m.n)}</span></button>`;}).join("")||`<p class="muted small">No patients.</p>`;
+  return rows.map(L=>{const m=(TRKF!=="all"&&L.find(x=>x.t===TRKF))||L[0];const on=L.some(x=>x.t==="ivf"&&x.id===CUR)&&(location.hash||"").slice(1)==="tracker";const dn=L.every(x=>x.r&&x.r.closed);
+    return `<button class="pt${on?" on":""}${dn?" done":""}" data-pt="${m.id}" data-pk="${m.t}"><span><b>${esc(m.name)}</b><br>${L.map(x=>`<span class="chip ${x.r&&x.r.closed?"ok":PT_CHIP[x.t][0]}" style="font-size:11px;padding:1px 7px;margin-right:3px">${x.r&&x.r.closed?"✓ ":""}${PT_CHIP[x.t][1]}</span>`).join("")} <span class="small muted">${esc(m.sub||"")}</span></span><span class="pill-n">${esc(m.n)}</span></button>`;}).join("")||`<p class="muted small">No patients.</p>`;
 }
 /* ---- Ένας ασθενής, πολλές καρτέλες ---- */
 let PG_PID=null;
@@ -2985,7 +2987,7 @@ function cardBarHTML(t,id){
   const r=recFind(t,id); if(!r) return "";
   const L=recsOfPerson(pidOf(r));
   const lab=x=>x.t==="ivf"?`IVF · ${x.r.cycles.length} cycles`:x.t==="preg"?("Obstetric"+(x.r.closed?" · completed":(x.sub?" · "+x.sub:""))):("Gynaecological"+(x.r.visits&&x.r.visits.length?` · ${x.r.visits.length} visits`:""));
-  return `<div class="cardbar"><span class="small muted">Patient records:</span>${L.map(x=>`<button class="cb${x.t===t&&x.id===id?" on":""}" data-cbopen="${x.t}:${x.id}">${esc(lab(x))}</button>`).join("")}<select data-cbadd="${t}:${id}" aria-label="Add record"><option value="">+ Add record…</option>${types.map(ty=>`<option value="${ty[0]}">${ty[1]}</option>`).join("")}</select></div>`;
+  return `<div class="cardbar"><span class="small muted">Patient records:</span>${L.map(x=>`<button class="cb${x.t===t&&x.id===id?" on":""}${x.r&&x.r.closed?" done":""}" data-cbopen="${x.t}:${x.id}">${esc(lab(x))}</button>`).join("")}<select data-cbadd="${t}:${id}" aria-label="Add record"><option value="">+ Add record…</option>${types.map(ty=>`<option value="${ty[0]}">${ty[1]}</option>`).join("")}</select></div>`;
 }
 function addCardFor(t,id,nt){
   const s=recFind(t,id); if(!s) return; const pid=pidOf(s); s.pid=pid; const nm=recName(t,s), si=s.info||{};
@@ -3170,7 +3172,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* update check */
-const BUILD="1795527193";
+const BUILD="1795532257";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='A new version is available <button class="btn sm" onclick="location.reload()">Refresh</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
