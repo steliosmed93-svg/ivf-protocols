@@ -147,6 +147,15 @@ body.athome .backrow{display:none}
 .mech figure{margin:0}.mechsvg{width:100%;max-width:640px;height:auto;display:block;margin:0 auto}
 .mech figcaption{font-size:12px;color:var(--ink-3);margin:6px 0 4px;text-align:center}
 .msteps{margin:8px 0 0;padding-left:22px}.msteps li{margin:5px 0;line-height:1.5}
+abbr[title]{text-decoration:underline dotted;text-underline-offset:2px;cursor:help}
+#abbrTip{position:absolute;z-index:99;max-width:300px;background:var(--ink);color:var(--paper);font-size:13px;padding:7px 10px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.abbrbox{margin:28px 0 8px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0 14px}
+.abbrbox summary{cursor:pointer;padding:11px 0;font-weight:600}
+.abbrbox dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 18px;margin:0 0 12px}
+.abbrbox dl div{display:flex;gap:8px;font-size:13.5px;padding:3px 0;border-bottom:1px dashed var(--line)}
+.abbrbox dt{font-weight:700;min-width:62px;color:var(--accent)}.abbrbox dd{margin:0;color:var(--ink-2)}
+.abbr-en{display:block;font-size:12px;color:var(--ink-3)}
+@media print{.abbrbox{display:block}}
 details.acc{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0 14px;margin:8px 0}
 details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 .pill-n{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
@@ -1626,6 +1635,85 @@ var MECH={
   "Ο μηχανισμός είναι βιολογικά εύλογος, αλλά οι δοκιμές δεν δείχνουν σταθερό όφελος στις γεννήσεις. Το ESHRE δεν συστήνει τη χρήση τους {{eshre19}}."]}
 };
 
+/* ---- Abbreviations glossary: [abbr, English expansion, Greek explanation] ---- */
+const ABBR=[
+["LH","Luteinising hormone","Ωχρινοτρόπος ορμόνη"],["FSH","Follicle-stimulating hormone","Θυλακιοτρόπος ορμόνη"],
+["hCG","Human chorionic gonadotropin","Ανθρώπινη χοριακή γοναδοτροπίνη"],["r-hCG","Recombinant hCG","Ανασυνδυασμένη hCG"],["u-hCG","Urinary hCG","hCG από ούρα"],
+["GnRH","Gonadotropin-releasing hormone","Εκλυτική ορμόνη των γοναδοτροπινών"],["GnRH-R","GnRH receptor","Υποδοχέας GnRH"],
+["hMG","Human menopausal gonadotropin (menotropin)","Ανθρώπινη εμμηνοπαυσιακή γοναδοτροπίνη"],["rFSH","Recombinant FSH","Ανασυνδυασμένη FSH"],["rLH","Recombinant LH","Ανασυνδυασμένη LH"],["r-hLH","Recombinant human LH","Ανασυνδυασμένη ανθρώπινη LH"],
+["OHSS","Ovarian hyperstimulation syndrome","Σύνδρομο υπερδιέγερσης ωοθηκών"],["IU","International units","Διεθνείς μονάδες"],["OPU","Oocyte pick-up","Ωοληψία"],
+["IVF","In vitro fertilisation","Εξωσωματική γονιμοποίηση"],["ICSI","Intracytoplasmic sperm injection","Ενδοκυτταροπλασματική έγχυση σπερματοζωαρίου"],
+["IVM","In vitro maturation","Ωρίμανση ωαρίων in vitro"],["CAPA-IVM","Capacitation IVM (biphasic IVM)","Διφασική ωρίμανση in vitro"],["mini-IVF","Minimal-stimulation IVF","Εξωσωματική ήπιας διέγερσης"],
+["PCOS","Polycystic ovary syndrome","Σύνδρομο πολυκυστικών ωοθηκών"],["PPOS","Progestin-primed ovarian stimulation","Διέγερση με προγεσταγόνο"],
+["AFC","Antral follicle count","Αριθμός άντρων ωοθυλακίων"],["AMH","Anti-Müllerian hormone","Αντιμυλλέρειος ορμόνη"],
+["FET","Frozen(-thawed) embryo transfer","Μεταφορά κατεψυγμένου εμβρύου"],["HRT","Hormone replacement therapy (artificial cycle)","Ορμονική υποκατάσταση (τεχνητός κύκλος)"],["HRT-FET","FET in an artificial (HRT) cycle","FET σε κύκλο ορμονικής υποκατάστασης"],
+["ET","Embryo transfer","Εμβρυομεταφορά"],["PGT","Preimplantation genetic testing","Προεμφυτευτικός γενετικός έλεγχος"],["PGT-A","PGT for aneuploidy","Προεμφυτευτικός έλεγχος ανευπλοειδιών"],
+["RIF","Recurrent implantation failure","Επαναλαμβανόμενη αποτυχία εμφύτευσης"],["MII","Metaphase II (mature oocyte)","Μετάφαση ΙΙ (ώριμο ωάριο)"],["MI","Metaphase I","Μετάφαση Ι"],["GV","Germinal vesicle (immature oocyte)","Βλαστικό κυστίδιο (ανώριμο ωάριο)"],["2PN","Two pronuclei (normal fertilisation)","Δύο προπυρήνες (φυσιολογική γονιμοποίηση)"],
+["ESHRE","European Society of Human Reproduction and Embryology","Ευρωπαϊκή Εταιρεία Ανθρώπινης Αναπαραγωγής και Εμβρυολογίας"],["POSEIDON","Patient-Oriented Strategies Encompassing IndividualizeD Oocyte Number","Ταξινόμηση χαμηλής απάντησης POSEIDON"],
+["RCT","Randomised controlled trial","Τυχαιοποιημένη ελεγχόμενη δοκιμή"],["RCTs","Randomised controlled trials","Τυχαιοποιημένες ελεγχόμενες δοκιμές"],["RR","Risk ratio (relative risk)","Σχετικός κίνδυνος"],["OR","Odds ratio","Λόγος σχετικών πιθανοτήτων"],["CI","Confidence interval","Διάστημα εμπιστοσύνης"],
+["MPA","Medroxyprogesterone acetate","Οξική μεδροξυπρογεστερόνη"],["DHEA","Dehydroepiandrosterone","Δεϋδροεπιανδροστερόνη"],["GH","Growth hormone","Αυξητική ορμόνη"],["LMWH","Low-molecular-weight heparin","Ηπαρίνη χαμηλού μοριακού βάρους"],
+["SERM","Selective oestrogen receptor modulator","Εκλεκτικός ρυθμιστής υποδοχέων οιστρογόνων"],["ER","Oestrogen receptor","Υποδοχέας οιστρογόνων"],["PR","Progesterone receptor","Υποδοχέας προγεστερόνης"],["PR-A","Progesterone receptor A","Υποδοχέας προγεστερόνης Α"],["PR-B","Progesterone receptor B","Υποδοχέας προγεστερόνης Β"],
+["E2","Oestradiol","Οιστραδιόλη"],["P4","Progesterone","Προγεστερόνη"],["A4","Androstenedione","Ανδροστενδιόνη"],["SHBG","Sex hormone-binding globulin","Σφαιρίνη δέσμευσης φυλετικών ορμονών"],
+["VEGF","Vascular endothelial growth factor","Αγγειακός ενδοθηλιακός αυξητικός παράγοντας"],["VEGFR-2","VEGF receptor 2","Υποδοχέας 2 του VEGF"],["LHCGR","LH/hCG receptor","Υποδοχέας LH/hCG"],["FSHR","FSH receptor","Υποδοχέας FSH"],
+["cAMP","Cyclic adenosine monophosphate","Κυκλικό AMP (δεύτερος αγγελιοφόρος)"],["PKA","Protein kinase A","Πρωτεϊνική κινάση Α"],["ERK","Extracellular signal-regulated kinase","Κινάση ERK"],["AKT","Protein kinase B","Πρωτεϊνική κινάση Β"],["AMPK","AMP-activated protein kinase","Κινάση ενεργοποιούμενη από AMP"],
+["IGF-1","Insulin-like growth factor 1","Ινσουλινόμορφος αυξητικός παράγοντας 1"],["CYP17","17α-hydroxylase/17,20-lyase","Ένζυμο σύνθεσης ανδρογόνων"],["CYP19A1","Aromatase","Αρωματάση"],["CTP","C-terminal peptide of hCG β","Καρβοξυτελικό πεπτίδιο της β-hCG"],
+["DNA","Deoxyribonucleic acid","Δεοξυριβονουκλεϊκό οξύ"],["cfDNA","Cell-free DNA","Ελεύθερο κυκλοφορούν DNA"],["BMI","Body mass index","Δείκτης μάζας σώματος"],["IM","Intramuscular","Ενδομυϊκά"],["SC","Subcutaneous","Υποδορίως"],
+["CRL","Crown-rump length","Κεφαλοουραίο μήκος"],["NT","Nuchal translucency","Αυχενική διαφάνεια"],["PAPP-A","Pregnancy-associated plasma protein A","Πρωτεΐνη Α πλάσματος σχετιζόμενη με την κύηση"],["PlGF","Placental growth factor","Πλακουντιακός αυξητικός παράγοντας"],
+["AFP","Alpha-fetoprotein","α-εμβρυϊκή πρωτεΐνη"],["AFI","Amniotic fluid index","Δείκτης αμνιακού υγρού"],["DVP","Deepest vertical pocket","Μέγιστη κάθετη δεξαμενή αμνιακού υγρού"],["MCA","Middle cerebral artery","Μέση εγκεφαλική αρτηρία"],["PI","Pulsatility index","Δείκτης σφύξεως"],["CPR","Cerebroplacental ratio","Εγκεφαλοπλακουντιακός λόγος"],
+["NST","Non-stress test","Καρδιοτοκογράφημα ηρεμίας"],["CVS","Chorionic villus sampling","Λήψη χοριακών λαχνών"],["USS","Ultrasound scan","Υπερηχογράφημα"],["OGTT","Oral glucose tolerance test","Δοκιμασία ανοχής γλυκόζης"],["GBS","Group B streptococcus","Στρεπτόκοκκος ομάδας Β"],
+["TSH","Thyroid-stimulating hormone","Θυρεοειδοτρόπος ορμόνη"],["FT4","Free thyroxine","Ελεύθερη θυροξίνη"],["FT3","Free triiodothyronine","Ελεύθερη τριιωδοθυρονίνη"],["WBC","White blood cells","Λευκά αιμοσφαίρια"],["PLT","Platelets","Αιμοπετάλια"],["25-OH","25-hydroxyvitamin D","25-υδροξυβιταμίνη D"],
+["HIV","Human immunodeficiency virus","Ιός ανθρώπινης ανοσοανεπάρκειας"],["HBV","Hepatitis B virus","Ιός ηπατίτιδας Β"],["HBsAg","Hepatitis B surface antigen","Επιφανειακό αντιγόνο ηπατίτιδας Β"],["HCV","Hepatitis C virus","Ιός ηπατίτιδας C"],["CMV","Cytomegalovirus","Κυτταρομεγαλοϊός"],["RSV","Respiratory syncytial virus","Αναπνευστικός συγκυτιακός ιός"],
+["HPV","Human papillomavirus","Ιός ανθρωπίνων θηλωμάτων"],["HPV-DNA","HPV DNA test","Μοριακός έλεγχος HPV"],["NILM","Negative for intraepithelial lesion or malignancy","Αρνητικό για ενδοεπιθηλιακή βλάβη ή κακοήθεια"],["ASC-US","Atypical squamous cells of undetermined significance","Άτυπα πλακώδη κύτταρα αδιευκρίνιστης σημασίας"],
+["LSIL","Low-grade squamous intraepithelial lesion","Χαμηλόβαθμη πλακώδης ενδοεπιθηλιακή βλάβη"],["HSIL","High-grade squamous intraepithelial lesion","Υψηλόβαθμη πλακώδης ενδοεπιθηλιακή βλάβη"],["AGC","Atypical glandular cells","Άτυπα αδενικά κύτταρα"],["CIN","Cervical intraepithelial neoplasia","Τραχηλική ενδοεπιθηλιακή νεοπλασία"],
+["BI-RADS","Breast Imaging Reporting and Data System","Σύστημα ταξινόμησης απεικόνισης μαστού"],["BRCA","Breast cancer susceptibility genes 1/2","Γονίδια προδιάθεσης καρκίνου μαστού"],["OCP","Oral contraceptive pill","Αντισυλληπτικό χάπι"],
+["PICO","Population, Intervention, Comparison, Outcome","Πληθυσμός, Παρέμβαση, Σύγκριση, Έκβαση"],["PRISMA","Preferred Reporting Items for Systematic Reviews and Meta-Analyses","Οδηγία αναφοράς συστηματικών ανασκοπήσεων"],
+["ART","Assisted reproductive technology","Τεχνικές υποβοηθούμενης αναπαραγωγής"],["HCG","Human chorionic gonadotropin","Ανθρώπινη χοριακή γοναδοτροπίνη"],["DYG","Dydrogesterone","Δυδρογεστερόνη"],["FOI","Follicle-to-oocyte index","Δείκτης ωοθυλακίων προς ωάρια"],
+["BMJ","British Medical Journal","Ιατρικό περιοδικό BMJ"],["JAMA","Journal of the American Medical Association","Ιατρικό περιοδικό JAMA"],["NEJM","New England Journal of Medicine","Ιατρικό περιοδικό NEJM"],["COVID-19","Coronavirus disease 2019","Νόσος από κορωνοϊό 2019"],
+["MD","Doctor of Medicine","Ιατρός"],["MBA","Master of Business Administration","Μεταπτυχιακό στη διοίκηση επιχειρήσεων"],["MSc","Master of Science","Μεταπτυχιακό δίπλωμα"],["JBI","Joanna Briggs Institute","Ινστιτούτο Joanna Briggs"],["ORCID","Open Researcher and Contributor ID","Μοναδικό αναγνωριστικό ερευνητή"],
+["AES-GCM","Advanced Encryption Standard, Galois/Counter Mode","Πρότυπο κρυπτογράφησης AES-GCM"],["PBKDF2-SHA256","Password-based key derivation function 2","Παραγωγή κλειδιού από κωδικό"],
+["DOI","Digital Object Identifier","Ψηφιακό αναγνωριστικό άρθρου"],["APA","American Psychological Association (citation style)","Σύστημα βιβλιογραφικών αναφορών APA"],["GDPR","General Data Protection Regulation","Γενικός Κανονισμός Προστασίας Δεδομένων"]
+];
+const ABBR_MAP={};ABBR.forEach(a=>ABBR_MAP[a[0]]=a);
+const ABBR_RE=new RegExp("(?<![A-Za-z0-9-])("+ABBR.map(a=>a[0]).sort((x,y)=>y.length-x.length).map(k=>k.replace(/[-]/g,"\\-")).join("|")+")(?![A-Za-z0-9]|-[A-Z0-9])","g");
+const ABBR_EN=()=>document.documentElement.lang==="en";
+function abbrText(a){return ABBR_EN()?a[1]:a[2]+" ("+a[1]+")";}
+function applyAbbr(root){
+  if(!root) return;
+  root.querySelectorAll(".abbrbox").forEach(n=>n.remove());
+  const found=new Set();
+  const tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{
+    const p=n.parentElement; if(!p||!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+    if(p.closest("script,style,textarea,abbr,.abbrbox")) return NodeFilter.FILTER_REJECT;
+    return NodeFilter.FILTER_ACCEPT;}});
+  const nodes=[];while(tw.nextNode()) nodes.push(tw.currentNode);
+  nodes.forEach(n=>{const t=n.nodeValue;ABBR_RE.lastIndex=0;if(!ABBR_RE.test(t)) return;
+    const inSvg=n.parentElement.closest("svg,button,select,option,.refentry,#abbrTip");ABBR_RE.lastIndex=0;
+    if(inSvg){let m;while((m=ABBR_RE.exec(t))) found.add(m[1]);return;}
+    const fr=document.createDocumentFragment();let last=0,m;ABBR_RE.lastIndex=0;
+    while((m=ABBR_RE.exec(t))){found.add(m[1]);if(m.index>last) fr.appendChild(document.createTextNode(t.slice(last,m.index)));
+      const ab=document.createElement("abbr");ab.textContent=m[1];ab.title=abbrText(ABBR_MAP[m[1]]);fr.appendChild(ab);last=m.index+m[1].length;}
+    if(last<t.length) fr.appendChild(document.createTextNode(t.slice(last)));n.parentNode.replaceChild(fr,n);});
+  if(!found.size) return;
+  const list=[...found].sort((a,b)=>a.localeCompare(b,"en",{sensitivity:"base"}));
+  const box=document.createElement("details");box.className="abbrbox";
+  box.innerHTML=`<summary>${ABBR_EN()?"Abbreviations on this page":"Συντομογραφίες σε αυτή τη σελίδα"} <span class="chip">${list.length}</span></summary><dl>${list.map(k=>{const a=ABBR_MAP[k];
+    return `<div><dt>${esc(k)}</dt><dd>${ABBR_EN()?esc(a[1]):esc(a[2])+` <span class="abbr-en">${esc(a[1])}</span>`}</dd></div>`;}).join("")}</dl>`;
+  root.appendChild(box);
+}
+(function(){
+  let tmr=null,busy=false,obs=null;
+  const run=()=>{const v=document.getElementById("view");if(!v)return;busy=true;obs&&obs.disconnect();
+    try{applyAbbr(v);}catch(e){console.warn(e);}obs&&obs.observe(v,{childList:true,subtree:true});busy=false;};
+  const start=()=>{const v=document.getElementById("view");if(!v)return setTimeout(start,200);
+    obs=new MutationObserver(()=>{if(busy)return;clearTimeout(tmr);tmr=setTimeout(run,180);});
+    obs.observe(v,{childList:true,subtree:true});run();};
+  document.addEventListener("DOMContentLoaded",start);if(document.readyState!=="loading") setTimeout(start,0);
+  document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("abbr[title]");const tip=document.getElementById("abbrTip");
+    if(!a){if(tip)tip.remove();return;}
+    const t=tip||Object.assign(document.createElement("div"),{id:"abbrTip"});t.textContent=a.textContent+": "+a.title;document.body.appendChild(t);
+    const r=a.getBoundingClientRect();t.style.left=Math.max(8,Math.min(window.innerWidth-t.offsetWidth-8,r.left))+"px";t.style.top=(r.bottom+window.scrollY+6)+"px";});
+})();
+
 /* ================= ΒΟΗΘΗΤΙΚΑ ================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -2844,7 +2932,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* έλεγχος νέας έκδοσης */
-const BUILD="1795525812";
+const BUILD="1795527193";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='Υπάρχει νέα έκδοση <button class="btn sm" onclick="location.reload()">Ανανέωση</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
