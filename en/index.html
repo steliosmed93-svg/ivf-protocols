@@ -964,6 +964,184 @@ STUDIES.push(
  {ref:"khoo24",yr:2024,type:"Μετα-ανάλυση",tags:["sp-male"],title:"Σπέρμα όρχεως σε υψηλή θραύση DNA",pico:"9 μελέτες σε μη αζωοσπερμικούς άνδρες με αυξημένη θραύση DNA.",find:"Περισσότερες κυήσεις (OR 2,51) και γεννήσεις (OR 2,59) με σπέρμα όρχεως, χωρίς διαφορά σε γονιμοποίηση ή αποβολές.",impact:"Πιθανή επιλογή σε επιλεγμένα ζευγάρια, όχι ρουτίνα.",crit:"Μελέτες χαμηλής ποιότητας· χρειάζονται RCT."}
 );
 
+/* ================= ΝΕΑ ΠΡΩΤΟΚΟΛΛΑ: microdose flare, depot, stop, προετοιμασία, dual/double trigger ================= */
+Object.assign(REFS,{
+ song14:{cite:"Song et al., 2014",apa:"Song, Y., Li, Z., Wu, X., Wang, X., Xiao, J., & Wang, B. (2014). Effectiveness of the antagonist/letrozole protocol for treating poor responders undergoing in vitro fertilization/intracytoplasmic sperm injection: A systematic review and meta-analysis. <i>Gynecological Endocrinology, 30</i>(5), 330–334.",doi:"10.3109/09513590.2013.875997"},
+ albuquerque13:{cite:"Albuquerque et al., 2013",apa:"Albuquerque, L. E., Tso, L. O., Saconato, H., Albuquerque, M. C., & Macedo, C. R. (2013). Depot versus daily administration of gonadotrophin-releasing hormone agonist protocols for pituitary down regulation in assisted reproduction cycles. <i>Cochrane Database of Systematic Reviews, 2013</i>(1), Article CD002808.",doi:"10.1002/14651858.CD002808.pub3"},
+ mauries22:{cite:"Mauries et al., 2022",apa:"Mauries, C., Ranisavljevic, N., Mollevi, C., Brunet, C., Hamamah, S., Brouillet, S., & Anahory, T. (2022). \"Short agonist stop\" protocol, an ovarian stimulation for poor responders in in vitro fertilization (IVF): A pilot study. <i>Frontiers in Endocrinology, 13</i>, Article 1056520.",doi:"10.3389/fendo.2022.1056520"},
+ orvieto20:{cite:"Orvieto et al., 2020",apa:"Orvieto, R., Kirshenbaum, M., Galiano, V., Elkan-Miller, T., Zilberberg, E., Haas, J., & Nahum, R. (2020). Stop GnRH-agonist combined with multiple-dose GnRH-antagonist protocol for patients with \"genuine\" poor response undergoing controlled ovarian hyperstimulation for IVF. <i>Frontiers in Endocrinology, 11</i>, Article 182.",doi:"10.3389/fendo.2020.00182"},
+ farquhar17:{cite:"Farquhar et al., 2017",apa:"Farquhar, C., Rombauts, L., Kremer, J. A., Lethaby, A., & Ayeleke, R. O. (2017). Oral contraceptive pill, progestogen or oestrogen pretreatment for ovarian stimulation protocols for women undergoing assisted reproductive techniques. <i>Cochrane Database of Systematic Reviews, 2017</i>(5), Article CD006109.",doi:"10.1002/14651858.CD006109.pub3"},
+ zhu22:{cite:"Zhu et al., 2022",apa:"Zhu, S., Lv, Z., Song, L., Zhang, Q., Fan, Y., & Li, J. (2022). Estradiol pretreatment in GnRH antagonist protocol for IVF/ICSI treatment. <i>Open Medicine, 17</i>(1), 1811–1820.",doi:"10.1515/med-2022-0594"},
+ hu21:{cite:"Hu et al., 2021",apa:"Hu, K. L., Wang, S., Ye, X., Zhang, D., & Hunt, S. (2021). GnRH agonist and hCG (dual trigger) versus hCG trigger for follicular maturation: A systematic review and meta-analysis of randomized trials. <i>Reproductive Biology and Endocrinology, 19</i>(1), Article 78.",doi:"10.1186/s12958-021-00766-5"},
+ hsia23:{cite:"Hsia et al., 2023",apa:"Hsia, L. H., Lee, T. H., Lin, Y. H., Huang, Y. Y., Chang, H. J., & Liu, Y. L. (2023). Dual trigger improves the pregnancy rate in fresh in vitro fertilization (IVF) cycles compared with the human chorionic gonadotropin (hCG) trigger: A systematic review and meta-analysis of randomized trials. <i>Journal of Assisted Reproduction and Genetics, 40</i>(9), 2063–2077.",doi:"10.1007/s10815-023-02888-8"},
+ sloth22:{cite:"Sloth et al., 2022",apa:"Sloth, A., Kjølhede, M., Sarmon, K. G., & Knudsen, U. B. (2022). Effect of dual trigger on reproductive outcome in low responders: A systematic PRISMA review and meta-analysis. <i>Gynecological Endocrinology, 38</i>(3), 213–221.",doi:"10.1080/09513590.2021.2000962"},
+ beebeejaun26:{cite:"Beebeejaun et al., 2026",apa:"Beebeejaun, Y., Copeland, T., Duffy, J. M. N., Sarris, I., Showell, M., & Sunkara, S. K. (2026). Oocyte maturation triggering in high responders in IVF treatment: A systematic review and network meta-analysis. <i>Frontiers in Endocrinology, 17</i>, Article 1669781.",doi:"10.3389/fendo.2026.1669781"},
+ haas14:{cite:"Haas et al., 2014",apa:"Haas, J., Zilberberg, E., Dar, S., Kedem, A., Machtinger, R., & Orvieto, R. (2014). Co-administration of GnRH-agonist and hCG for final oocyte maturation (double trigger) in patients with low number of oocytes retrieved per number of preovulatory follicles: A preliminary report. <i>Journal of Ovarian Research, 7</i>, Article 77.",doi:"10.1186/1757-2215-7-77"}
+});
+function insertProtoAfter(afterId,p){const i=PROTOCOLS.findIndex(x=>x.id===afterId);if(i<0)PROTOCOLS.push(p);else PROTOCOLS.splice(i+1,0,p);}
+
+insertProtoAfter("flare",{
+ id:"microdose-flare", cat:"stim", name:"Microdose flare αγωνιστή GnRH", en:"Microdose GnRH agonist flare protocol",
+ tags:["Χαμηλές απαντήτριες","Προθεραπεία με αντισυλληπτικό","Μόνο trigger με hCG"],
+ summary:"Πολύ μικρές δόσεις αγωνιστή GnRH δύο φορές την ημέρα από την αρχή του κύκλου, μετά από προθεραπεία με αντισυλληπτικό. Αξιοποιεί την έξαρση της ενδογενούς FSH/LH με λιγότερη διέγερση του ωχρινικού σωματίου από το κλασικό βραχύ πρωτόκολλο.",
+ snapshot:{supp:"Μικροδόση αγωνιστή 2 φορές/ημ από Η1",dur:"≈ 10–12 ημέρες (μετά από 2–3 εβδ. αντισυλληπτικό)",ohss:"Χαμηλός",ag:"Όχι",fresh:"Ναι",who:"Χαμηλές απαντήτριες, μετά από αποτυχία ανταγωνιστή"},
+ principle:[
+  "Η μικροδόση (π.χ. λευπρορελίνη 20–50 μg δύο φορές την ημέρα) προκαλεί ήπια και παρατεταμένη έξαρση FSH/LH που προστίθεται στις εξωγενείς γοναδοτροπίνες, ενώ η συνεχής χορήγηση αποτρέπει τελικά την πρόωρη αιχμή LH.",
+  "Το αντισυλληπτικό του προηγούμενου κύκλου καταστέλλει το ωχρινικό σωμάτιο, ώστε το flare να μην ανεβάσει την προγεστερόνη και να συγχρονιστεί η κοόρτη των ωοθυλακίων.",
+  "Σε μετα-ανάλυση 3 μελετών (688 κύκλοι), το microdose flare είχε υψηλότερο ποσοστό κλινικής κύησης από το σχήμα ανταγωνιστή με λετροζόλη στις χαμηλές απαντήτριες, με παρόμοιο αριθμό ωαρίων· η ποιότητα των δεδομένων είναι περιορισμένη {{song14}}. Στη μετα-ανάλυση δικτύου της Cochrane, ανταγωνιστής και flare δεν διαφέρουν σαφώς στις ζώσες γεννήσεις {{melo25}}."
+ ],
+ indications:["Χαμηλές απαντήτριες (POSEIDON 3–4), ιδίως μετά από φτωχή απάντηση με ανταγωνιστή","Ασθενείς όπου θέλεις τη μέγιστη ενδογενή ενίσχυση της στρατολόγησης"],
+ cautions:["Έλεγξε E2/P4 πριν το flare: P4 > 1,5 ng/mL σημαίνει ενεργό ωχρινικό σωμάτιο","Το αντισυλληπτικό μπορεί να καταστείλει υπερβολικά μια ήδη χαμηλή αποθήκη: κράτα το σύντομο","Η υπόφυση απευαισθητοποιείται: trigger μόνο με hCG"],
+ timeline:{axis:"Ημέρα κύκλου (μετά τη διακοπή του αντισυλληπτικού)",from:0,to:16,ticks:[1,3,5,7,9,11,13,15],
+  rows:[{label:"Αντισυλληπτικό (πριν)",bars:[{s:0,e:0.6,c:"warn",t:"14–21 ημ πριν"}]},
+   {label:"Μικροδόση αγωνιστή",bars:[{s:1,e:11.5,c:"teal",t:"20–50 μg × 2/ημ"}]},
+   {label:"FSH / hMG",bars:[{s:3,e:11.5,c:"acc",t:"300 IU/ημ"}]},
+   {label:"Υπέρηχος / E2",marks:[1,6,8,10,11]},
+   {label:"Trigger → OPU",events:[{d:11.5,t:"hCG"},{d:13,t:"OPU"}]},
+   {label:"Ωχρινική στήριξη",bars:[{s:13,e:16,c:"ok",t:"P4"}]}]},
+ table:[
+  {when:"Προηγούμενος κύκλος",drug:"Αντισυλληπτικό",dose:"14–21 ημέρες",why:"Καταστολή του ωχρινικού σωματίου και συγχρονισμός της κοόρτης.",expect:"Αιμόρροια διακοπής 3–5 ημέρες μετά"},
+  {when:"Ημέρα 1 (≈ 3 ημέρες μετά τη διακοπή)",drug:"Βασικός έλεγχος",dose:"Υπέρηχος, E2, P4",why:"Αποκλεισμός κύστεων και ενεργού ωχρινικού σωματίου πριν το flare.",expect:"E2 < 50 pg/mL, P4 < 1,5 ng/mL, χωρίς κύστεις"},
+  {when:"Ημέρα 1 έως trigger",drug:"Αγωνιστής GnRH σε μικροδόση",dose:"Λευπρορελίνη 20–50 μg (ή τριπτορελίνη αντίστοιχα) υποδόρια δύο φορές την ημέρα",why:"Ήπια, παρατεταμένη έξαρση FSH/LH και στη συνέχεια αποτροπή της αιχμής LH.",expect:""},
+  {when:"Ημέρα 3 έως trigger",drug:"rFSH ή hMG (± LH)",dose:"Συνήθως 300 IU/ημ",why:"Μέγιστη στρατολόγηση· μεγαλύτερες δόσεις δεν φαίνεται να προσθέτουν όφελος {{eshre19}}.",expect:"Ανάπτυξη ≈ 1–2 mm/ημέρα"},
+  {when:"Ανά 2 ημέρες από Η6",drug:"Υπέρηχος, E2, P4",dose:"",why:"Έλεγχος απάντησης και πρόωρης ωχρινοποίησης.",expect:"P4 < 1,5 ng/mL την ημέρα του trigger"},
+  {when:"≥ 2–3 ωοθυλάκια ≥ 17 mm",drug:"hCG",dose:"r-hCG 250 μg ή u-hCG 10.000 IU",why:"Ο αγωνιστής δεν μπορεί να χρησιμοποιηθεί ως trigger.",expect:"OPU σε 35–36 ώρες"},
+  {when:"Από την OPU",drug:"Προγεστερόνη",dose:"Όπως στα άλλα πρωτόκολλα",why:"Ωχρινική ανεπάρκεια μετά την απευαισθητοποίηση της υπόφυσης.",expect:""}
+ ],
+ trigger:["<b>Μόνο hCG</b>. Ο αγωνιστής GnRH δεν προκαλεί αιχμή LH σε απευαισθητοποιημένη υπόφυση."],
+ ohss:"Πολύ σπάνιο στον πληθυσμό αυτό.",
+ pearls:["Δεν υπάρχει τεκμηριωμένη ανωτερότητα έναντι του ανταγωνιστή· είναι λογική εναλλακτική όταν ο ανταγωνιστής απέτυχε {{melo25}}.","Δες και «Βραχύ πρωτόκολλο αγωνιστή (flare)» και «Χαμηλές απαντήτριες (POSEIDON)»."],
+ refs:["song14","melo25","eshre19"]
+});
+
+insertProtoAfter("long-agonist",{
+ id:"long-depot", cat:"stim", name:"Μακρύ πρωτόκολλο με depot αγωνιστή", en:"Long protocol with depot GnRH agonist",
+ tags:["Μία ένεση","Ευκολία για την ασθενή","Περισσότερες γοναδοτροπίνες"],
+ summary:"Το κλασικό μακρύ πρωτόκολλο με μία ένεση depot αγωνιστή στη μέση ωχρινική φάση αντί για καθημερινές ενέσεις. Ίδια αποτελέσματα, αλλά βαθύτερη καταστολή.",
+ snapshot:{supp:"Depot αγωνιστής (1 ένεση) από Η21",dur:"≈ 4–5 εβδομάδες",ohss:"Μέτριος έως υψηλός",ag:"Όχι",fresh:"Ναι",who:"Όταν προτιμάται το μακρύ πρωτόκολλο και οι καθημερινές ενέσεις είναι πρόβλημα"},
+ principle:[
+  "Μία ένεση τριπτορελίνης ή λευπρορελίνης depot (συχνά μισή ή πλήρης δόση 3,75 mg) στη μέση ωχρινική φάση οδηγεί σε καταστολή της υπόφυσης σε ≈ 2 εβδομάδες, χωρίς καθημερινές ενέσεις.",
+  "Στην ανασκόπηση Cochrane (16 RCTs, 1.811 γυναίκες) δεν βρέθηκε διαφορά μεταξύ depot και καθημερινού αγωνιστή στις ζώσες γεννήσεις/εξελισσόμενες κυήσεις ούτε στο σοβαρό OHSS· με το depot χρειάστηκαν όμως περισσότερες γοναδοτροπίνες και περισσότερες ημέρες διέγερσης {{albuquerque13}}.",
+  "Η βαθύτερη καταστολή της LH σημαίνει ότι σε ορισμένες ασθενείς μπορεί να χρειαστεί προσθήκη LH δραστικότητας."
+ ],
+ indications:["Ασθενείς που προτιμούν μία ένεση αντί για καθημερινές","Κέντρα που χρησιμοποιούν μακρύ πρωτόκολλο για προγραμματισμό"],
+ cautions:["Περισσότερες γοναδοτροπίνες και μεγαλύτερη διέγερση {{albuquerque13}}","Η καταστολή δεν «σταματά» αν χρειαστεί να ακυρωθεί ο κύκλος: διαρκεί εβδομάδες","Trigger μόνο με hCG: σε υψηλές απαντήτριες προτίμησε ανταγωνιστή"],
+ timeline:{axis:"Ημέρα (Η1 = 1η ημέρα της περιόδου μετά την ένεση)",from:-10,to:16,ticks:[-8,-4,1,4,8,12,16],
+  rows:[{label:"Depot αγωνιστής",events:[{d:-8,t:"1 ένεση Η21"}]},
+   {label:"Καταστολή",bars:[{s:-8,e:13,c:"teal",t:"διαρκεί εβδομάδες"}]},
+   {label:"Έλεγχος καταστολής",marks:[2]},
+   {label:"FSH / hMG",bars:[{s:3,e:13,c:"acc",t:"150–300 IU/ημ"}]},
+   {label:"Trigger → OPU",events:[{d:13,t:"hCG"},{d:14.5,t:"OPU"}]}]},
+ table:[
+  {when:"Ημέρα 21 προηγούμενου κύκλου",drug:"Depot αγωνιστής GnRH",dose:"Τριπτορελίνη ή λευπρορελίνη 1,875–3,75 mg εφάπαξ",why:"Καταστολή της υπόφυσης χωρίς καθημερινές ενέσεις.",expect:"Περίοδος σε ≈ 7–10 ημέρες"},
+  {when:"≈ 14 ημέρες μετά την ένεση",drug:"Έλεγχος καταστολής",dose:"Υπέρηχος + E2 (± LH)",why:"Επιβεβαίωση καταστολής πριν τη διέγερση.",expect:"E2 < 50 pg/mL, ενδομήτριο < 5 mm, χωρίς κύστεις"},
+  {when:"Μετά την καταστολή έως trigger",drug:"rFSH ή hMG (± LH)",dose:"150–300 IU/ημ, συχνά λίγο υψηλότερα από το καθημερινό σχήμα",why:"Η βαθύτερη καταστολή απαιτεί περισσότερη διέγερση {{albuquerque13}}.",expect:"Ανάπτυξη ≈ 1,5–2 mm/ημέρα"},
+  {when:"Ανά 2–3 ημέρες",drug:"Υπέρηχος, E2",dose:"",why:"Προσαρμογή δόσης.",expect:""},
+  {when:"≥ 3 ωοθυλάκια ≥ 17 mm",drug:"hCG",dose:"r-hCG 250 μg",why:"Ο αγωνιστής δεν μπορεί να γίνει trigger.",expect:"OPU 35–36 ώρες μετά"},
+  {when:"Από την OPU",drug:"Προγεστερόνη",dose:"",why:"Ωχρινική ανεπάρκεια.",expect:""}
+ ],
+ trigger:["<b>Μόνο hCG.</b>"],
+ ohss:"Όπως στο μακρύ πρωτόκολλο: σε κίνδυνο, coasting, μειωμένη δόση hCG, freeze-all και καβεργολίνη. Σε αναμενόμενη υψηλή απάντηση προτίμησε εξαρχής ανταγωνιστή.",
+ pearls:["Ίδια αποτελεσματικότητα με τον καθημερινό αγωνιστή, μεγαλύτερο κόστος γοναδοτροπινών {{albuquerque13}}.","Για παρατεταμένη καταστολή 1–3 μηνών, δες «Υπερ-μακρύ πρωτόκολλο»."],
+ refs:["albuquerque13"]
+});
+
+insertProtoAfter("long-depot",{
+ id:"agonist-stop", cat:"stim", name:"«Stop» πρωτόκολλο αγωνιστή", en:"GnRH agonist stop protocol",
+ tags:["Χαμηλές απαντήτριες","Πειραματικό","Αγωνιστής που διακόπτεται"],
+ summary:"Ο αγωνιστής GnRH ξεκινά στην ωχρινική φάση (ή στην αρχή του κύκλου) και διακόπτεται όταν αρχίζει η διέγερση, ώστε η καταστολή να είναι ελαφρύτερη. Συχνά προστίθεται ανταγωνιστής για την πρόληψη της αιχμής LH.",
+ snapshot:{supp:"Αγωνιστής που διακόπτεται + ανταγωνιστής",dur:"≈ 3 εβδομάδες",ohss:"Χαμηλός",ag:"Όχι (μετά από αγωνιστή)",fresh:"Ναι",who:"Επιλεγμένες χαμηλές απαντήτριες, μετά από αποτυχίες"},
+ principle:[
+  "Η ιδέα είναι να συγχρονιστεί η κοόρτη και να αξιοποιηθεί το flare του αγωνιστή, χωρίς τη βαθιά καταστολή του μακρού πρωτοκόλλου που μειώνει την απάντηση στις χαμηλές απαντήτριες.",
+  "Σε μικρές μελέτες κοορτής, η εκδοχή «stop αγωνιστή + ανταγωνιστή» σε «γνήσιες» χαμηλές απαντήτριες (≤ 3 ωάρια με 300 IU) έδωσε περισσότερα ωάρια και έμβρυα καλής ποιότητας από τον προηγούμενο κύκλο της ίδιας ασθενούς, με περισσότερες γοναδοτροπίνες {{orvieto20}}.",
+  "Η εκδοχή «short agonist stop» αύξησε τα ωάρια (7,3 έναντι 5,7) σε σύγκριση με την προηγούμενη προσπάθεια σε 63 γυναίκες κατά POSEIDON· οι συγγραφείς τονίζουν ότι χρειάζεται RCT {{mauries22}}."
+ ],
+ indications:["Γνήσια χαμηλή απάντηση σε προηγούμενο συμβατικό κύκλο","Μόνο μετά από ενημέρωση ότι η τεκμηρίωση είναι προκαταρκτική"],
+ cautions:["Δεν υπάρχουν RCTs με ζώσες γεννήσεις: χρησιμοποίησέ το ως εξατομικευμένη επιλογή","Ο αγωνιστής πριν τη διέγερση αποκλείει το trigger με αγωνιστή","Μεγαλύτερη διάρκεια και δόση γοναδοτροπινών {{orvieto20}}"],
+ timeline:{axis:"Ημέρα κύκλου διέγερσης",from:-8,to:16,ticks:[-6,-2,1,4,8,12,16],
+  rows:[{label:"Αγωνιστής GnRH",bars:[{s:-7,e:1,c:"teal",t:"από ωχρινική φάση, διακοπή στην έναρξη"}]},
+   {label:"FSH / hMG",bars:[{s:1,e:12,c:"acc",t:"300 IU/ημ"}]},
+   {label:"Ανταγωνιστής",bars:[{s:6,e:12,c:"warn",t:"0,25 mg/ημ"}]},
+   {label:"Υπέρηχος / E2",marks:[1,5,7,9,11]},
+   {label:"Trigger → OPU",events:[{d:12,t:"hCG"},{d:13.5,t:"OPU"}]}]},
+ table:[
+  {when:"Μέση ωχρινική φάση (ή Η1, short stop)",drug:"Αγωνιστής GnRH",dose:"Τριπτορελίνη 0,1 mg/ημ υποδόρια",why:"Συγχρονισμός της κοόρτης και flare.",expect:""},
+  {when:"Έναρξη διέγερσης",drug:"Διακοπή αγωνιστή",dose:"",why:"Ελαφρύτερη καταστολή, ώστε να μη μειωθεί η απάντηση.",expect:"Βασικός υπέρηχος χωρίς κύστεις"},
+  {when:"Ημέρα 1 έως trigger",drug:"rFSH ή hMG (± LH)",dose:"Συνήθως 300 IU/ημ",why:"Μέγιστη στρατολόγηση.",expect:""},
+  {when:"Ωοθυλάκιο ≥ 13–14 mm ή E2 > 300 pg/mL",drug:"Ανταγωνιστής GnRH",dose:"0,25 mg/ημ έως το trigger",why:"Η υπόφυση μπορεί να ανακάμψει μετά τη διακοπή: πρόληψη πρόωρης αιχμής LH {{orvieto20}}.",expect:"LH χαμηλή"},
+  {when:"≥ 2–3 ωοθυλάκια ≥ 17 mm",drug:"hCG",dose:"r-hCG 250 μg",why:"Trigger με hCG μετά από αγωνιστή.",expect:"OPU 35–36 ώρες μετά"},
+  {when:"Από την OPU",drug:"Προγεστερόνη",dose:"",why:"Ωχρινική στήριξη.",expect:""}
+ ],
+ trigger:["<b>hCG</b>. Η υπόφυση έχει εκτεθεί σε αγωνιστή και η απάντηση σε trigger με αγωνιστή δεν είναι αξιόπιστη."],
+ ohss:"Πρακτικά αμελητέος στον πληθυσμό αυτό.",
+ pearls:["Πολλές παραλλαγές στη βιβλιογραφία (luteal start stop, short agonist stop, με λετροζόλη): γράψε στον φάκελο ποια ακριβώς χρησιμοποίησες.","Αν η ασθενής δεν απάντησε σε ανταγωνιστή ή flare, πρώτα σκέψου DuoStim ή συσσώρευση ωαρίων/εμβρύων (δες «Χαμηλές απαντήτριες»)."],
+ refs:["orvieto20","mauries22"]
+});
+
+insertProtoAfter("antagonist",{
+ id:"antagonist-pretreat", cat:"stim", name:"Ανταγωνιστής με προετοιμασία (αντισυλληπτικό ή οιστραδιόλη)", en:"Antagonist protocol with OCP or estradiol pretreatment",
+ tags:["Προγραμματισμός κύκλου","Αντισυλληπτικό: μείωση ζώντων γεννήσεων","Οιστραδιόλη: ουδέτερη"],
+ summary:"Πρωτόκολλο ανταγωνιστή όπου η έναρξη της διέγερσης προγραμματίζεται με προηγούμενη λήψη αντισυλληπτικού, προγεσταγόνου ή οιστραδιόλης στην ωχρινική φάση. Χρήσιμο για την οργάνωση του κέντρου, αλλά με διαφορετική τεκμηρίωση ανά φάρμακο.",
+ snapshot:{supp:"Ανταγωνιστής GnRH",dur:"≈ 9–12 ημέρες διέγερσης (+ προετοιμασία)",ohss:"Χαμηλός",ag:"Ναι",fresh:"Ναι",who:"Όταν χρειάζεται προγραμματισμός της ωοληψίας"},
+ principle:[
+  "Αντισυλληπτικό: στην ανασκόπηση Cochrane, η προθεραπεία με αντισυλληπτικό σε κύκλους ανταγωνιστή συνδέθηκε με λιγότερες ζώσες γεννήσεις/εξελισσόμενες κυήσεις σε σύγκριση με καμία προθεραπεία (OR 0,74· 6 RCTs, 1.335 γυναίκες, μέτρια ποιότητα) {{farquhar17}}.",
+  "Οιστραδιόλη στην ωχρινική φάση: σε μετα-ανάλυση 7 RCTs (1.236 ασθενείς) δεν άλλαξαν οι εξελισσόμενες κυήσεις και οι ζώσες γεννήσεις, ούτε η διάρκεια ή η δόση των γοναδοτροπινών· είναι λοιπόν ουδέτερη επιλογή για τον προγραμματισμό {{zhu22}}.",
+  "Προγεσταγόνο: τα δεδομένα είναι ανεπαρκή για να φανεί όφελος ή βλάβη {{farquhar17}}."
+ ],
+ indications:["Οργάνωση ωοληψιών (αποφυγή Σαββατοκύριακων, αργιών)","Ασθενείς με ακανόνιστους κύκλους, για προβλέψιμη έναρξη"],
+ cautions:["Το αντισυλληπτικό να μη χρησιμοποιείται ως ρουτίνα για αποτελεσματικότητα {{farquhar17}}","Αν δοθεί αντισυλληπτικό, άφησε 5 ημέρες από τη διακοπή έως την έναρξη FSH","Η προετοιμασία καθυστερεί την έναρξη κατά ένα κύκλο"],
+ timeline:{axis:"Ημέρα (Η1 = έναρξη FSH)",from:-14,to:14,ticks:[-12,-8,-4,1,5,9,13],
+  rows:[{label:"Οιστραδιόλη (εναλλακτικά)",bars:[{s:-10,e:0,c:"warn",t:"E2 2 mg × 2 από Η20–21"}]},
+   {label:"FSH / hMG",bars:[{s:1,e:10,c:"acc",t:"150–225 IU/ημ"}]},
+   {label:"Ανταγωνιστής",bars:[{s:6,e:10,c:"teal",t:"0,25 mg/ημ"}]},
+   {label:"Υπέρηχος / E2",marks:[1,6,8,10]},
+   {label:"Trigger → OPU",events:[{d:10,t:"hCG ή αγωνιστής"},{d:11.5,t:"OPU"}]}]},
+ table:[
+  {when:"Ημέρα 20–21 προηγούμενου κύκλου",drug:"Οιστραδιόλη (προτιμότερη)",dose:"Οιστραδιόλη 2 mg × 2/ημ από το στόμα έως την περίοδο ή έως την προγραμματισμένη έναρξη",why:"Καταστολή της πρώιμης αύξησης FSH στην ωχρινική φάση και συγχρονισμός της κοόρτης, χωρίς επίδραση στις ζώσες γεννήσεις {{zhu22}}.",expect:"Περίοδος κατά τη λήψη ή μετά τη διακοπή"},
+  {when:"Εναλλακτικά, 12–28 ημέρες πριν",drug:"Αντισυλληπτικό",dose:"1 δισκίο/ημ",why:"Προγραμματισμός. Μειώνει τις ζώσες γεννήσεις στους κύκλους ανταγωνιστή {{farquhar17}}.",expect:"Έναρξη FSH 5 ημέρες μετά τη διακοπή"},
+  {when:"Ημέρα έναρξης",drug:"Βασικός έλεγχος",dose:"Υπέρηχος, E2, P4",why:"Αποκλεισμός κύστεων και πρόωρης ωχρινοποίησης.",expect:"P4 < 1,5 ng/mL"},
+  {when:"Ημέρα 1 έως trigger",drug:"rFSH ή hMG",dose:"Εξατομικευμένα (AMH, AFC, ΔΜΣ)",why:"Όπως στο κλασικό πρωτόκολλο ανταγωνιστή.",expect:""},
+  {when:"Ημέρα 5–6 ή ωοθυλάκιο ≥ 13–14 mm",drug:"Ανταγωνιστής GnRH",dose:"Γκανιρελίξη ή σετρορελίξη 0,25 mg/ημ",why:"Πρόληψη πρόωρης αιχμής LH.",expect:""},
+  {when:"≥ 3 ωοθυλάκια ≥ 17 mm",drug:"hCG ή αγωνιστής GnRH",dose:"r-hCG 250 μg ή τριπτορελίνη 0,2 mg",why:"Ο αγωνιστής όταν υπάρχει κίνδυνος OHSS ή γίνεται freeze-all.",expect:"OPU 35–36 ώρες μετά"}
+ ],
+ trigger:["Όπως στο πρωτόκολλο ανταγωνιστή: <b>hCG</b> για φρέσκια μεταφορά, <b>αγωνιστής</b> σε κίνδυνο OHSS ή freeze-all."],
+ ohss:"Όπως στον ανταγωνιστή: trigger με αγωνιστή και freeze-all σε υψηλή απάντηση.",
+ pearls:["Αν χρειάζεσαι προγραμματισμό, προτίμησε οιστραδιόλη αντί για αντισυλληπτικό {{farquhar17;zhu22}}.","Δες και «Πρωτόκολλο ανταγωνιστή GnRH» για τη βασική λογική."],
+ refs:["farquhar17","zhu22"]
+});
+
+insertProtoAfter("ohss",{
+ id:"dual-trigger", cat:"strategy", name:"Dual και double trigger", en:"Dual and double trigger",
+ tags:["Αγωνιστής + hCG","Χαμηλή ωριμότητα ωαρίων","Σύνδρομο κενού ωοθυλακίου"],
+ summary:"Συνδυασμός αγωνιστή GnRH και hCG για την τελική ωρίμανση: ταυτόχρονα (dual trigger, ≈ 34–36 ώρες πριν την OPU) ή σε διαφορετικό χρόνο (double trigger: αγωνιστής 40 ώρες και hCG 34 ώρες πριν).",
+ snapshot:{supp:"Πρωτόκολλο ανταγωνιστή",dur:"Μόνο η ημέρα του trigger",ohss:"Ανάλογος της δόσης hCG",ag:"Ναι, σε συνδυασμό",fresh:"Ναι",who:"Χαμηλή ωριμότητα ή απόδοση ωαρίων σε προηγούμενο κύκλο"},
+ principle:[
+  "Ο αγωνιστής προκαλεί ενδογενή αιχμή LH και FSH, όπως στον φυσικό κύκλο, ενώ η hCG εξασφαλίζει παρατεταμένη LH δραστικότητα για την ωρίμανση και το ωχρινικό σωμάτιο.",
+  "Μετα-αναλύσεις RCTs βρήκαν περισσότερα ώριμα ωάρια και υψηλότερες ζώσες γεννήσεις με dual trigger σε σύγκριση με μόνο hCG, κυρίως σε φρέσκιες μεταφορές {{hu21;hsia23}}. Στις χαμηλές απαντήτριες το όφελος στηρίζεται κυρίως σε μη τυχαιοποιημένες μελέτες {{sloth22}}.",
+  "Στις υψηλές απαντήτριες, μετα-ανάλυση δικτύου δεν βρήκε διαφορά σε ωάρια ή κυήσεις μεταξύ hCG, αγωνιστή και dual trigger· μόνο ο αγωνιστής μείωσε σημαντικά το OHSS {{beebeejaun26}}.",
+  "Το double trigger (αγωνιστής 40 ώρες και hCG 34 ώρες πριν την OPU) προτάθηκε για γνήσιο σύνδρομο κενού ωοθυλακίου και για χαμηλή αναλογία ωαρίων προς ώριμα ωοθυλάκια· στηρίζεται σε μικρές μελέτες απόδειξης της ιδέας {{haas14}}."
+ ],
+ indications:["Χαμηλή ωριμότητα (MII < 75%) ή λίγα ωάρια σε σχέση με τα ωοθυλάκια σε προηγούμενο κύκλο","Σύνδρομο κενού ωοθυλακίου (double trigger)","Χαμηλές απαντήτριες, ως εξατομικευμένη επιλογή {{sloth22}}"],
+ cautions:["Μόνο σε πρωτόκολλο ανταγωνιστή ή χωρίς καταστολή με αγωνιστή (η υπόφυση πρέπει να απαντά)","Σε υψηλή απάντηση η hCG ξαναφέρνει κίνδυνο OHSS: προτίμησε μόνο αγωνιστή και freeze-all {{beebeejaun26}}","Δεν χρειάζεται ως ρουτίνα σε φυσιολογικές απαντήτριες με καλή ωριμότητα"],
+ timeline:{axis:"Ώρες πριν την ωοληψία",from:-44,to:0,ticks:[-40,-36,-34,-24,-12,0],
+  rows:[{label:"Dual trigger",events:[{d:-35,t:"αγωνιστής + hCG μαζί"}]},
+   {label:"Double trigger: αγωνιστής",events:[{d:-40,t:"τριπτορελίνη"}]},
+   {label:"Double trigger: hCG",events:[{d:-34,t:"hCG"}]},
+   {label:"Ωοληψία",events:[{d:0,t:"OPU"}]}]},
+ table:[
+  {when:"Ημέρα trigger (dual)",drug:"Αγωνιστής GnRH + hCG",dose:"Τριπτορελίνη 0,2 mg + r-hCG 250 μg (ή u-hCG 5.000–10.000 IU), ταυτόχρονα",why:"Αιχμή LH + FSH από τον αγωνιστή και σταθερή LH δραστικότητα από την hCG {{hu21}}.",expect:"OPU 35–36 ώρες μετά"},
+  {when:"Υψηλή απάντηση, εναλλακτικά",drug:"Αγωνιστής + χαμηλή δόση hCG",dose:"Τριπτορελίνη 0,2 mg + u-hCG 1.000–1.500 IU",why:"Υποστήριξη ωχρινικού σωματίου για φρέσκια μεταφορά· ο κίνδυνος OHSS δεν μηδενίζεται {{beebeejaun26}}.",expect:"Εξατομίκευση· σε μεγάλο κίνδυνο freeze-all"},
+  {when:"40 ώρες πριν την OPU (double)",drug:"Αγωνιστής GnRH",dose:"Τριπτορελίνη 0,2 mg",why:"Πρώιμη έναρξη της ωρίμανσης και της αποκόλλησης του ωαρίου.",expect:""},
+  {when:"34 ώρες πριν την OPU (double)",drug:"hCG",dose:"r-hCG 250 μg ή u-hCG 10.000 IU",why:"Ολοκλήρωση της ωρίμανσης {{haas14}}.",expect:""},
+  {when:"Πρωί μετά το trigger (προαιρετικά)",drug:"LH (± P4) ορού",dose:"",why:"Έλεγχος ότι η υπόφυση απάντησε στον αγωνιστή.",expect:"LH > 15 IU/L"},
+  {when:"Από την OPU",drug:"Προγεστερόνη",dose:"Όπως με hCG trigger",why:"Η hCG υποστηρίζει το ωχρινικό σωμάτιο· η τυπική ωχρινική στήριξη επαρκεί.",expect:""}
+ ],
+ trigger:["<b>Dual:</b> αγωνιστής + hCG ταυτόχρονα, 34–36 ώρες πριν την OPU.","<b>Double:</b> αγωνιστής 40 ώρες και hCG 34 ώρες πριν την OPU.","Αν προηγήθηκε αγωνιστής GnRH για καταστολή (μακρύ, flare, stop), ο αγωνιστής ως trigger δεν λειτουργεί αξιόπιστα."],
+ ohss:"Το OHSS εξαρτάται από τη δόση hCG. Σε ≥ 18–20 ωοθυλάκια ≥ 11 mm ή πολύ υψηλή E2 προτίμησε μόνο αγωνιστή και freeze-all.",
+ pearls:["Καταχώρισε στον φάκελο ωάρια και MII: η αναλογία MII/ωάρια < 75% ή ωάρια/ωοθυλάκια < 50% είναι συχνές ενδείξεις για dual ή double trigger στον επόμενο κύκλο.","Δες και «Υψηλές απαντήτριες και PCOS: πρόληψη OHSS»."],
+ refs:["hu21","hsia23","sloth22","beebeejaun26","haas14"]
+});
+
 /* ================= ENGLISH CONTENT ================= */
 PROTOCOLS.length=0; DRUGS.length=0; STUDIES.length=0; QUIZ.length=0;
 PROTOCOLS.push(
@@ -1628,6 +1806,165 @@ QUIZ.push(
 );
 PROTOCOLS.forEach(p=>{p.en="";});
 
+/* ================= NEW PROTOCOLS (EN) ================= */
+insertProtoAfter("flare",{
+ id:"microdose-flare", cat:"stim", name:"Microdose GnRH agonist flare protocol", en:"",
+ tags:["Poor responders","OCP pretreatment","hCG trigger only"],
+ summary:"Very small doses of GnRH agonist twice daily from the start of the cycle, after oral contraceptive pretreatment. It uses the endogenous FSH/LH flare with less stimulation of the previous corpus luteum than the classic short protocol.",
+ snapshot:{supp:"Microdose agonist twice daily from D1",dur:"≈ 10–12 days (after 2–3 wk OCP)",ohss:"Low",ag:"No",fresh:"Yes",who:"Poor responders, after a failed antagonist cycle"},
+ principle:[
+  "The microdose (e.g. leuprolide 20–50 μg twice daily) causes a mild, sustained FSH/LH flare that adds to exogenous gonadotropins, while continued administration eventually prevents a premature LH surge.",
+  "The OCP in the previous cycle suppresses the corpus luteum, so that the flare does not raise progesterone, and synchronises the follicular cohort.",
+  "In a meta-analysis of 3 studies (688 cycles), microdose flare had a higher clinical pregnancy rate than antagonist plus letrozole in poor responders, with a similar number of oocytes; the evidence is limited {{song14}}. In the Cochrane network meta-analysis, antagonist and flare protocols do not clearly differ in live birth {{melo25}}."
+ ],
+ indications:["Poor responders (POSEIDON 3–4), especially after a poor antagonist cycle","When maximal endogenous support of recruitment is wanted"],
+ cautions:["Check E2/P4 before the flare: P4 > 1.5 ng/mL means an active corpus luteum","The OCP may over-suppress an already low reserve: keep it short","The pituitary becomes desensitised: hCG trigger only"],
+ timeline:{axis:"Cycle day (after stopping the OCP)",from:0,to:16,ticks:[1,3,5,7,9,11,13,15],
+  rows:[{label:"OCP (before)",bars:[{s:0,e:0.6,c:"warn",t:"14–21 days before"}]},
+   {label:"Microdose agonist",bars:[{s:1,e:11.5,c:"teal",t:"20–50 μg × 2/day"}]},
+   {label:"FSH / hMG",bars:[{s:3,e:11.5,c:"acc",t:"300 IU/day"}]},
+   {label:"Ultrasound / E2",marks:[1,6,8,10,11]},
+   {label:"Trigger → OPU",events:[{d:11.5,t:"hCG"},{d:13,t:"OPU"}]},
+   {label:"Luteal support",bars:[{s:13,e:16,c:"ok",t:"P4"}]}]},
+ table:[
+  {when:"Previous cycle",drug:"Oral contraceptive",dose:"14–21 days",why:"Suppression of the corpus luteum and cohort synchronisation.",expect:"Withdrawal bleed 3–5 days later"},
+  {when:"Day 1 (≈ 3 days after stopping)",drug:"Baseline check",dose:"Ultrasound, E2, P4",why:"Exclude cysts and an active corpus luteum before the flare.",expect:"E2 < 50 pg/mL, P4 < 1.5 ng/mL, no cysts"},
+  {when:"Day 1 to trigger",drug:"Microdose GnRH agonist",dose:"Leuprolide 20–50 μg (or equivalent triptorelin) SC twice daily",why:"Mild, sustained FSH/LH flare, then prevention of the LH surge.",expect:""},
+  {when:"Day 3 to trigger",drug:"rFSH or hMG (± LH)",dose:"Usually 300 IU/day",why:"Maximal recruitment; higher doses do not appear to add benefit {{eshre19}}.",expect:"Growth ≈ 1–2 mm/day"},
+  {when:"Every 2 days from D6",drug:"Ultrasound, E2, P4",dose:"",why:"Monitor response and premature luteinisation.",expect:"P4 < 1.5 ng/mL on trigger day"},
+  {when:"≥ 2–3 follicles ≥ 17 mm",drug:"hCG",dose:"r-hCG 250 μg or u-hCG 10,000 IU",why:"The agonist cannot be used as trigger.",expect:"OPU at 35–36 hours"},
+  {when:"From OPU",drug:"Progesterone",dose:"As in other protocols",why:"Luteal insufficiency after pituitary desensitisation.",expect:""}
+ ],
+ trigger:["<b>hCG only</b>. A GnRH agonist does not cause an LH surge in a desensitised pituitary."],
+ ohss:"Very rare in this population.",
+ pearls:["No proven superiority over the antagonist; a reasonable alternative when the antagonist has failed {{melo25}}.","See also “Short / flare-up GnRH agonist protocol” and “Poor responders (POSEIDON)”."],
+ refs:["song14","melo25","eshre19"]
+});
+insertProtoAfter("long-agonist",{
+ id:"long-depot", cat:"stim", name:"Long protocol with depot GnRH agonist", en:"",
+ tags:["Single injection","Patient convenience","More gonadotropins"],
+ summary:"The classic long protocol with one depot agonist injection in the mid-luteal phase instead of daily injections. Same outcomes, but deeper suppression.",
+ snapshot:{supp:"Depot agonist (1 injection) from D21",dur:"≈ 4–5 weeks",ohss:"Moderate to high",ag:"No",fresh:"Yes",who:"When a long protocol is preferred and daily injections are a problem"},
+ principle:[
+  "One injection of depot triptorelin or leuprolide (often half or full 3.75 mg) in the mid-luteal phase leads to pituitary suppression in ≈ 2 weeks without daily injections.",
+  "In the Cochrane review (16 RCTs, 1,811 women) there was no difference between depot and daily agonist in live birth/ongoing pregnancy or severe OHSS; depot required more gonadotropins and more days of stimulation {{albuquerque13}}.",
+  "Deeper LH suppression means some patients may need added LH activity."
+ ],
+ indications:["Patients who prefer one injection to daily injections","Centres using the long protocol for scheduling"],
+ cautions:["More gonadotropins and longer stimulation {{albuquerque13}}","Suppression cannot be “switched off” if the cycle is cancelled: it lasts weeks","hCG trigger only: in high responders prefer an antagonist"],
+ timeline:{axis:"Day (D1 = first day of menses after the injection)",from:-10,to:16,ticks:[-8,-4,1,4,8,12,16],
+  rows:[{label:"Depot agonist",events:[{d:-8,t:"1 injection D21"}]},
+   {label:"Suppression",bars:[{s:-8,e:13,c:"teal",t:"lasts weeks"}]},
+   {label:"Suppression check",marks:[2]},
+   {label:"FSH / hMG",bars:[{s:3,e:13,c:"acc",t:"150–300 IU/day"}]},
+   {label:"Trigger → OPU",events:[{d:13,t:"hCG"},{d:14.5,t:"OPU"}]}]},
+ table:[
+  {when:"Day 21 of previous cycle",drug:"Depot GnRH agonist",dose:"Triptorelin or leuprolide 1.875–3.75 mg once",why:"Pituitary suppression without daily injections.",expect:"Menses in ≈ 7–10 days"},
+  {when:"≈ 14 days after the injection",drug:"Suppression check",dose:"Ultrasound + E2 (± LH)",why:"Confirm suppression before stimulation.",expect:"E2 < 50 pg/mL, endometrium < 5 mm, no cysts"},
+  {when:"After suppression to trigger",drug:"rFSH or hMG (± LH)",dose:"150–300 IU/day, often slightly higher than with daily agonist",why:"Deeper suppression needs more stimulation {{albuquerque13}}.",expect:"Growth ≈ 1.5–2 mm/day"},
+  {when:"Every 2–3 days",drug:"Ultrasound, E2",dose:"",why:"Dose adjustment.",expect:""},
+  {when:"≥ 3 follicles ≥ 17 mm",drug:"hCG",dose:"r-hCG 250 μg",why:"The agonist cannot trigger.",expect:"OPU 35–36 hours later"},
+  {when:"From OPU",drug:"Progesterone",dose:"",why:"Luteal insufficiency.",expect:""}
+ ],
+ trigger:["<b>hCG only.</b>"],
+ ohss:"As in the long protocol: when at risk, coasting, reduced hCG dose, freeze-all and cabergoline. For an expected high response choose an antagonist from the start.",
+ pearls:["Same efficacy as daily agonist, higher gonadotropin cost {{albuquerque13}}.","For prolonged 1–3-month suppression, see “Ultra-long GnRH agonist protocol”."],
+ refs:["albuquerque13"]
+});
+insertProtoAfter("long-depot",{
+ id:"agonist-stop", cat:"stim", name:"GnRH agonist stop protocol", en:"",
+ tags:["Poor responders","Experimental","Agonist discontinued"],
+ summary:"The GnRH agonist starts in the luteal phase (or at the start of the cycle) and is stopped when stimulation begins, so that suppression is lighter. An antagonist is often added to prevent the LH surge.",
+ snapshot:{supp:"Agonist that is stopped + antagonist",dur:"≈ 3 weeks",ohss:"Low",ag:"No (after agonist)",fresh:"Yes",who:"Selected poor responders, after failures"},
+ principle:[
+  "The aim is to synchronise the cohort and use the agonist flare, without the deep suppression of the long protocol that reduces response in poor responders.",
+  "In small cohort studies, the “stop agonist + antagonist” version in “genuine” poor responders (≤ 3 oocytes with 300 IU) gave more oocytes and top-quality embryos than the same patient’s previous cycle, with more gonadotropins {{orvieto20}}.",
+  "The “short agonist stop” version increased oocytes (7.3 vs 5.7) compared with the previous attempt in 63 POSEIDON women; the authors stress that an RCT is needed {{mauries22}}."
+ ],
+ indications:["Genuine poor response in a previous conventional cycle","Only after explaining that the evidence is preliminary"],
+ cautions:["No RCTs with live birth: use as an individualised option","Agonist exposure before stimulation rules out an agonist trigger","Longer duration and higher gonadotropin dose {{orvieto20}}"],
+ timeline:{axis:"Stimulation cycle day",from:-8,to:16,ticks:[-6,-2,1,4,8,12,16],
+  rows:[{label:"GnRH agonist",bars:[{s:-7,e:1,c:"teal",t:"from luteal phase, stopped at start"}]},
+   {label:"FSH / hMG",bars:[{s:1,e:12,c:"acc",t:"300 IU/day"}]},
+   {label:"Antagonist",bars:[{s:6,e:12,c:"warn",t:"0.25 mg/day"}]},
+   {label:"Ultrasound / E2",marks:[1,5,7,9,11]},
+   {label:"Trigger → OPU",events:[{d:12,t:"hCG"},{d:13.5,t:"OPU"}]}]},
+ table:[
+  {when:"Mid-luteal phase (or D1, short stop)",drug:"GnRH agonist",dose:"Triptorelin 0.1 mg/day SC",why:"Cohort synchronisation and flare.",expect:""},
+  {when:"Start of stimulation",drug:"Stop the agonist",dose:"",why:"Lighter suppression so that response is not reduced.",expect:"Baseline scan without cysts"},
+  {when:"Day 1 to trigger",drug:"rFSH or hMG (± LH)",dose:"Usually 300 IU/day",why:"Maximal recruitment.",expect:""},
+  {when:"Follicle ≥ 13–14 mm or E2 > 300 pg/mL",drug:"GnRH antagonist",dose:"0.25 mg/day until trigger",why:"The pituitary may recover after stopping: prevent a premature LH surge {{orvieto20}}.",expect:"Low LH"},
+  {when:"≥ 2–3 follicles ≥ 17 mm",drug:"hCG",dose:"r-hCG 250 μg",why:"hCG trigger after agonist exposure.",expect:"OPU 35–36 hours later"},
+  {when:"From OPU",drug:"Progesterone",dose:"",why:"Luteal support.",expect:""}
+ ],
+ trigger:["<b>hCG</b>. The pituitary has been exposed to agonist and the response to an agonist trigger is unreliable."],
+ ohss:"Practically negligible in this population.",
+ pearls:["Many variants in the literature (luteal-start stop, short agonist stop, with letrozole): record in the folder exactly which one you used.","If the patient failed antagonist or flare, first consider DuoStim or oocyte/embryo accumulation (see “Poor responders”)."],
+ refs:["orvieto20","mauries22"]
+});
+insertProtoAfter("antagonist",{
+ id:"antagonist-pretreat", cat:"stim", name:"Antagonist protocol with OCP or estradiol pretreatment", en:"",
+ tags:["Cycle scheduling","OCP: fewer live births","Estradiol: neutral"],
+ summary:"Antagonist protocol where the start of stimulation is scheduled with prior oral contraceptive, progestogen or luteal estradiol. Useful for clinic organisation, but the evidence differs by drug.",
+ snapshot:{supp:"GnRH antagonist",dur:"≈ 9–12 days of stimulation (+ pretreatment)",ohss:"Low",ag:"Yes",fresh:"Yes",who:"When oocyte retrieval needs scheduling"},
+ principle:[
+  "Oral contraceptive: in the Cochrane review, OCP pretreatment in antagonist cycles was associated with fewer live births/ongoing pregnancies than no pretreatment (OR 0.74; 6 RCTs, 1,335 women, moderate quality) {{farquhar17}}.",
+  "Luteal estradiol: in a meta-analysis of 7 RCTs (1,236 patients) ongoing pregnancy and live birth did not change, nor did gonadotropin duration or dose; it is therefore a neutral option for scheduling {{zhu22}}.",
+  "Progestogen: evidence is insufficient to show benefit or harm {{farquhar17}}."
+ ],
+ indications:["Scheduling of retrievals (avoiding weekends, holidays)","Irregular cycles, for a predictable start"],
+ cautions:["Do not use the OCP routinely for efficacy {{farquhar17}}","If an OCP is used, allow 5 days from stopping to starting FSH","Pretreatment delays the start by one cycle"],
+ timeline:{axis:"Day (D1 = start of FSH)",from:-14,to:14,ticks:[-12,-8,-4,1,5,9,13],
+  rows:[{label:"Estradiol (alternative)",bars:[{s:-10,e:0,c:"warn",t:"E2 2 mg × 2 from D20–21"}]},
+   {label:"FSH / hMG",bars:[{s:1,e:10,c:"acc",t:"150–225 IU/day"}]},
+   {label:"Antagonist",bars:[{s:6,e:10,c:"teal",t:"0.25 mg/day"}]},
+   {label:"Ultrasound / E2",marks:[1,6,8,10]},
+   {label:"Trigger → OPU",events:[{d:10,t:"hCG or agonist"},{d:11.5,t:"OPU"}]}]},
+ table:[
+  {when:"Day 20–21 of previous cycle",drug:"Estradiol (preferred)",dose:"Estradiol 2 mg twice daily orally until menses or the planned start",why:"Suppresses the early luteal FSH rise and synchronises the cohort, without effect on live birth {{zhu22}}.",expect:"Menses during or after stopping"},
+  {when:"Alternatively, 12–28 days before",drug:"Oral contraceptive",dose:"1 tablet/day",why:"Scheduling. Reduces live birth in antagonist cycles {{farquhar17}}.",expect:"Start FSH 5 days after stopping"},
+  {when:"Start day",drug:"Baseline check",dose:"Ultrasound, E2, P4",why:"Exclude cysts and premature luteinisation.",expect:"P4 < 1.5 ng/mL"},
+  {when:"Day 1 to trigger",drug:"rFSH or hMG",dose:"Individualised (AMH, AFC, BMI)",why:"As in the standard antagonist protocol.",expect:""},
+  {when:"Day 5–6 or follicle ≥ 13–14 mm",drug:"GnRH antagonist",dose:"Ganirelix or cetrorelix 0.25 mg/day",why:"Prevent a premature LH surge.",expect:""},
+  {when:"≥ 3 follicles ≥ 17 mm",drug:"hCG or GnRH agonist",dose:"r-hCG 250 μg or triptorelin 0.2 mg",why:"Agonist when there is OHSS risk or freeze-all.",expect:"OPU 35–36 hours later"}
+ ],
+ trigger:["As in the antagonist protocol: <b>hCG</b> for fresh transfer, <b>agonist</b> for OHSS risk or freeze-all."],
+ ohss:"As with the antagonist: agonist trigger and freeze-all in high response.",
+ pearls:["If you need scheduling, prefer estradiol over the OCP {{farquhar17;zhu22}}.","See also “GnRH antagonist protocol”."],
+ refs:["farquhar17","zhu22"]
+});
+insertProtoAfter("ohss",{
+ id:"dual-trigger", cat:"strategy", name:"Dual and double trigger", en:"",
+ tags:["Agonist + hCG","Low oocyte maturity","Empty follicle syndrome"],
+ summary:"Combination of GnRH agonist and hCG for final maturation: simultaneously (dual trigger, ≈ 34–36 hours before OPU) or at different times (double trigger: agonist 40 hours and hCG 34 hours before).",
+ snapshot:{supp:"Antagonist protocol",dur:"Trigger day only",ohss:"Depends on the hCG dose",ag:"Yes, combined",fresh:"Yes",who:"Low maturity or oocyte yield in a previous cycle"},
+ principle:[
+  "The agonist induces an endogenous LH and FSH surge, as in the natural cycle, while hCG provides sustained LH activity for maturation and the corpus luteum.",
+  "Meta-analyses of RCTs found more mature oocytes and higher live birth with dual trigger than hCG alone, mainly in fresh transfers {{hu21;hsia23}}. In poor responders the benefit rests mainly on non-randomised studies {{sloth22}}.",
+  "In high responders, a network meta-analysis found no difference in oocytes or pregnancy between hCG, agonist and dual trigger; only the agonist significantly reduced OHSS {{beebeejaun26}}.",
+  "The double trigger (agonist 40 hours and hCG 34 hours before OPU) was proposed for genuine empty follicle syndrome and a low oocyte-to-follicle ratio; it rests on small proof-of-concept studies {{haas14}}."
+ ],
+ indications:["Low maturity (MII < 75%) or few oocytes relative to follicles in a previous cycle","Empty follicle syndrome (double trigger)","Poor responders, as an individualised option {{sloth22}}"],
+ cautions:["Only in antagonist or non-suppressed cycles (the pituitary must respond)","In high response, hCG brings back OHSS risk: prefer agonist only and freeze-all {{beebeejaun26}}","Not needed routinely in normal responders with good maturity"],
+ timeline:{axis:"Hours before retrieval",from:-44,to:0,ticks:[-40,-36,-34,-24,-12,0],
+  rows:[{label:"Dual trigger",events:[{d:-35,t:"agonist + hCG together"}]},
+   {label:"Double trigger: agonist",events:[{d:-40,t:"triptorelin"}]},
+   {label:"Double trigger: hCG",events:[{d:-34,t:"hCG"}]},
+   {label:"Retrieval",events:[{d:0,t:"OPU"}]}]},
+ table:[
+  {when:"Trigger day (dual)",drug:"GnRH agonist + hCG",dose:"Triptorelin 0.2 mg + r-hCG 250 μg (or u-hCG 5,000–10,000 IU), together",why:"LH + FSH surge from the agonist and stable LH activity from hCG {{hu21}}.",expect:"OPU 35–36 hours later"},
+  {when:"High response, alternatively",drug:"Agonist + low-dose hCG",dose:"Triptorelin 0.2 mg + u-hCG 1,000–1,500 IU",why:"Corpus luteum support for fresh transfer; OHSS risk is not eliminated {{beebeejaun26}}.",expect:"Individualise; freeze-all if high risk"},
+  {when:"40 hours before OPU (double)",drug:"GnRH agonist",dose:"Triptorelin 0.2 mg",why:"Early start of maturation and oocyte detachment.",expect:""},
+  {when:"34 hours before OPU (double)",drug:"hCG",dose:"r-hCG 250 μg or u-hCG 10,000 IU",why:"Completes maturation {{haas14}}.",expect:""},
+  {when:"Morning after trigger (optional)",drug:"Serum LH (± P4)",dose:"",why:"Check that the pituitary responded to the agonist.",expect:"LH > 15 IU/L"},
+  {when:"From OPU",drug:"Progesterone",dose:"As with hCG trigger",why:"hCG supports the corpus luteum; standard luteal support is enough.",expect:""}
+ ],
+ trigger:["<b>Dual:</b> agonist + hCG together, 34–36 hours before OPU.","<b>Double:</b> agonist 40 hours and hCG 34 hours before OPU.","If a GnRH agonist was used for suppression (long, flare, stop), an agonist trigger is not reliable."],
+ ohss:"OHSS depends on the hCG dose. With ≥ 18–20 follicles ≥ 11 mm or very high E2, prefer agonist only and freeze-all.",
+ pearls:["Record oocytes and MII in the folder: MII/oocytes < 75% or oocytes/follicles < 50% are common reasons to use dual or double trigger in the next cycle.","See also “High responders and PCOS: OHSS prevention”."],
+ refs:["hu21","hsia23","sloth22","beebeejaun26","haas14"]
+});
+
 /* ================= HELPERS ================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -1654,7 +1991,7 @@ function navHTML(h){
    <div class="navgrp">Clinic</div>${L("tracker","Patients")}${L("tools","Tools")}${L("quiz","Quiz")}
    <div class="navgrp">Information</div>${L("author","About")}${L("refs","References")}${L("about","Methodology and roadmap")}${L("terms","Terms and privacy")}`;
 }
-const NAVN={"antagonist":"GnRH antagonist","long-agonist":"Long agonist","flare":"Short (flare)","ultra-long":"Ultra-long","ppos":"PPOS","mild":"Mild / natural IVF","duostim":"DuoStim","fp-random":"Fertility preservation","ivm":"IVM","poseidon":"Low responders","ohss":"High responders / OHSS","fet-hrt":"HRT cycle","fet-nc":"Natural cycle","fet-letrozole":"Letrozole","fet-donor":"Oocyte recipient","sp-endo":"Endometriosis","sp-hydro":"Hydrosalpinx","sp-rif":"Implantation failure (RIF)","sp-male":"Male factor / ICSI","sp-thromb":"Thrombophilia / heparin"};
+const NAVN={"antagonist":"GnRH antagonist","long-agonist":"Long agonist","flare":"Short (flare)","microdose-flare":"Microdose flare","long-depot":"Long with depot","agonist-stop":"«Stop» agonist","antagonist-pretreat":"Antagonist with pretreatment","dual-trigger":"Dual / double trigger","ultra-long":"Ultra-long","ppos":"PPOS","mild":"Mild / natural IVF","duostim":"DuoStim","fp-random":"Fertility preservation","ivm":"IVM","poseidon":"Low responders","ohss":"High responders / OHSS","fet-hrt":"HRT cycle","fet-nc":"Natural cycle","fet-letrozole":"Letrozole","fet-donor":"Oocyte recipient","sp-endo":"Endometriosis","sp-hydro":"Hydrosalpinx","sp-rif":"Implantation failure (RIF)","sp-male":"Male factor / ICSI","sp-thromb":"Thrombophilia / heparin"};
 function navName(p){return NAVN[p.id]||p.name;}
 function route(){
   const h=(location.hash||"#home").slice(1);
@@ -2420,7 +2757,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* update check */
-const BUILD="1795453595";
+const BUILD="1795523625";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='A new version is available <button class="btn sm" onclick="location.reload()">Refresh</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
