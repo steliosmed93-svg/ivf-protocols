@@ -158,6 +158,18 @@ abbr[title]{text-decoration:underline dotted;text-underline-offset:2px;cursor:he
 .abbrbox dt{font-weight:700;min-width:62px;color:var(--accent)}.abbrbox dd{margin:0;color:var(--ink-2)}
 .abbr-en{display:block;font-size:12px;color:var(--ink-3)}
 @media print{.abbrbox{display:block}}
+.exadd{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.exadd .f{flex:1 1 140px;min-width:0;margin:0}.exadd .f input{width:100%;box-sizing:border-box}.exadd .exn{flex:2 1 220px}.exadd .btn{flex:0 0 auto}
+.exadd.rep{margin:8px 0;padding:10px;border:1px dashed var(--line);border-radius:8px}
+.exhint{min-height:1em;margin:6px 0 4px;color:var(--ink-2)}
+.exlist{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.exitem{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--paper)}
+.exhead{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.exact{margin-left:auto;display:flex;gap:6px}
+.btn.sm{padding:5px 10px;font-size:13px}
+.extbl{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}.extbl th{text-align:left;font-size:12px;color:var(--ink-3);font-weight:600;padding:2px 4px}
+.extbl td{padding:3px 4px;border-top:1px solid var(--line)}.extbl input{width:100%;border:1px solid transparent;background:transparent;font:inherit;color:inherit;padding:4px 6px;border-radius:6px}
+.extbl input:hover,.extbl input:focus{border-color:var(--line);background:var(--card)}
+.exx{border:0;background:none;color:var(--crit);cursor:pointer;font-size:15px;padding:4px 8px}
+
 details.acc{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0 14px;margin:8px 0}
 details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 .pill-n{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
@@ -1489,6 +1501,79 @@ function applyAbbr(root){
     const t=tip||Object.assign(document.createElement("div"),{id:"abbrTip"});t.textContent=a.textContent+": "+a.title;document.body.appendChild(t);
     const r=a.getBoundingClientRect();t.style.left=Math.max(8,Math.min(window.innerWidth-t.offsetWidth-8,r.left))+"px";t.style.top=(r.bottom+window.scrollY+6)+"px";});
 })();
+
+/* ---- Εξετάσεις ασθενούς: κατάλογος με ονομασίες όπως στην ηλεκτρονική συνταγογράφηση + ελεύθερη σημείωση ---- */
+const EXCAT=[
+["Αιματολογικές",["Γενική εξέταση αίματος","Ομάδα αίματος και Rhesus","Έμμεση Coombs","Άμεση Coombs","Ηλεκτροφόρηση αιμοσφαιρίνης","Δρεπανοκυτταρική δοκιμασία (Sickling test)","Ταχύτητα καθίζησης ερυθρών (ΤΚΕ)","Δικτυοερυθροκύτταρα"]],
+["Πήξη και θρομβοφιλία",["Χρόνος προθρομβίνης (PT, INR)","Χρόνος μερικής θρομβοπλαστίνης (APTT)","Ινωδογόνο","D-Dimers","Αντιθρομβίνη ΙΙΙ","Πρωτεΐνη C","Πρωτεΐνη S (ελεύθερη)","Αντίσταση στην ενεργοποιημένη πρωτεΐνη C (APC-R)","Αντιπηκτικό του λύκου","Αντικαρδιολιπινικά αντισώματα IgG","Αντικαρδιολιπινικά αντισώματα IgM","Αντισώματα έναντι β2-γλυκοπρωτεΐνης Ι IgG","Αντισώματα έναντι β2-γλυκοπρωτεΐνης Ι IgM","Μετάλλαξη παράγοντα V Leiden","Μετάλλαξη προθρομβίνης G20210A","Μετάλλαξη MTHFR C677T","Μετάλλαξη MTHFR A1298C","Πολυμορφισμός PAI-1","Ομοκυστεΐνη"]],
+["Βιοχημικές",["Σάκχαρο","Καμπύλη σακχάρου (OGTT 75 g)","Γλυκοζυλιωμένη αιμοσφαιρίνη (HbA1c)","Ινσουλίνη","Ουρία","Κρεατινίνη","Ουρικό οξύ","SGOT (AST)","SGPT (ALT)","γ-GT","Αλκαλική φωσφατάση (ALP)","Χολερυθρίνη ολική και άμεση","LDH","Ολικά λευκώματα","Λευκωματίνη","Κάλιο","Νάτριο","Ασβέστιο","Μαγνήσιο","Φώσφορος","Σίδηρος","Φερριτίνη","Τρανσφερρίνη / TIBC","Βιταμίνη Β12","Φυλλικό οξύ","25-OH Βιταμίνη D","Χοληστερόλη ολική","HDL χοληστερόλη","LDL χοληστερόλη","Τριγλυκερίδια","C-αντιδρώσα πρωτεΐνη (CRP)","Χολικά οξέα","Λεύκωμα ούρων 24ώρου","Λόγος λευκωματίνης / κρεατινίνης ούρων"]],
+["Ορμονικές",["FSH","LH","Οιστραδιόλη (E2)","Προγεστερόνη","Προλακτίνη","Αντιμυλλέρειος ορμόνη (AMH)","Τεστοστερόνη ολική","Ελεύθερη τεστοστερόνη","Δ4-Ανδροστενδιόνη","DHEA-S","17-OH Προγεστερόνη","SHBG","β-hCG ποσοτική","TSH","FT4","FT3","Αντι-TPO αντισώματα","Αντι-Tg αντισώματα","Κορτιζόλη","Αυξητική ορμόνη (GH)","IGF-1"]],
+["Ορολογικές / λοιμώξεις",["HBsAg","Anti-HBs","Anti-HBc","Anti-HCV","Anti-HIV 1/2","VDRL / RPR","TPHA","Ερυθρά IgG","Ερυθρά IgM","Τοξόπλασμα IgG","Τοξόπλασμα IgM","Τοξόπλασμα avidity IgG","CMV IgG","CMV IgM","CMV avidity IgG","Ανεμευλογιά (VZV) IgG","Παρβοϊός B19 IgG","Παρβοϊός B19 IgM","HSV 1/2 IgG","Chlamydia trachomatis IgG"]],
+["Μικροβιολογικές",["Γενική εξέταση ούρων","Καλλιέργεια ούρων","Καλλιέργεια κολπικού υγρού","Καλλιέργεια τραχηλικού επιχρίσματος","Καλλιέργεια για Mycoplasma / Ureaplasma","PCR Chlamydia trachomatis","PCR Neisseria gonorrhoeae","Καλλιέργεια για στρεπτόκοκκο ομάδας Β (κόλπος-ορθό)","Σπερμοδιάγραμμα","Καλλιέργεια σπέρματος","Κατακερματισμός DNA σπερματοζωαρίων"]],
+["Κυτταρολογικές / μοριακές",["Τεστ Παπανικολάου","Τεστ Παπανικολάου υγρής φάσης","HPV DNA test","Γονοτύπηση HPV","Κολποσκόπηση","Βιοψία τραχήλου","Βιοψία ενδομητρίου"]],
+["Γενετικές / προγεννητικές",["Καρυότυπος περιφερικού αίματος","Έλεγχος φορείας κυστικής ίνωσης (CFTR)","Έλεγχος φορείας νωτιαίας μυϊκής ατροφίας (SMA)","Έλεγχος Fragile X","PAPP-A","Ελεύθερη β-hCG","PlGF","Λόγος sFlt-1 / PlGF","α-Εμβρυϊκή πρωτεΐνη (AFP)","Μη επεμβατικός προγεννητικός έλεγχος (NIPT)","Λήψη χοριακών λαχνών (CVS)","Αμνιοπαρακέντηση"]],
+["Απεικονιστικές",["Υπερηχογράφημα έσω γεννητικών οργάνων (διακολπικό)","Υπερηχογράφημα αυχενικής διαφάνειας","Υπερηχογράφημα Β΄ επιπέδου","Υπερηχογράφημα ανάπτυξης εμβρύου","Doppler εμβρύου / ομφαλίου","Υπερηχογράφημα μαστών","Μαστογραφία","Υστεροσαλπιγγογραφία","Υστεροσαλπιγγοσκόπηση με υπερήχους (HyCoSy)","Υστεροσκόπηση","Μαγνητική τομογραφία πυέλου","Μέτρηση οστικής πυκνότητας (DEXA)","Καρδιοτοκογράφημα (NST)"]]];
+const EXALL=[];EXCAT.forEach(([c,L])=>L.forEach(n=>EXALL.push([n,c])));
+const exNorm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/\s+/g," ").trim();
+const EXIDX=new Map(EXALL.map(([n,c])=>[exNorm(n),[n,c]]));
+const exToday=()=>new Date().toISOString().slice(0,10);
+const exFmt=d=>d?d.split("-").reverse().join("/"):"";
+let EXOPEN={};
+function examsHTML(t,id){
+  const r=recFind(t,id); if(!r) return "";
+  const X=(r.exams||[]).map((x,i)=>({x,i}));
+  const last=e=>[...(e.x.entries||[])].sort((a,b)=>(b.d||"").localeCompare(a.d||""))[0];
+  X.sort((a,b)=>((last(b)||{}).d||"").localeCompare((last(a)||{}).d||""));
+  const key=t+":"+id;
+  return `<div class="card exw" data-exw="${key}"><h3>Εξετάσεις</h3>
+  <p class="small muted">Επίλεξε εξέταση από τον κατάλογο (ονομασίες όπως στην ηλεκτρονική συνταγογράφηση). Αν δεν υπάρχει, γράψε την ελεύθερα: αποθηκεύεται ως σημείωση. Με «+ Επανάληψη» προσθέτεις νέα ημερομηνία στην ίδια εξέταση όσες φορές χρειάζεται.</p>
+  <div class="exadd">
+   <label class="f exn">Εξέταση<input data-exin="name" list="exdl" placeholder="Γράψε για αναζήτηση…" autocomplete="off"></label>
+   <label class="f">Ημερομηνία<input data-exin="d" type="date" value="${exToday()}"></label>
+   <label class="f">Αποτέλεσμα<input data-exin="v" placeholder="π.χ. 2,1 ng/ml"></label>
+   <label class="f exn">Σημείωση<input data-exin="n" placeholder="προαιρετικά"></label>
+   <button class="btn pri" data-exadd>+ Προσθήκη</button>
+  </div>
+  <p class="small exhint" data-exhint></p>
+  ${X.length?`<div class="exlist">${X.map(({x,i})=>{const E=(x.entries||[]).map((e,j)=>({e,j})).sort((a,b)=>(b.e.d||"").localeCompare(a.e.d||""));const op=EXOPEN[key+":"+i];
+   return `<div class="exitem"><div class="exhead"><b>${esc(x.name)}</b>${x.custom?`<span class="chip warn">Σημείωση · εκτός καταλόγου</span>`:`<span class="chip">${esc(x.cat||"")}</span>`}<span class="small muted">${E.length} ${E.length===1?"φορά":"φορές"}</span>
+     <span class="exact"><button class="btn sm" data-exrep="${i}">+ Επανάληψη</button><button class="btn sm ghost" data-exdel="${i}">Διαγραφή</button></span></div>
+     ${op?`<div class="exadd rep"><label class="f">Ημερομηνία<input data-exrin="d" type="date" value="${exToday()}"></label><label class="f">Αποτέλεσμα<input data-exrin="v"></label><label class="f exn">Σημείωση<input data-exrin="n"></label><button class="btn pri" data-exrsave="${i}">Αποθήκευση</button><button class="btn ghost" data-exrcancel="${i}">Άκυρο</button></div>`:""}
+     <table class="extbl"><thead><tr><th>Ημερομηνία</th><th>Αποτέλεσμα</th><th>Σημείωση</th><th></th></tr></thead><tbody>${E.map(({e,j})=>`<tr><td><input type="date" data-exe="${i}.${j}.d" value="${esc(e.d||"")}"></td><td><input data-exe="${i}.${j}.v" value="${esc(e.v||"")}" placeholder="–"></td><td><input data-exe="${i}.${j}.n" value="${esc(e.n||"")}" placeholder="–"></td><td><button class="exx" data-exedel="${i}.${j}" title="Διαγραφή μέτρησης" aria-label="Διαγραφή μέτρησης">✕</button></td></tr>`).join("")}</tbody></table></div>`;}).join("")}</div>`:`<p class="muted small">Δεν έχουν καταχωριστεί εξετάσεις.</p>`}
+  </div>`;
+}
+function exDatalist(){if(document.getElementById("exdl"))return;const d=document.createElement("datalist");d.id="exdl";d.innerHTML=EXALL.map(([n,c])=>`<option value="${esc(n)}">${esc(c)}</option>`).join("");document.body.appendChild(d);}
+function exRerender(w){const [t,id]=w.dataset.exw.split(":");const y=window.scrollY;w.outerHTML=examsHTML(t,id);exDatalist();window.scrollTo(0,y);}
+function exRec(w){const [t,id]=w.dataset.exw.split(":");const r=recFind(t,id);if(r&&!r.exams)r.exams=[];return r;}
+function exAdd(r,name,entry){
+  const k=exNorm(name),hit=EXIDX.get(k);const nm=hit?hit[0]:name.trim();
+  let x=r.exams.find(e=>exNorm(e.name)===exNorm(nm));
+  if(!x){x={name:nm,cat:hit?hit[1]:"",custom:!hit,entries:[]};r.exams.push(x);}
+  x.entries.push(entry);return x;
+}
+document.addEventListener("click",e=>{
+  const w=e.target.closest&&e.target.closest("[data-exw]");if(!w)return;
+  const r=exRec(w);if(!r)return;const key=w.dataset.exw,b=e.target.closest("button");if(!b)return;
+  if(b.hasAttribute("data-exadd")){
+    const g=k=>w.querySelector(`[data-exin="${k}"]`).value.trim();const nm=g("name");
+    if(!nm){const h=w.querySelector("[data-exhint]");h.textContent="Γράψε ή διάλεξε πρώτα μια εξέταση.";w.querySelector('[data-exin="name"]').focus();return;}
+    exAdd(r,nm,{d:g("d"),v:g("v"),n:g("n")});save();exRerender(w);return;}
+  if(b.dataset.exrep!=null){EXOPEN[key+":"+b.dataset.exrep]=1;exRerender(w);return;}
+  if(b.dataset.exrcancel!=null){delete EXOPEN[key+":"+b.dataset.exrcancel];exRerender(w);return;}
+  if(b.dataset.exrsave!=null){const i=+b.dataset.exrsave,box=b.closest(".exadd"),g=k=>box.querySelector(`[data-exrin="${k}"]`).value.trim();
+    r.exams[i].entries.push({d:g("d"),v:g("v"),n:g("n")});delete EXOPEN[key+":"+i];save();exRerender(w);return;}
+  if(b.dataset.exdel!=null){if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="Σίγουρα; Πάτα ξανά";setTimeout(()=>{if(b.isConnected){b.dataset.sure="";b.textContent="Διαγραφή";}},4000);return;}
+    r.exams.splice(+b.dataset.exdel,1);save();exRerender(w);return;}
+  if(b.dataset.exedel!=null){const [i,j]=b.dataset.exedel.split(".").map(Number);r.exams[i].entries.splice(j,1);if(!r.exams[i].entries.length)r.exams.splice(i,1);save();exRerender(w);return;}
+});
+document.addEventListener("change",e=>{
+  const w=e.target.closest&&e.target.closest("[data-exw]");if(!w)return;const r=exRec(w);if(!r)return;
+  const a=e.target.dataset.exe;if(a){const [i,j,f]=a.split(".");const en=r.exams[+i]&&r.exams[+i].entries[+j];if(en){en[f]=e.target.value.trim();save();}return;}
+  if(e.target.dataset.exin==="name"){const h=w.querySelector("[data-exhint]"),v=e.target.value.trim(),hit=EXIDX.get(exNorm(v));
+    h.textContent=!v?"":hit?"✓ Από τον κατάλογο: "+hit[1]:"Δεν υπάρχει στον κατάλογο: θα αποθηκευτεί ως σημείωση (ελεύθερο κείμενο).";}
+});
+document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const w=e.target.closest&&e.target.closest("[data-exw]");if(!w||!e.target.dataset.exin)return;e.preventDefault();w.querySelector("[data-exadd]").click();});
+new MutationObserver(()=>{if(document.querySelector("[data-exw]"))exDatalist();}).observe(document.documentElement,{childList:true,subtree:true});
 
 /* ================= ENGLISH CONTENT ================= */
 PROTOCOLS.length=0; DRUGS.length=0; STUDIES.length=0; QUIZ.length=0;
@@ -3048,6 +3133,7 @@ function ptPane(p){
   </div><p class="small" style="margin-bottom:0"><b>POSEIDON:</b> <span class="chip acc">${esc(pos.g)}</span> ${esc(pos.t)} ${cite("{{poseidon16}}")}</p></div>
   <div class="tabs">${p.cycles.map(x=>`<button class="tab${x.id===CURC?" on":""}" data-cyc="${x.id}">${esc(x.label||"Cycle")}</button>`).join("")}<button class="tab" id="addCyc">+ New cycle</button></div>
   ${c?cyclePane(p,c):`<p class="muted">No cycle yet. Press “+ New cycle”.</p>`}
+  ${examsHTML("ivf",p.id)}
   <div class="row" style="margin-top:18px"><button class="btn danger" id="delPt">Delete folder</button></div>`;
 }
 function cyclePane(p,c){
@@ -3172,7 +3258,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* update check */
-const BUILD="1795532257";
+const BUILD="1795816326";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='A new version is available <button class="btn sm" onclick="location.reload()">Refresh</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
