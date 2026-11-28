@@ -172,6 +172,20 @@ abbr[title]{text-decoration:underline dotted;text-underline-offset:2px;cursor:he
 .extbl input:hover,.extbl input:focus{border-color:var(--line);background:var(--card)}
 .exx{border:0;background:none;color:var(--crit);cursor:pointer;font-size:15px;padding:4px 8px}
 
+.phbtns{gap:8px;align-items:flex-end;flex-wrap:wrap}.phbtns label.btn{cursor:pointer}.phtype{margin:0;min-width:180px}
+.phstat{color:var(--accent);font-weight:600}
+.phgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:10px}
+.phit{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper);display:flex;flex-direction:column}
+.phthumb{position:relative;border:0;padding:0;background:#111;cursor:zoom-in;aspect-ratio:4/3;display:block;width:100%}
+.phthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.phloc{position:absolute;left:6px;top:6px;background:var(--warn);color:#fff;font-size:11px;padding:1px 6px;border-radius:6px}
+.phit figcaption{display:flex;flex-direction:column;gap:4px;padding:6px}.phit figcaption input,.phit figcaption select{font:inherit;font-size:13px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);width:100%;box-sizing:border-box}
+.phdel{align-self:flex-end;border:0;background:none;color:var(--crit);font-size:12.5px;cursor:pointer;padding:2px 4px}
+.phlb{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);display:flex;flex-direction:column}
+.phlb-top{display:flex;justify-content:space-between;align-items:center;color:#fff;padding:10px 14px;font-size:14px}.phlb-top button{background:none;border:0;color:#fff;font-size:24px;cursor:pointer}
+.phlb-img{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;position:relative}.phlb-img img{max-width:100%;max-height:100%;object-fit:contain;touch-action:pinch-zoom}
+.phlb-img img.blur{filter:blur(6px)}.phlb-err{position:absolute;bottom:20px;color:#fff;background:rgba(0,0,0,.6);padding:8px 12px;border-radius:8px}
+.phlb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:0;color:#fff;font-size:36px;width:48px;height:64px;border-radius:8px;cursor:pointer}.phlb-nav.l{left:8px}.phlb-nav.r{right:8px}
 details.acc{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0 14px;margin:8px 0}
 details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 .pill-n{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
@@ -1814,6 +1828,88 @@ document.addEventListener("change",e=>{
 document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const w=e.target.closest&&e.target.closest("[data-exw]");if(!w||!e.target.dataset.exin)return;e.preventDefault();w.querySelector("[data-exadd]").click();});
 new MutationObserver(()=>{if(document.querySelector("[data-exw]"))exDatalist();}).observe(document.documentElement,{childList:true,subtree:true});
 
+/* ---- Φωτογραφίες ασθενούς: λήψη με κάμερα ή από συλλογή, κρυπτογραφημένο ανέβασμα ---- */
+const PH_MAX=1600, PH_THUMB=220, PH_TYPES=["Υπερηχογράφημα","Εξέταση / αποτέλεσμα","Παραπεμπτικό / έγγραφο","Άλλο"];
+const PHCACHE={}; let PHPEND={};
+function phLoadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{res(im);setTimeout(()=>URL.revokeObjectURL(u),1000);};im.onerror=rej;im.src=u;});}
+function phResize(im,max,q){const s=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)),w=Math.round(im.naturalWidth*s),h=Math.round(im.naturalHeight*s);
+  const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);return {u:c.toDataURL("image/jpeg",q),w,h};}
+/* local store: IndexedDB */
+function phIDB(){return new Promise((res,rej)=>{const r=indexedDB.open("ivfprot-photos",1);r.onupgradeneeded=()=>r.result.createObjectStore("p");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function phIdbPut(k,v){const db=await phIDB();return new Promise((res,rej)=>{const t=db.transaction("p","readwrite");t.objectStore("p").put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error);});}
+async function phIdbGet(k){const db=await phIDB();return new Promise((res,rej)=>{const t=db.transaction("p");const r=t.objectStore("p").get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function phIdbDel(k){const db=await phIDB();return new Promise(res=>{const t=db.transaction("p","readwrite");t.objectStore("p").delete(k);t.oncomplete=res;t.onerror=res;});}
+const phCloud=()=>MODE==="cloud"&&FS&&USER&&CKEY;
+const phDoc=id=>FS.collection("users").doc(USER.uid).collection("photos").doc(id);
+async function phStore(id,dataUrl){
+  if(phCloud()){await phDoc(id).set({...(await encObj({u:dataUrl})),t:Date.now()});return "cloud";}
+  await phIdbPut(id,dataUrl);return "local";}
+async function phFetch(ph){
+  if(PHCACHE[ph.id]) return PHCACHE[ph.id];
+  let u=null;
+  if(ph.where==="cloud"){if(!phCloud())throw new Error("locked");const d=await phDoc(ph.id).get();if(!d.exists)throw new Error("missing");u=(await decObj(d.data())).u;}
+  else u=await phIdbGet(ph.id);
+  if(!u) throw new Error("missing"); PHCACHE[ph.id]=u; return u;}
+async function phRemove(ph){delete PHCACHE[ph.id];try{if(ph.where==="cloud"){if(phCloud())await phDoc(ph.id).delete();}else await phIdbDel(ph.id);}catch(e){console.warn(e);}}
+function photosHTML(t,id){
+  const r=recFind(t,id); if(!r) return ""; const P=r.photos||[], key=t+":"+id;
+  const pend=Object.values(PHPEND).filter(x=>x.key===key);
+  return `<div class="card phw" data-phw="${key}"><h3>Φωτογραφίες</h3>
+  <p class="small muted">Υπερηχογραφήματα, εξετάσεις ή έγγραφα που σου έδωσε η ασθενής. Στο κινητό το «Λήψη φωτογραφίας» ανοίγει την κάμερα. Η φωτογραφία ανεβαίνει αμέσως ${phCloud()?"κρυπτογραφημένη στο cloud και τη βλέπεις από κάθε συσκευή":"<b>μόνο σε αυτή τη συσκευή</b>, γιατί δεν είσαι συνδεδεμένος"}.</p>
+  <div class="row phbtns">
+   <label class="btn pri">📷 Λήψη φωτογραφίας<input type="file" accept="image/*" capture="environment" data-phin hidden></label>
+   <label class="btn">🖼 Από τη συλλογή<input type="file" accept="image/*" multiple data-phin hidden></label>
+   <label class="f phtype">Τύπος<select data-phtype>${PH_TYPES.map(x=>`<option>${x}</option>`).join("")}</select></label>
+  </div>
+  ${pend.length?`<p class="small phstat">${pend.map(x=>esc(x.msg)).join(" · ")}</p>`:""}
+  ${P.length?`<div class="phgrid">${[...P].map((p,i)=>({p,i})).sort((a,b)=>(b.p.d||"").localeCompare(a.p.d||"")).map(({p,i})=>`<figure class="phit">
+    <button class="phthumb" data-phopen="${i}" title="Άνοιγμα"><img src="${p.thumb}" alt="${esc(p.cap||p.type||"Φωτογραφία")}" loading="lazy">${p.where==="local"?`<span class="phloc" title="Μόνο σε αυτή τη συσκευή">συσκευή</span>`:""}</button>
+    <figcaption><select data-phf="${i}.type">${PH_TYPES.map(x=>`<option${x===p.type?" selected":""}>${x}</option>`).join("")}</select>
+    <input type="date" data-phf="${i}.d" value="${esc(p.d||"")}"><input data-phf="${i}.cap" value="${esc(p.cap||"")}" placeholder="Λεζάντα (π.χ. NT 12+3)">
+    <button class="phdel" data-phdel="${i}">Διαγραφή</button></figcaption></figure>`).join("")}</div>`:`<p class="muted small">Δεν υπάρχουν φωτογραφίες.</p>`}
+  </div>`;
+}
+function phRerender(w){const [t,id]=w.dataset.phw.split(":");const y=window.scrollY;w.outerHTML=photosHTML(t,id);window.scrollTo(0,y);}
+function phRerenderKey(key){const w=document.querySelector(`[data-phw="${key}"]`);if(w)phRerender(w);}
+async function phAddFiles(key,files,type){
+  const [t,id]=key.split(":");
+  for(const f of files){
+    const pk=uid();PHPEND[pk]={key,msg:"Ανεβαίνει "+(f.name||"φωτογραφία")+"…"};phRerenderKey(key);
+    try{
+      const im=await phLoadImg(f);let q=.78,full=phResize(im,PH_MAX,q);
+      while(full.u.length>650000&&q>.4){q-=.1;full=phResize(im,PH_MAX,q);}
+      const th=phResize(im,PH_THUMB,.7);const pid=uid();
+      const where=await phStore(pid,full.u);PHCACHE[pid]=full.u;
+      const r=recFind(t,id);if(!r)throw new Error("record");(r.photos||(r.photos=[])).push({id:pid,d:today(),type,cap:"",thumb:th.u,w:full.w,h:full.h,where});save();
+      delete PHPEND[pk];
+    }catch(e){console.warn(e);PHPEND[pk].msg="Αποτυχία ανεβάσματος: "+(e&&e.code==="permission-denied"?"δεν επιτρέπεται ακόμα η αποθήκευση φωτογραφιών στο cloud":(e.message||e));
+      setTimeout(()=>{delete PHPEND[pk];phRerenderKey(key);},9000);}
+    phRerenderKey(key);
+  }
+}
+function phLightbox(r,i){
+  const P=r.photos||[];let k=i;const box=document.createElement("div");box.className="phlb";document.body.appendChild(box);document.body.style.overflow="hidden";
+  const close=()=>{box.remove();document.body.style.overflow="";document.removeEventListener("keydown",kd);};
+  const show=async()=>{const p=P[k];box.innerHTML=`<div class="phlb-top"><span>${esc(p.type||"")}${p.d?" · "+exFmt(p.d):""}${p.cap?" · "+esc(p.cap):""}</span><button data-x aria-label="Κλείσιμο">✕</button></div>
+    <div class="phlb-img"><img src="${p.thumb}" class="blur" alt=""></div>${P.length>1?`<button class="phlb-nav l" data-p aria-label="Προηγούμενη">‹</button><button class="phlb-nav r" data-n aria-label="Επόμενη">›</button>`:""}`;
+    try{const u=await phFetch(p);if(P[k]===p){const img=box.querySelector(".phlb-img img");img.src=u;img.classList.remove("blur");}}
+    catch(e){box.querySelector(".phlb-img").insertAdjacentHTML("beforeend",`<p class="phlb-err">${e.message==="locked"?"Ξεκλείδωσε τους φακέλους για να δεις την πλήρη φωτογραφία.":"Η πλήρης φωτογραφία δεν βρέθηκε σε αυτή τη συσκευή."}</p>`);}};
+  const kd=e=>{if(e.key==="Escape")close();if(e.key==="ArrowRight"){k=(k+1)%P.length;show();}if(e.key==="ArrowLeft"){k=(k-1+P.length)%P.length;show();}};
+  box.addEventListener("click",e=>{if(e.target.closest("[data-x]")||e.target===box)close();else if(e.target.closest("[data-n]")){k=(k+1)%P.length;show();}else if(e.target.closest("[data-p]")){k=(k-1+P.length)%P.length;show();}});
+  document.addEventListener("keydown",kd);show();
+}
+document.addEventListener("change",e=>{
+  const w=e.target.closest&&e.target.closest("[data-phw]");if(!w)return;const [t,id]=w.dataset.phw.split(":"),r=recFind(t,id);if(!r)return;
+  if(e.target.hasAttribute("data-phin")){const fs=[...e.target.files];e.target.value="";if(fs.length)phAddFiles(w.dataset.phw,fs,w.querySelector("[data-phtype]").value);return;}
+  const f=e.target.dataset.phf;if(f){const [i,k]=f.split(".");if(r.photos&&r.photos[+i]){r.photos[+i][k]=e.target.value.trim();save();}}
+});
+document.addEventListener("click",e=>{
+  const w=e.target.closest&&e.target.closest("[data-phw]");if(!w)return;const [t,id]=w.dataset.phw.split(":"),r=recFind(t,id);if(!r)return;
+  const o=e.target.closest("[data-phopen]");if(o){phLightbox(r,+o.dataset.phopen);return;}
+  const d=e.target.closest("[data-phdel]");if(d){if(d.dataset.sure!=="1"){d.dataset.sure="1";d.textContent="Σίγουρα;";setTimeout(()=>{if(d.isConnected){d.dataset.sure="";d.textContent="Διαγραφή";}},4000);return;}
+    const ph=r.photos.splice(+d.dataset.phdel,1)[0];save();phRemove(ph);phRerender(w);}
+});
+
 /* ================= ΒΟΗΘΗΤΙΚΑ ================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -2494,7 +2590,7 @@ function ptPane(p){
   </div><p class="small" style="margin-bottom:0"><b>POSEIDON:</b> <span class="chip acc">${esc(pos.g)}</span> ${esc(pos.t)} ${cite("{{poseidon16}}")}</p></div>
   <div class="tabs">${p.cycles.map(x=>`<button class="tab${x.id===CURC?" on":""}" data-cyc="${x.id}">${esc(x.label||"Κύκλος")}</button>`).join("")}<button class="tab" id="addCyc">+ Νέος κύκλος</button></div>
   ${c?cyclePane(p,c):`<p class="muted">Δεν υπάρχει κύκλος. Πάτησε «+ Νέος κύκλος».</p>`}
-  ${examsHTML("ivf",p.id)}
+  ${examsHTML("ivf",p.id)}${photosHTML("ivf",p.id)}
   <div class="row" style="margin-top:18px"><button class="btn danger" id="delPt">Διαγραφή φακέλου</button></div>`;
 }
 function cyclePane(p,c){
@@ -2805,7 +2901,7 @@ function vPreg(p){
   </div>
   ${p.closed?"":`<div class="pg-quick"><button class="btn pri big" data-pvsheet>${pgSvg("plus",18)} Επίσκεψη</button><button class="btn big" data-plsheet>${pgSvg("flask",18)} Αποτέλεσμα</button><button class="btn big pg-dots" data-pmore aria-label="Περισσότερα">•••</button></div>`}
   <div class="pg-tabs">${tabs.map(([k,l,ic,n])=>`<button class="${pTab===k?"on":""}" data-ptab="${k}">${pgSvg(ic,18)}<span>${l}</span>${n?`<i>${n}</i>`:""}</button>`).join("")}</div>
-  <div class="pg-body">${body}</div>
+  <div class="pg-body">${body}${pTab==="labs"||pTab==="us"?photosHTML("preg",p.id):""}</div>
   <div class="acts pg-foot">${p.closed?`<button class="btn" data-preopen>Επαναφορά στις ενεργές</button>`:""}<button class="btn" data-pmore>••• Περισσότερα</button></div>`;
 }
 function autoTA(){document.querySelectorAll(".pg-body textarea").forEach(a=>{a.style.height="auto";a.style.height=(a.scrollHeight+2)+"px"})}
@@ -2995,7 +3091,7 @@ function pageGyn(id){
    ${F("scr.cx_res","Αποτέλεσμα (π.χ. NILM, HPV αρνητικό, ASC-US)",s.cx_res,"text"," wide")}
    ${F("scr.hpvvac","Εμβόλιο HPV (δόσεις / έτος)",s.hpvvac)}${F("scr.mmg_d","Τελευταία μαστογραφία",s.mmg_d,"date")}${F("scr.mmg_res","Αποτέλεσμα (BI-RADS)",s.mmg_res)}
    ${F("scr.dexa_d","Τελευταία μέτρηση οστικής πυκνότητας",s.dexa_d,"date")}${F("scr.dexa_res","Αποτέλεσμα (T-score)",s.dexa_res)}</div></div>
-  ${examsHTML("gyn",p.id)}
+  ${examsHTML("gyn",p.id)}${photosHTML("gyn",p.id)}
   <div class="row" style="margin-top:18px"><button class="btn danger" id="gyDel">Διαγραφή καρτέλας</button></div></div>`;
 }
 function gyVisitForm(p,v){
@@ -3034,7 +3130,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* έλεγχος νέας έκδοσης */
-const BUILD="1795859825";
+const BUILD="1795867058";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='Υπάρχει νέα έκδοση <button class="btn sm" onclick="location.reload()">Ανανέωση</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
