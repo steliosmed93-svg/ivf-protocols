@@ -1713,6 +1713,7 @@ function nextHTML(t,id){
    <label class="f nvwhy">Αιτία / τι θα γίνει<input data-nvf="why" value="${esc(n.why||"")}" placeholder="π.χ. υπερηχογράφημα 32 εβδ., αποτελέσματα εξετάσεων"></label>
   </div>
   <div class="row nvq"><span class="small muted">Γρήγορα:</span>${[["+1 εβδ.",7],["+2 εβδ.",14],["+4 εβδ.",28],["+3 μήνες",91],["+6 μήνες",182],["+1 έτος",365]].map(([l,d])=>`<button class="btn sm" data-nvadd="${d}">${l}</button>`).join("")}${n.d?`<button class="btn sm ghost" data-nvclr>Καθαρισμός</button>`:""}</div>
+  ${n.d?`<div class="row nvq"><button class="btn sm" data-nvics>📱 Προσθήκη στο ημερολόγιο iPhone / Apple</button></div>`:""}
   ${!n.d&&cur&&cur.src==="visit"?`<p class="small muted">Από την τελευταία επίσκεψη: επανεξέταση ${exFmt(cur.d)}.</p>`:""}`}</div>`;
 }
 function nvRender(w){const [t,id]=w.dataset.nvw.split(":");w.outerHTML=nextHTML(t,id);}
@@ -1721,6 +1722,7 @@ document.addEventListener("change",e=>{const w=e.target.closest&&e.target.closes
 document.addEventListener("click",e=>{const w=e.target.closest&&e.target.closest("[data-nvw]");
   if(w){const [t,id]=w.dataset.nvw.split(":"),r=recFind(t,id);if(!r)return;const b=e.target.closest("button");if(!b)return;
     if(b.dataset.nvadd){r.nextv=r.nextv||{};r.nextv.d=isoAdd(today(),+b.dataset.nvadd);gcMarkDirty(t,id);save();nvRender(w);}
+    else if(b.hasAttribute("data-nvics"))nvICS(t,id);
     else if(b.hasAttribute("data-nvclr")){const g=r.nextv&&r.nextv.gid;delete r.nextv;gcForget(t,id,g);save();nvRender(w);}return;}
   const o=e.target.closest&&e.target.closest("[data-nvopen]");if(o){const [t,id]=o.dataset.nvopen.split(":");openRec(t,id);}
 });
@@ -1730,6 +1732,18 @@ function upcomingHTML(){
   return `<details class="card nvup" open><summary><h3 style="display:inline">Επόμενες επισκέψεις</h3> <span class="chip">${L.length}</span>${late?` <span class="chip crit">${late} εκπρόθεσμες</span>`:""}</summary>${gcBarHTML()}
   ${L.length?`<div class="nvlist">${L.map(({x,n})=>`<button class="nvrow ${nvCls(n.d)}" data-nvopen="${x.t}:${x.id}"><span class="nvd"><b>${exFmt(n.d)}</b>${n.tm?` ${esc(n.tm)}`:""}<small>${nvRel(n.d)}</small></span><span class="nvn"><b>${esc(x.name)}</b> <span class="chip ${PT_CHIP[x.t][0]}" style="font-size:11px;padding:1px 7px">${PT_CHIP[x.t][1]}</span><small>${esc(n.why||"")}</small></span></button>`).join("")}</div>`
   :`<p class="muted small">Δεν έχει οριστεί επόμενη επίσκεψη. Όρισέ τη μέσα στην καρτέλα κάθε ασθενούς.</p>`}</details>`;
+}
+
+function nvICS(t,id){
+  const r=recFind(t,id),v=r&&r.nextv;if(!v||!v.d)return;
+  const esc2=s=>String(s||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");
+  const ymd=v.d.replace(/-/g,""),title=(typeof gcTitle==="function"?gcTitle(t,r):recName(t,r));
+  let dt;if(v.tm){const [h,m]=v.tm.split(":").map(Number),e=h*60+m+30;dt=`DTSTART;TZID=Europe/Athens:${ymd}T${String(h).padStart(2,"0")}${String(m).padStart(2,"0")}00\r\nDTEND;TZID=Europe/Athens:${ymd}T${String(Math.floor(e/60)%24).padStart(2,"0")}${String(e%60).padStart(2,"0")}00`;}
+  else dt=`DTSTART;VALUE=DATE:${ymd}\r\nDTEND;VALUE=DATE:${isoAdd(v.d,1).replace(/-/g,"")}`;
+  const now=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,"");
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//ivf-protocols//GR","CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT",`UID:${t}-${id}-${ymd}@ivf-protocols`,`DTSTAMP:${now}`,dt,`SUMMARY:${esc2(title)}`,`DESCRIPTION:${esc2("Ραντεβού από την εφαρμογή Πρωτόκολλα Εξωσωματικής")}`,"BEGIN:VALARM","TRIGGER:-PT1H","ACTION:DISPLAY","DESCRIPTION:Ραντεβού","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=u;a.download=`rantevou-${(recName(t,r)||"asthenis").replace(/\s+/g,"_")}-${v.d}.ics`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},2000);
 }
 
 /* ---- Αμφίδρομος συγχρονισμός «Επόμενης επίσκεψης» με Google Calendar ---- */
@@ -3509,7 +3523,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* update check */
-const BUILD="1795870031";
+const BUILD="1795872389";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='A new version is available <button class="btn sm" onclick="location.reload()">Refresh</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
