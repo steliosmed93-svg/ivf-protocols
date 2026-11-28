@@ -1962,17 +1962,28 @@ function upcomingHTML(){
   :`<p class="muted small">Δεν έχει οριστεί επόμενη επίσκεψη. Όρισέ τη μέσα στην καρτέλα κάθε ασθενούς.</p>`}</details>`;
 }
 
-function nvICS(t,id){
-  const r=recFind(t,id),v=r&&r.nextv;if(!v||!v.d)return;
-  const esc2=s=>String(s||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");
-  const ymd=v.d.replace(/-/g,""),title=(typeof gcTitle==="function"?gcTitle(t,r):recName(t,r));
-  let dt;if(v.tm){const [h,m]=v.tm.split(":").map(Number),e=h*60+m+30;dt=`DTSTART;TZID=Europe/Athens:${ymd}T${String(h).padStart(2,"0")}${String(m).padStart(2,"0")}00\r\nDTEND;TZID=Europe/Athens:${ymd}T${String(Math.floor(e/60)%24).padStart(2,"0")}${String(e%60).padStart(2,"0")}00`;}
+function nvVEVENT(t,id){
+  const r=recFind(t,id),v=r&&r.nextv;if(!v||!v.d||r.closed)return "";
+  const e2=s=>String(s||"").replace(/\\/g,"\\\\").replace(/;/g,"\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");
+  const ymd=v.d.replace(/-/g,""),title=(typeof gcTitle==="function"?gcTitle(t,r):recName(t,r));let dt;
+  if(v.tm){const [h,m]=v.tm.split(":").map(Number),e=h*60+m+30,p=x=>String(x).padStart(2,"0");dt=`DTSTART;TZID=Europe/Athens:${ymd}T${p(h)}${p(m)}00\r\nDTEND;TZID=Europe/Athens:${ymd}T${p(Math.floor(e/60)%24)}${p(e%60)}00`;}
   else dt=`DTSTART;VALUE=DATE:${ymd}\r\nDTEND;VALUE=DATE:${isoAdd(v.d,1).replace(/-/g,"")}`;
   const now=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,"");
-  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//ivf-protocols//GR","CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT",`UID:${t}-${id}-${ymd}@ivf-protocols`,`DTSTAMP:${now}`,dt,`SUMMARY:${esc2(title)}`,`DESCRIPTION:${esc2("Ραντεβού από την εφαρμογή Πρωτόκολλα Εξωσωματικής")}`,"BEGIN:VALARM","TRIGGER:-PT1H","ACTION:DISPLAY","DESCRIPTION:Ραντεβού","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
-  const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");
-  a.href=u;a.download=`rantevou-${(recName(t,r)||"asthenis").replace(/\s+/g,"_")}-${v.d}.ics`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},2000);
+  return ["BEGIN:VEVENT",`UID:${t}-${id}@ivf-protocols`,`DTSTAMP:${now}`,`SEQUENCE:${Math.floor(Date.now()/1000)}`,dt,`SUMMARY:${e2(title)}`,`DESCRIPTION:${e2("Ραντεβού από την εφαρμογή Πρωτόκολλα Εξωσωματικής ("+NV_TYPE[t]+")")}`,"BEGIN:VALARM","TRIGGER:-PT1H","ACTION:DISPLAY","DESCRIPTION:Ραντεβού","END:VALARM","END:VEVENT"].join("\r\n");
 }
+function nvDownloadICS(evs,fname){
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//ivf-protocols//GR","CALSCALE:GREGORIAN","METHOD:PUBLISH",...evs,"END:VCALENDAR"].join("\r\n");
+  const u=URL.createObjectURL(new Blob([ics],{type:"text/calendar;charset=utf-8"})),a=document.createElement("a");
+  a.href=u;a.download=fname;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},2000);
+}
+function nvICS(t,id){const r=recFind(t,id),ev=nvVEVENT(t,id);if(!ev)return;nvDownloadICS([ev],`rantevou-${(recName(t,r)||"asthenis").replace(/\s+/g,"_")}-${r.nextv.d}.ics`);
+  (r.nextv.ics=r.nextv.d+" "+(r.nextv.tm||""));save();}
+function nvICSAll(){const L=allPatients().filter(x=>x.r.nextv&&x.r.nextv.d&&!x.r.closed&&x.r.nextv.d>=today());
+  if(!L.length){gcStatus("Δεν υπάρχουν μελλοντικά ραντεβού για εξαγωγή.");return;}
+  nvDownloadICS(L.map(x=>nvVEVENT(x.t,x.id)).filter(Boolean),`rantevou-ola-${today()}.ics`);
+  L.forEach(x=>x.r.nextv.ics=x.r.nextv.d+" "+(x.r.nextv.tm||""));save();
+  const el=document.querySelector("[data-icsmsg]");if(el)el.textContent=`✓ ${L.length} ραντεβού στάλθηκαν στο ημερολόγιο (${new Date().toLocaleTimeString("el-GR",{hour:"2-digit",minute:"2-digit"})})`;}
+document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-icsall]"))nvICSAll();});
 
 /* ---- Αμφίδρομος συγχρονισμός «Επόμενης επίσκεψης» με Google Calendar ---- */
 const GC_SCOPE="https://www.googleapis.com/auth/calendar.events", GC_API="https://www.googleapis.com/calendar/v3/calendars/primary/events", GC_TZ="Europe/Athens", GC_MIN=30;
@@ -2053,7 +2064,9 @@ function gcRefreshViews(){const h=(location.hash||"").slice(1);if(h==="tracker"&
 function gcStatus(m){GC_MSG=m;document.querySelectorAll("[data-gcmsg]").forEach(el=>el.textContent=m);}
 function gcBarHTML(){return `<div class="gcbar"><span class="gclogo">📅 Google Calendar</span>
   ${gcOn()?`<button class="btn sm" data-gcsync>↻ Συγχρονισμός</button><button class="btn sm ghost" data-gcoff>Αποσύνδεση</button>`:`<button class="btn sm pri" data-gcsync>Σύνδεση με Google Calendar</button>`}
-  <span class="small muted" data-gcmsg>${esc(GC_MSG||(gcOn()?"Πάτησε «Συγχρονισμός» για να φέρεις και να στείλεις ραντεβού.":"Τα ραντεβού θα εμφανίζονται και στο ημερολόγιό σου (και στο iPhone, αν έχεις προσθέσει εκεί τον λογαριασμό Google)."))}</span></div>`;}
+  <span class="small muted" data-gcmsg>${esc(GC_MSG||(gcOn()?"Πάτησε «Συγχρονισμός» για να φέρεις και να στείλεις ραντεβού.":"Τα ραντεβού θα εμφανίζονται και στο ημερολόγιό σου (και στο iPhone, αν έχεις προσθέσει εκεί τον λογαριασμό Google)."))}</span></div>
+  <div class="gcbar"><span class="gclogo">📱 Ημερολόγιο iPhone / Apple</span><button class="btn sm pri" data-icsall>Προσθήκη ραντεβού στο iPhone</button>
+  <span class="small muted" data-icsmsg>${(()=>{const p=allPatients().filter(x=>x.r.nextv&&x.r.nextv.d&&!x.r.closed&&x.r.nextv.d>=today()&&x.r.nextv.ics!==x.r.nextv.d+" "+(x.r.nextv.tm||"")).length;return p?`${p} ραντεβού δεν έχουν σταλεί ακόμα (ή άλλαξαν) στο iPhone.`:"Όλα τα ραντεβού έχουν σταλεί στο iPhone.";})()}</span></div>`;}
 /* αυτόματο σπρώξιμο αλλαγών όταν υπάρχει ενεργή σύνδεση */
 let GC_T=null;
 function gcMarkDirty(t,id){const r=recFind(t,id);if(!r)return;if(r.nextv)r.nextv.dirty=1;
@@ -3299,7 +3312,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* έλεγχος νέας έκδοσης */
-const BUILD="1795872389";
+const BUILD="1795872778";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='Υπάρχει νέα έκδοση <button class="btn sm" onclick="location.reload()">Ανανέωση</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
