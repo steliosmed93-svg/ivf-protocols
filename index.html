@@ -160,6 +160,8 @@ abbr[title]{text-decoration:underline dotted;text-underline-offset:2px;cursor:he
 @media print{.abbrbox{display:block}}
 .exadd{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.exadd .f{flex:1 1 140px;min-width:0;margin:0}.exadd .f input{width:100%;box-sizing:border-box}.exadd .exn{flex:2 1 220px}.exadd .btn{flex:0 0 auto}
 .exadd.rep{margin:8px 0;padding:10px;border:1px dashed var(--line);border-radius:8px}
+.exnote{margin-top:10px;padding:12px;border:1px dashed var(--warn);border-radius:8px;background:var(--warn-soft);display:flex;flex-direction:column;gap:8px}.exnote textarea{width:100%;box-sizing:border-box;font:inherit}
+.extbl textarea{width:100%;border:1px solid transparent;background:transparent;font:inherit;color:inherit;padding:4px 6px;border-radius:6px;resize:vertical;field-sizing:content;min-height:30px}.extbl textarea:hover,.extbl textarea:focus{border-color:var(--line);background:var(--card)}
 .exhint{min-height:1em;margin:6px 0 4px;color:var(--ink-2)}
 .exlist{display:flex;flex-direction:column;gap:10px;margin-top:8px}
 .exitem{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--paper)}
@@ -1759,13 +1761,18 @@ function examsHTML(t,id){
    <label class="f">Αποτέλεσμα<input data-exin="v" placeholder="π.χ. 2,1 ng/ml"></label>
    <label class="f exn">Σημείωση<input data-exin="n" placeholder="προαιρετικά"></label>
    <button class="btn pri" data-exadd>+ Προσθήκη</button>
+   <button class="btn" data-exnote>✎ Εκτός συστήματος (σημείωση)</button>
   </div>
+  ${EXOPEN[key+":note"]?`<div class="exnote"><b>Εξέταση που δεν υπάρχει στο σύστημα</b>
+   <div class="exadd"><label class="f exn">Όνομα εξέτασης<input data-exnin="name" placeholder="π.χ. Ανοσολογικός έλεγχος NK κυττάρων"></label><label class="f">Ημερομηνία<input data-exnin="d" type="date" value="${exToday()}"></label><label class="f">Αποτέλεσμα<input data-exnin="v" placeholder="προαιρετικά"></label></div>
+   <label class="f">Σημείωση<textarea data-exnin="n" rows="3" placeholder="Ελεύθερο κείμενο: τι έγινε, πού, σχόλια…"></textarea></label>
+   <div class="row"><button class="btn pri" data-exnsave>Αποθήκευση σημείωσης</button><button class="btn ghost" data-exncancel>Άκυρο</button></div></div>`:""}
   <p class="small exhint" data-exhint></p>
   ${X.length?`<div class="exlist">${X.map(({x,i})=>{const E=(x.entries||[]).map((e,j)=>({e,j})).sort((a,b)=>(b.e.d||"").localeCompare(a.e.d||""));const op=EXOPEN[key+":"+i];
    return `<div class="exitem"><div class="exhead"><b>${esc(x.name)}</b>${x.custom?`<span class="chip warn">Σημείωση · εκτός καταλόγου</span>`:`<span class="chip">${esc(x.cat||"")}</span>`}<span class="small muted">${E.length} ${E.length===1?"φορά":"φορές"}</span>
      <span class="exact"><button class="btn sm" data-exrep="${i}">+ Επανάληψη</button><button class="btn sm ghost" data-exdel="${i}">Διαγραφή</button></span></div>
      ${op?`<div class="exadd rep"><label class="f">Ημερομηνία<input data-exrin="d" type="date" value="${exToday()}"></label><label class="f">Αποτέλεσμα<input data-exrin="v"></label><label class="f exn">Σημείωση<input data-exrin="n"></label><button class="btn pri" data-exrsave="${i}">Αποθήκευση</button><button class="btn ghost" data-exrcancel="${i}">Άκυρο</button></div>`:""}
-     <table class="extbl"><thead><tr><th>Ημερομηνία</th><th>Αποτέλεσμα</th><th>Σημείωση</th><th></th></tr></thead><tbody>${E.map(({e,j})=>`<tr><td><input type="date" data-exe="${i}.${j}.d" value="${esc(e.d||"")}"></td><td><input data-exe="${i}.${j}.v" value="${esc(e.v||"")}" placeholder="–"></td><td><input data-exe="${i}.${j}.n" value="${esc(e.n||"")}" placeholder="–"></td><td><button class="exx" data-exedel="${i}.${j}" title="Διαγραφή μέτρησης" aria-label="Διαγραφή μέτρησης">✕</button></td></tr>`).join("")}</tbody></table></div>`;}).join("")}</div>`:`<p class="muted small">Δεν έχουν καταχωριστεί εξετάσεις.</p>`}
+     <table class="extbl"><thead><tr><th>Ημερομηνία</th><th>Αποτέλεσμα</th><th>Σημείωση</th><th></th></tr></thead><tbody>${E.map(({e,j})=>`<tr><td><input type="date" data-exe="${i}.${j}.d" value="${esc(e.d||"")}"></td><td><input data-exe="${i}.${j}.v" value="${esc(e.v||"")}" placeholder="–"></td><td><textarea rows="1" data-exe="${i}.${j}.n" placeholder="–">${esc(e.n||"")}</textarea></td><td><button class="exx" data-exedel="${i}.${j}" title="Διαγραφή μέτρησης" aria-label="Διαγραφή μέτρησης">✕</button></td></tr>`).join("")}</tbody></table></div>`;}).join("")}</div>`:`<p class="muted small">Δεν έχουν καταχωριστεί εξετάσεις.</p>`}
   </div>`;
 }
 function exDatalist(){if(document.getElementById("exdl"))return;const d=document.createElement("datalist");d.id="exdl";d.innerHTML=EXALL.map(([n,c])=>`<option value="${esc(n)}">${esc(c)}</option>`).join("");document.body.appendChild(d);}
@@ -1784,6 +1791,12 @@ document.addEventListener("click",e=>{
     const g=k=>w.querySelector(`[data-exin="${k}"]`).value.trim();const nm=g("name");
     if(!nm){const h=w.querySelector("[data-exhint]");h.textContent="Γράψε ή διάλεξε πρώτα μια εξέταση.";w.querySelector('[data-exin="name"]').focus();return;}
     exAdd(r,nm,{d:g("d"),v:g("v"),n:g("n")});save();exRerender(w);return;}
+  if(b.hasAttribute("data-exnote")){EXOPEN[key+":note"]=1;exRerender(w);const i=document.querySelector(`[data-exw="${key}"] [data-exnin="name"]`);if(i)i.focus();return;}
+  if(b.hasAttribute("data-exncancel")){delete EXOPEN[key+":note"];exRerender(w);return;}
+  if(b.hasAttribute("data-exnsave")){const g=k=>w.querySelector(`[data-exnin="${k}"]`).value.trim();const nm=g("name");
+    if(!nm){w.querySelector('[data-exnin="name"]').focus();return;}
+    let x=r.exams.find(e=>e.custom&&exNorm(e.name)===exNorm(nm));if(!x){x={name:nm,cat:"",custom:true,entries:[]};r.exams.push(x);}
+    x.entries.push({d:g("d"),v:g("v"),n:g("n")});delete EXOPEN[key+":note"];save();exRerender(w);return;}
   if(b.dataset.exrep!=null){EXOPEN[key+":"+b.dataset.exrep]=1;exRerender(w);return;}
   if(b.dataset.exrcancel!=null){delete EXOPEN[key+":"+b.dataset.exrcancel];exRerender(w);return;}
   if(b.dataset.exrsave!=null){const i=+b.dataset.exrsave,box=b.closest(".exadd"),g=k=>box.querySelector(`[data-exrin="${k}"]`).value.trim();
@@ -3021,7 +3034,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* έλεγχος νέας έκδοσης */
-const BUILD="1795816326";
+const BUILD="1795859825";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='Υπάρχει νέα έκδοση <button class="btn sm" onclick="location.reload()">Ανανέωση</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
