@@ -186,6 +186,13 @@ abbr[title]{text-decoration:underline dotted;text-underline-offset:2px;cursor:he
 .phlb-img{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;position:relative}.phlb-img img{max-width:100%;max-height:100%;object-fit:contain;touch-action:pinch-zoom}
 .phlb-img img.blur{filter:blur(6px)}.phlb-err{position:absolute;bottom:20px;color:#fff;background:rgba(0,0,0,.6);padding:8px 12px;border-radius:8px}
 .phlb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:0;color:#fff;font-size:36px;width:48px;height:64px;border-radius:8px;cursor:pointer}.phlb-nav.l{left:8px}.phlb-nav.r{right:8px}
+.nvform{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.nvform .f{flex:1 1 140px;margin:0}.nvform .f input{width:100%;box-sizing:border-box}.nvform .nvwhy{flex:3 1 260px}
+.nvq{gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.nvup summary{cursor:pointer;list-style:none}.nvup summary::-webkit-details-marker{display:none}
+.nvlist{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.nvrow{display:flex;gap:14px;align-items:center;text-align:left;width:100%;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;background:var(--card);padding:8px 12px;cursor:pointer;font:inherit;color:inherit}
+.nvrow:hover{background:var(--tint)}.nvrow.crit{border-left-color:var(--crit);background:var(--crit-soft)}.nvrow.warn{border-left-color:var(--warn)}.nvrow.acc{border-left-color:var(--accent)}
+.nvd{min-width:110px;display:flex;flex-direction:column}.nvd small,.nvn small{color:var(--ink-3);font-size:12px}.nvn{display:flex;flex-direction:column;gap:2px;align-items:flex-start}
 details.acc{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0 14px;margin:8px 0}
 details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 .pill-n{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
@@ -1912,6 +1919,46 @@ document.addEventListener("click",e=>{
     const ph=r.photos.splice(+d.dataset.phdel,1)[0];save();phRemove(ph);phRerender(w);}
 });
 
+/* ---- Επόμενη επίσκεψη ανά καρτέλα + λίστα επόμενων επισκέψεων στους Ασθενείς ---- */
+const NV_TYPE={ivf:"Εξωσωματική",preg:"Μαιευτικό",gyn:"Γυναικολογικό"};
+function nvOf(t,r){
+  if(!r||r.closed) return null;
+  if(r.nextv&&r.nextv.d) return {...r.nextv,src:"set"};
+  if(t==="gyn"){const V=[...(r.visits||[])].filter(v=>v.next).sort((a,b)=>(b.d||"").localeCompare(a.d||""));if(V[0])return {d:V[0].next,tm:"",why:"Επανεξέταση"+(V[0].dx?": "+V[0].dx:""),src:"visit"};}
+  return null;
+}
+function nvDays(d){const a=new Date(d+"T12:00:00"),b=new Date(today()+"T12:00:00");return Math.round((a-b)/864e5);}
+function nvRel(d){const n=nvDays(d);return n===0?"Σήμερα":n===1?"Αύριο":n===-1?"Χθες":n<0?`εκπρόθεσμη ${-n} ημ.`:n<14?`σε ${n} ημέρες`:n<60?`σε ${Math.round(n/7)} εβδ.`:`σε ${Math.round(n/30)} μήνες`;}
+function nvCls(d){const n=nvDays(d);return n<0?"crit":n<=1?"warn":n<=7?"acc":"";}
+function nvShort(d){const [y,m,dd]=d.split("-");return `${dd}/${m}`;}
+function nextHTML(t,id){
+  const r=recFind(t,id);if(!r)return "";const n=r.nextv||{},cur=nvOf(t,r),key=t+":"+id;
+  return `<div class="card nvw" data-nvw="${key}"><h3>Επόμενη επίσκεψη ${cur?`<span class="chip ${nvCls(cur.d)}">${nvRel(cur.d)}</span>`:""}</h3>
+  ${r.closed?`<p class="muted small">Η καρτέλα είναι ολοκληρωμένη.</p>`:`<div class="nvform">
+   <label class="f">Ημερομηνία<input type="date" data-nvf="d" value="${esc(n.d||"")}"></label>
+   <label class="f">Ώρα<input type="time" data-nvf="tm" value="${esc(n.tm||"")}"></label>
+   <label class="f nvwhy">Αιτία / τι θα γίνει<input data-nvf="why" value="${esc(n.why||"")}" placeholder="π.χ. υπερηχογράφημα 32 εβδ., αποτελέσματα εξετάσεων"></label>
+  </div>
+  <div class="row nvq"><span class="small muted">Γρήγορα:</span>${[["+1 εβδ.",7],["+2 εβδ.",14],["+4 εβδ.",28],["+3 μήνες",91],["+6 μήνες",182],["+1 έτος",365]].map(([l,d])=>`<button class="btn sm" data-nvadd="${d}">${l}</button>`).join("")}${n.d?`<button class="btn sm ghost" data-nvclr>Καθαρισμός</button>`:""}</div>
+  ${!n.d&&cur&&cur.src==="visit"?`<p class="small muted">Από την τελευταία επίσκεψη: επανεξέταση ${exFmt(cur.d)}.</p>`:""}`}</div>`;
+}
+function nvRender(w){const [t,id]=w.dataset.nvw.split(":");w.outerHTML=nextHTML(t,id);}
+document.addEventListener("change",e=>{const w=e.target.closest&&e.target.closest("[data-nvw]");if(!w||!e.target.dataset.nvf)return;const [t,id]=w.dataset.nvw.split(":"),r=recFind(t,id);if(!r)return;
+  r.nextv=r.nextv||{};r.nextv[e.target.dataset.nvf]=e.target.value.trim();if(!r.nextv.d&&!r.nextv.why&&!r.nextv.tm)delete r.nextv;save();if(e.target.dataset.nvf==="d")nvRender(w);});
+document.addEventListener("click",e=>{const w=e.target.closest&&e.target.closest("[data-nvw]");
+  if(w){const [t,id]=w.dataset.nvw.split(":"),r=recFind(t,id);if(!r)return;const b=e.target.closest("button");if(!b)return;
+    if(b.dataset.nvadd){r.nextv=r.nextv||{};r.nextv.d=isoAdd(today(),+b.dataset.nvadd);save();nvRender(w);}
+    else if(b.hasAttribute("data-nvclr")){delete r.nextv;save();nvRender(w);}return;}
+  const o=e.target.closest&&e.target.closest("[data-nvopen]");if(o){const [t,id]=o.dataset.nvopen.split(":");openRec(t,id);}
+});
+function upcomingHTML(){
+  const L=allPatients().map(x=>({x,n:nvOf(x.t,x.r)})).filter(o=>o.n).sort((a,b)=>(a.n.d+(a.n.tm||"")).localeCompare(b.n.d+(b.n.tm||"")));
+  const late=L.filter(o=>nvDays(o.n.d)<0).length;
+  return `<details class="card nvup" ${L.length?"open":""}><summary><h3 style="display:inline">Επόμενες επισκέψεις</h3> <span class="chip">${L.length}</span>${late?` <span class="chip crit">${late} εκπρόθεσμες</span>`:""}</summary>
+  ${L.length?`<div class="nvlist">${L.map(({x,n})=>`<button class="nvrow ${nvCls(n.d)}" data-nvopen="${x.t}:${x.id}"><span class="nvd"><b>${exFmt(n.d)}</b>${n.tm?` ${esc(n.tm)}`:""}<small>${nvRel(n.d)}</small></span><span class="nvn"><b>${esc(x.name)}</b> <span class="chip ${PT_CHIP[x.t][0]}" style="font-size:11px;padding:1px 7px">${PT_CHIP[x.t][1]}</span><small>${esc(n.why||"")}</small></span></button>`).join("")}</div>`
+  :`<p class="muted small">Δεν έχει οριστεί επόμενη επίσκεψη. Όρισέ τη μέσα στην καρτέλα κάθε ασθενούς.</p>`}</details>`;
+}
+
 /* ================= ΒΟΗΘΗΤΙΚΑ ================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -2498,6 +2545,7 @@ function pageTracker(){
   return `<h1>Ασθενείς</h1>${trackerBanner()}
   ${localImport.length?`<div class="callout warn"><p>Βρέθηκαν <b>${localImport.length}</b> φάκελοι αποθηκευμένοι μόνο σε αυτή τη συσκευή. <button class="btn sm" id="impLocal">Μεταφορά στον λογαριασμό μου</button></p></div>`:""}
   ${mig?`<div class="pgw">${mig}</div>`:""}
+  ${upcomingHTML()}
   <div class="trk">
    <div>
     <div class="row" style="margin-bottom:10px"><button class="btn pri" id="newPt">+ Νέος ασθενής</button><button class="btn" id="cfgBtn">Όρια</button></div>
@@ -2517,7 +2565,7 @@ function ptListHTML(q){
   const rows=[...G.values()].map(L=>{L.sort((a,b)=>ptPrio(a)-ptPrio(b));return L;})
     .filter(L=>(TRKF==="all"||L.some(x=>x.t===TRKF))&&(!qq||L.some(x=>x.name.toLowerCase().includes(qq))));
   return rows.map(L=>{const m=(TRKF!=="all"&&L.find(x=>x.t===TRKF))||L[0];const on=L.some(x=>x.t==="ivf"&&x.id===CUR)&&(location.hash||"").slice(1)==="tracker";const dn=L.every(x=>x.r&&x.r.closed);
-    return `<button class="pt${on?" on":""}${dn?" done":""}" data-pt="${m.id}" data-pk="${m.t}"><span><b>${esc(m.name)}</b><br>${L.map(x=>`<span class="chip ${x.r&&x.r.closed?"ok":PT_CHIP[x.t][0]}" style="font-size:11px;padding:1px 7px;margin-right:3px">${x.r&&x.r.closed?"✓ ":""}${PT_CHIP[x.t][1]}</span>`).join("")} <span class="small muted">${esc(m.sub||"")}</span></span><span class="pill-n">${esc(m.n)}</span></button>`;}).join("")||`<p class="muted small">Κανένας ασθενής.</p>`;
+    return `<button class="pt${on?" on":""}${dn?" done":""}" data-pt="${m.id}" data-pk="${m.t}"><span><b>${esc(m.name)}</b><br>${L.map(x=>`<span class="chip ${x.r&&x.r.closed?"ok":PT_CHIP[x.t][0]}" style="font-size:11px;padding:1px 7px;margin-right:3px">${x.r&&x.r.closed?"✓ ":""}${PT_CHIP[x.t][1]}</span>`).join("")} <span class="small muted">${esc(m.sub||"")}</span>${(()=>{const N=L.map(x=>nvOf(x.t,x.r)).filter(Boolean).sort((a,b)=>a.d.localeCompare(b.d))[0];return N?`<br><span class="chip ${nvCls(N.d)}" style="font-size:11px;padding:1px 7px;margin-top:3px">📅 ${nvShort(N.d)}${N.tm?" "+esc(N.tm):""} · ${nvRel(N.d)}</span>`:""})()}</span><span class="pill-n">${esc(m.n)}</span></button>`;}).join("")||`<p class="muted small">Κανένας ασθενής.</p>`;
 }
 /* ---- Ένας ασθενής, πολλές καρτέλες ---- */
 let PG_PID=null;
@@ -2590,6 +2638,7 @@ function ptPane(p){
    <label class="f wide" for="f_dx">Διάγνωση / ένδειξη<input id="f_dx" data-f="dx" value="${esc(p.dx||"")}"></label>
    <label class="f wide" for="f_notes">Σημειώσεις<input id="f_notes" data-f="notes" value="${esc(p.notes||"")}"></label>
   </div><p class="small" style="margin-bottom:0"><b>POSEIDON:</b> <span class="chip acc">${esc(pos.g)}</span> ${esc(pos.t)} ${cite("{{poseidon16}}")}</p></div>
+  ${nextHTML("ivf",p.id)}
   <div class="tabs">${p.cycles.map(x=>`<button class="tab${x.id===CURC?" on":""}" data-cyc="${x.id}">${esc(x.label||"Κύκλος")}</button>`).join("")}<button class="tab" id="addCyc">+ Νέος κύκλος</button></div>
   ${c?cyclePane(p,c):`<p class="muted">Δεν υπάρχει κύκλος. Πάτησε «+ Νέος κύκλος».</p>`}
   ${examsHTML("ivf",p.id)}${photosHTML("ivf",p.id)}
@@ -2903,7 +2952,7 @@ function vPreg(p){
   </div>
   ${p.closed?"":`<div class="pg-quick"><button class="btn pri big" data-pvsheet>${pgSvg("plus",18)} Επίσκεψη</button><button class="btn big" data-plsheet>${pgSvg("flask",18)} Αποτέλεσμα</button><button class="btn big pg-dots" data-pmore aria-label="Περισσότερα">•••</button></div>`}
   <div class="pg-tabs">${tabs.map(([k,l,ic,n])=>`<button class="${pTab===k?"on":""}" data-ptab="${k}">${pgSvg(ic,18)}<span>${l}</span>${n?`<i>${n}</i>`:""}</button>`).join("")}</div>
-  <div class="pg-body">${body}${pTab==="labs"||pTab==="us"?photosHTML("preg",p.id):""}</div>
+  <div class="pg-body">${pTab==="ov"||pTab==="vis"?nextHTML("preg",p.id):""}${body}${pTab==="labs"||pTab==="us"?photosHTML("preg",p.id):""}</div>
   <div class="acts pg-foot">${p.closed?`<button class="btn" data-preopen>Επαναφορά στις ενεργές</button>`:""}<button class="btn" data-pmore>••• Περισσότερα</button></div>`;
 }
 function autoTA(){document.querySelectorAll(".pg-body textarea").forEach(a=>{a.style.height="auto";a.style.height=(a.scrollHeight+2)+"px"})}
@@ -3080,7 +3129,7 @@ function pageGyn(id){
   const F=(k,l,v,t="text",w="")=>`<label class="f${w}">${l}<input data-gf="${k}" type="${t}" value="${esc(v??"")}"></label>`;
   const T=(k,l,v)=>`<label class="f wide">${l}<textarea data-gf="${k}" rows="2" style="font-family:inherit;font-size:14.5px;min-height:56px">${esc(v??"")}</textarea></label>`;
   const vs=[...(p.visits||[])].sort((a,b)=>(b.d||"").localeCompare(a.d||""));
-  return `<div class="gyw"><p class="small"><a href="#tracker">‹ Ασθενείς</a></p>${cardBarHTML("gyn",p.id)}
+  return `<div class="gyw"><p class="small"><a href="#tracker">‹ Ασθενείς</a></p>${cardBarHTML("gyn",p.id)}${nextHTML("gyn",p.id)}
   <div class="row" style="align-items:center;gap:12px;flex-wrap:wrap"><h1 style="margin:0">${esc(i.name||"Νέα ασθενής")}</h1><span class="chip">Γυναικολογικό</span>${age!==null?`<span class="chip acc">${age} ετών</span>`:""}</div>
   <p class="muted small">Δημιουργήθηκε ${gyFmtD(p.created)} · ${vs.length} επισκέψεις</p>
   <div class="row" style="margin:10px 0 16px"><button class="btn pri" id="gyAddV">+ Νέα επίσκεψη</button><button class="btn" id="gyPrint">Εκτύπωση</button></div>
@@ -3143,7 +3192,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* έλεγχος νέας έκδοσης */
-const BUILD="1795868541";
+const BUILD="1795869134";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='Υπάρχει νέα έκδοση <button class="btn sm" onclick="location.reload()">Ανανέωση</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
