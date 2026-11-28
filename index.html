@@ -187,6 +187,7 @@ abbr[title]{text-decoration:underline dotted;text-underline-offset:2px;cursor:he
 .phlb-img img.blur{filter:blur(6px)}.phlb-err{position:absolute;bottom:20px;color:#fff;background:rgba(0,0,0,.6);padding:8px 12px;border-radius:8px}
 .phlb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:0;color:#fff;font-size:36px;width:48px;height:64px;border-radius:8px;cursor:pointer}.phlb-nav.l{left:8px}.phlb-nav.r{right:8px}
 .nvform{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.nvform .f{flex:1 1 140px;margin:0}.nvform .f input{width:100%;box-sizing:border-box}.nvform .nvwhy{flex:3 1 260px}
+.gcbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px;padding:8px 10px;border:1px dashed var(--line);border-radius:8px}.gclogo{font-weight:600;font-size:14px}
 .nvq{gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap}
 .nvup summary{cursor:pointer;list-style:none}.nvup summary::-webkit-details-marker{display:none}
 .nvlist{display:flex;flex-direction:column;gap:6px;margin-top:10px}
@@ -1933,7 +1934,7 @@ function nvCls(d){const n=nvDays(d);return n<0?"crit":n<=1?"warn":n<=7?"acc":"";
 function nvShort(d){const [y,m,dd]=d.split("-");return `${dd}/${m}`;}
 function nextHTML(t,id){
   const r=recFind(t,id);if(!r)return "";const n=r.nextv||{},cur=nvOf(t,r),key=t+":"+id;
-  return `<div class="card nvw" data-nvw="${key}"><h3>Επόμενη επίσκεψη ${cur?`<span class="chip ${nvCls(cur.d)}">${nvRel(cur.d)}</span>`:""}</h3>
+  return `<div class="card nvw" data-nvw="${key}"><h3>Επόμενη επίσκεψη ${cur?`<span class="chip ${nvCls(cur.d)}">${nvRel(cur.d)}</span>`:""}${n.gid&&!n.dirty?` <span class="chip ok" title="Υπάρχει στο Google Calendar">📅 στο ημερολόγιο</span>`:n.d&&gcOn()?` <span class="chip" title="Θα σταλεί στον επόμενο συγχρονισμό">📅 εκκρεμεί συγχρονισμός</span>`:""}</h3>
   ${r.closed?`<p class="muted small">Η καρτέλα είναι ολοκληρωμένη.</p>`:`<div class="nvform">
    <label class="f">Ημερομηνία<input type="date" data-nvf="d" value="${esc(n.d||"")}"></label>
    <label class="f">Ώρα<input type="time" data-nvf="tm" value="${esc(n.tm||"")}"></label>
@@ -1944,20 +1945,112 @@ function nextHTML(t,id){
 }
 function nvRender(w){const [t,id]=w.dataset.nvw.split(":");w.outerHTML=nextHTML(t,id);}
 document.addEventListener("change",e=>{const w=e.target.closest&&e.target.closest("[data-nvw]");if(!w||!e.target.dataset.nvf)return;const [t,id]=w.dataset.nvw.split(":"),r=recFind(t,id);if(!r)return;
-  r.nextv=r.nextv||{};r.nextv[e.target.dataset.nvf]=e.target.value.trim();if(!r.nextv.d&&!r.nextv.why&&!r.nextv.tm)delete r.nextv;save();if(e.target.dataset.nvf==="d")nvRender(w);});
+  r.nextv=r.nextv||{};r.nextv[e.target.dataset.nvf]=e.target.value.trim();if(!r.nextv.d&&!r.nextv.why&&!r.nextv.tm){const g=r.nextv.gid;delete r.nextv;gcForget(t,id,g);}else gcMarkDirty(t,id);save();if(e.target.dataset.nvf==="d")nvRender(w);});
 document.addEventListener("click",e=>{const w=e.target.closest&&e.target.closest("[data-nvw]");
   if(w){const [t,id]=w.dataset.nvw.split(":"),r=recFind(t,id);if(!r)return;const b=e.target.closest("button");if(!b)return;
-    if(b.dataset.nvadd){r.nextv=r.nextv||{};r.nextv.d=isoAdd(today(),+b.dataset.nvadd);save();nvRender(w);}
-    else if(b.hasAttribute("data-nvclr")){delete r.nextv;save();nvRender(w);}return;}
+    if(b.dataset.nvadd){r.nextv=r.nextv||{};r.nextv.d=isoAdd(today(),+b.dataset.nvadd);gcMarkDirty(t,id);save();nvRender(w);}
+    else if(b.hasAttribute("data-nvclr")){const g=r.nextv&&r.nextv.gid;delete r.nextv;gcForget(t,id,g);save();nvRender(w);}return;}
   const o=e.target.closest&&e.target.closest("[data-nvopen]");if(o){const [t,id]=o.dataset.nvopen.split(":");openRec(t,id);}
 });
 function upcomingHTML(){
   const L=allPatients().map(x=>({x,n:nvOf(x.t,x.r)})).filter(o=>o.n).sort((a,b)=>(a.n.d+(a.n.tm||"")).localeCompare(b.n.d+(b.n.tm||"")));
   const late=L.filter(o=>nvDays(o.n.d)<0).length;
-  return `<details class="card nvup" ${L.length?"open":""}><summary><h3 style="display:inline">Επόμενες επισκέψεις</h3> <span class="chip">${L.length}</span>${late?` <span class="chip crit">${late} εκπρόθεσμες</span>`:""}</summary>
+  return `<details class="card nvup" open><summary><h3 style="display:inline">Επόμενες επισκέψεις</h3> <span class="chip">${L.length}</span>${late?` <span class="chip crit">${late} εκπρόθεσμες</span>`:""}</summary>${gcBarHTML()}
   ${L.length?`<div class="nvlist">${L.map(({x,n})=>`<button class="nvrow ${nvCls(n.d)}" data-nvopen="${x.t}:${x.id}"><span class="nvd"><b>${exFmt(n.d)}</b>${n.tm?` ${esc(n.tm)}`:""}<small>${nvRel(n.d)}</small></span><span class="nvn"><b>${esc(x.name)}</b> <span class="chip ${PT_CHIP[x.t][0]}" style="font-size:11px;padding:1px 7px">${PT_CHIP[x.t][1]}</span><small>${esc(n.why||"")}</small></span></button>`).join("")}</div>`
   :`<p class="muted small">Δεν έχει οριστεί επόμενη επίσκεψη. Όρισέ τη μέσα στην καρτέλα κάθε ασθενούς.</p>`}</details>`;
 }
+
+/* ---- Αμφίδρομος συγχρονισμός «Επόμενης επίσκεψης» με Google Calendar ---- */
+const GC_SCOPE="https://www.googleapis.com/auth/calendar.events", GC_API="https://www.googleapis.com/calendar/v3/calendars/primary/events", GC_TZ="Europe/Athens", GC_MIN=30;
+let GC_TOK=null, GC_EXP=0, GC_CLIENT=null, GC_BUSY=false, GC_MSG="", GC_WAIT=null;
+const gcOn=()=>{try{return localStorage.getItem("ivfprot.gcal")==="1";}catch(e){return false;}};
+const gcSetOn=v=>{try{v?localStorage.setItem("ivfprot.gcal","1"):localStorage.removeItem("ivfprot.gcal");}catch(e){}};
+const gcValid=()=>GC_TOK&&Date.now()<GC_EXP-60000;
+function gcToken(prompt){return new Promise((res,rej)=>{
+  if(gcValid())return res(GC_TOK);
+  if(!(window.google&&google.accounts&&google.accounts.oauth2))return rej(new Error("Η σύνδεση Google δεν έχει φορτώσει ακόμα."));
+  GC_WAIT={res,rej};
+  if(!GC_CLIENT)GC_CLIENT=google.accounts.oauth2.initTokenClient({client_id:GIS_CID,scope:GC_SCOPE,
+    callback:t=>{const w=GC_WAIT;GC_WAIT=null;if(t&&t.access_token){GC_TOK=t.access_token;GC_EXP=Date.now()+(+t.expires_in||3600)*1000;w&&w.res(GC_TOK);}else w&&w.rej(new Error((t&&t.error)||"Δεν δόθηκε άδεια."));},
+    error_callback:e=>{const w=GC_WAIT;GC_WAIT=null;w&&w.rej(new Error(e&&e.type==="popup_closed"?"Το παράθυρο έκλεισε.":"Η σύνδεση με το Google Calendar απέτυχε."));}});
+  GC_CLIENT.requestAccessToken({prompt:prompt||"",hint:USER&&USER.email||undefined});
+});}
+async function gcFetch(url,opt={}){
+  const r=await fetch(url,{...opt,headers:{Authorization:"Bearer "+GC_TOK,"Content-Type":"application/json",...(opt.headers||{})}});
+  if(r.status===401){GC_TOK=null;throw new Error("Η σύνδεση με το Google Calendar έληξε. Πάτησε ξανά «Συγχρονισμός».");}
+  if(r.status===404||r.status===410)return null;
+  if(!r.ok)throw new Error("Google Calendar: σφάλμα "+r.status);
+  return r.status===204?{}:r.json();
+}
+const gcNorm=s=>exNorm(s).replace(/[^a-z0-9α-ω ]/g," ").replace(/\s+/g," ").trim();
+function gcWhy(sum,name){const T=new Set(gcNorm(name).split(" ").filter(Boolean));return String(sum||"").split(/\s+/).filter(w=>!T.has(gcNorm(w))).join(" ").replace(/^\s*[·\-–:,]\s*|\s*[·\-–:,]\s*$/g,"").replace(/\s*·\s*·\s*/g," · ").trim();}
+function gcTitle(t,r){const n=recName(t,r)||"Ασθενής",w=(r.nextv&&r.nextv.why)||"";return n+(w?" · "+w:"");}
+function gcBody(t,id,r){const n=r.nextv,e={summary:gcTitle(t,r),description:"Ραντεβού από την εφαρμογή Πρωτόκολλα Εξωσωματικής ("+NV_TYPE[t]+").",extendedProperties:{private:{ivfrec:t+":"+id}}};
+  if(n.tm){const s=n.d+"T"+n.tm+":00",[h,m]=n.tm.split(":").map(Number),en=new Date(Date.UTC(2000,0,1,h,m+GC_MIN));const e2=en.getUTCDate()>1?isoAdd(n.d,1):n.d;
+    e.start={dateTime:s,timeZone:GC_TZ};e.end={dateTime:e2+"T"+String(en.getUTCHours()).padStart(2,"0")+":"+String(en.getUTCMinutes()).padStart(2,"0")+":00",timeZone:GC_TZ};}
+  else{e.start={date:n.d};e.end={date:isoAdd(n.d,1)};}
+  return e;}
+function gcEvTime(ev){const s=ev.start||{};if(s.date)return {d:s.date,tm:""};if(s.dateTime){const x=new Date(s.dateTime);const p=new Intl.DateTimeFormat("en-CA",{timeZone:GC_TZ,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(x);const g=k=>(p.find(q=>q.type===k)||{}).value;return {d:`${g("year")}-${g("month")}-${g("day")}`,tm:`${g("hour")==="24"?"00":g("hour")}:${g("minute")}`};}return null;}
+function gcRecs(){return allPatients().map(x=>({t:x.t,id:x.id,r:x.r,name:x.name}));}
+/* μία καρτέλα → ημερολόγιο */
+async function gcPush(t,id){
+  const r=recFind(t,id);if(!r)return;const n=r.nextv;
+  if((!n||!n.d||r.closed)&&n&&n.gid){await gcFetch(GC_API+"/"+encodeURIComponent(n.gid),{method:"DELETE"});delete n.gid;delete n.gup;}
+  if(r.gcDel&&r.gcDel.length){for(const g of r.gcDel)await gcFetch(GC_API+"/"+encodeURIComponent(g),{method:"DELETE"});delete r.gcDel;}
+  if(!n||!n.d||r.closed){if(n)delete n.dirty;return;}
+  const body=gcBody(t,id,r);let ev=null;
+  if(n.gid)ev=await gcFetch(GC_API+"/"+encodeURIComponent(n.gid),{method:"PATCH",body:JSON.stringify(body)});
+  if(!ev)ev=await gcFetch(GC_API,{method:"POST",body:JSON.stringify(body)});
+  n.gid=ev.id;n.gup=ev.updated;delete n.dirty;
+}
+/* πλήρης συγχρονισμός */
+async function gcSync(interactive){GC_LAST=Date.now();
+  if(GC_BUSY)return;GC_BUSY=true;gcStatus("Συγχρονισμός με Google Calendar…");
+  let pushed=0,pulled=0,linked=0;
+  try{
+    await gcToken(interactive&&!gcOn()?"consent":"");gcSetOn(true);
+    const R=gcRecs();
+    for(const x of R){const n=x.r.nextv;if((n&&(n.dirty||(n.d&&!n.gid&&!x.r.closed)))||(x.r.gcDel&&x.r.gcDel.length)){await gcPush(x.t,x.id);pushed++;}}
+    const tMin=new Date(Date.now()-60*864e5).toISOString(),tMax=new Date(Date.now()+400*864e5).toISOString();
+    let evs=[],pt="";do{const j=await gcFetch(`${GC_API}?singleEvents=true&orderBy=startTime&maxResults=2500&showDeleted=false&timeMin=${encodeURIComponent(tMin)}&timeMax=${encodeURIComponent(tMax)}${pt?"&pageToken="+pt:""}`);evs=evs.concat(j.items||[]);pt=j.nextPageToken||"";}while(pt);
+    const byId=new Map(evs.map(e=>[e.id,e]));
+    /* α) ραντεβού της εφαρμογής που άλλαξαν ή σβήστηκαν στο ημερολόγιο */
+    for(const x of R){const n=x.r.nextv;if(!n||!n.gid)continue;const ev=byId.get(n.gid);
+      if(!ev){if(n.d>=tMin.slice(0,10)){delete x.r.nextv;pulled++;}continue;}
+      if(ev.updated!==n.gup){const tt=gcEvTime(ev);if(tt){n.d=tt.d;n.tm=tt.tm;}n.why=gcWhy(ev.summary,recName(x.t,x.r))||n.why;n.gup=ev.updated;pulled++;}}
+    /* β) νέα ραντεβού που έβαλες στο ημερολόγιο με το όνομα της ασθενούς */
+    const linkedIds=new Set(R.map(x=>x.r.nextv&&x.r.nextv.gid).filter(Boolean));
+    const names=R.filter(x=>!x.r.closed&&gcNorm(x.name).split(" ").length>=2).map(x=>({...x,k:gcNorm(x.name)}));
+    for(const ev of evs){if(linkedIds.has(ev.id)||ev.status==="cancelled")continue;const tag=ev.extendedProperties&&ev.extendedProperties.private&&ev.extendedProperties.private.ivfrec;
+      let hit=null;if(tag){const [t,id]=tag.split(":");hit=names.find(x=>x.t===t&&x.id===id)||null;}
+      if(!hit){const s=" "+gcNorm(ev.summary||"")+" ";const M=names.filter(x=>s.includes(" "+x.k+" ")||s.includes(" "+x.k.split(" ").reverse().join(" ")+" "));if(M.length)hit=M.sort((a,b)=>({preg:0,gyn:1,ivf:2})[a.t]-({preg:0,gyn:1,ivf:2})[b.t])[0];}
+      if(!hit)continue;const tt=gcEvTime(ev);if(!tt||tt.d<today())continue;const cur=hit.r.nextv;
+      if(cur&&cur.d&&cur.d>=today()&&cur.d<=tt.d&&cur.gid)continue;
+      const s=gcWhy(ev.summary,recName(hit.t,hit.r));
+      hit.r.nextv={d:tt.d,tm:tt.tm,why:s,gid:ev.id,gup:ev.updated};linked++;linkedIds.add(ev.id);
+      try{const j=await gcFetch(GC_API+"/"+encodeURIComponent(ev.id),{method:"PATCH",body:JSON.stringify({extendedProperties:{private:{ivfrec:hit.t+":"+hit.id}}})});if(j)hit.r.nextv.gup=j.updated;}catch(e){}}
+    save();
+    gcStatus(`✓ Συγχρονίστηκε ${new Date().toLocaleTimeString("el-GR",{hour:"2-digit",minute:"2-digit"})}`+(pushed+pulled+linked?` · ${pushed} προς ημερολόγιο, ${pulled+linked} από ημερολόγιο`:""));
+  }catch(e){console.warn(e);gcStatus("⚠ "+(e.message||e));}
+  finally{GC_BUSY=false;gcRefreshViews();}
+}
+function gcRefreshViews(){const h=(location.hash||"").slice(1);if(h==="tracker"&&typeof refreshTracker==="function")refreshTracker();
+  document.querySelectorAll("[data-nvw]").forEach(w=>nvRender(w));}
+function gcStatus(m){GC_MSG=m;document.querySelectorAll("[data-gcmsg]").forEach(el=>el.textContent=m);}
+function gcBarHTML(){return `<div class="gcbar"><span class="gclogo">📅 Google Calendar</span>
+  ${gcOn()?`<button class="btn sm" data-gcsync>↻ Συγχρονισμός</button><button class="btn sm ghost" data-gcoff>Αποσύνδεση</button>`:`<button class="btn sm pri" data-gcsync>Σύνδεση με Google Calendar</button>`}
+  <span class="small muted" data-gcmsg>${esc(GC_MSG||(gcOn()?"Πάτησε «Συγχρονισμός» για να φέρεις και να στείλεις ραντεβού.":"Τα ραντεβού θα εμφανίζονται και στο ημερολόγιό σου (και στο iPhone, αν έχεις προσθέσει εκεί τον λογαριασμό Google)."))}</span></div>`;}
+/* αυτόματο σπρώξιμο αλλαγών όταν υπάρχει ενεργή σύνδεση */
+let GC_T=null;
+function gcMarkDirty(t,id){const r=recFind(t,id);if(!r)return;if(r.nextv)r.nextv.dirty=1;
+  if(gcOn()&&gcValid()){clearTimeout(GC_T);GC_T=setTimeout(async()=>{try{await gcPush(t,id);save();gcStatus("✓ Ενημερώθηκε το ημερολόγιο");}catch(e){gcStatus("⚠ "+e.message);}},800);}}
+function gcForget(t,id,gid){const r=recFind(t,id);if(!r||!gid)return;(r.gcDel||(r.gcDel=[])).push(gid);
+  if(gcOn()&&gcValid()){setTimeout(async()=>{try{await gcPush(t,id);save();gcStatus("✓ Αφαιρέθηκε από το ημερολόγιο");}catch(e){gcStatus("⚠ "+e.message);}},300);}}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-gcsync],[data-gcoff]");if(!b)return;
+  if(b.hasAttribute("data-gcoff")){gcSetOn(false);try{if(GC_TOK&&google.accounts.oauth2.revoke)google.accounts.oauth2.revoke(GC_TOK);}catch(x){}GC_TOK=null;GC_MSG="";gcRefreshViews();return;}
+  gcSync(true);});
+let GC_LAST=0;
+setInterval(()=>{if(gcOn()&&gcValid()&&!GC_BUSY&&Date.now()-GC_LAST>5*60000&&(location.hash||"").slice(1)==="tracker"){GC_LAST=Date.now();gcSync(false);}},30000);
 
 /* ================= ΒΟΗΘΗΤΙΚΑ ================= */
 const $ = s => document.querySelector(s);
@@ -3192,7 +3285,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* έλεγχος νέας έκδοσης */
-const BUILD="1795869134";
+const BUILD="1795870031";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='Υπάρχει νέα έκδοση <button class="btn sm" onclick="location.reload()">Ανανέωση</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
