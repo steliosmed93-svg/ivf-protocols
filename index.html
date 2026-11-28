@@ -2777,7 +2777,7 @@ let PREG=[];let pTab="ov";let pDel=null;
 const savePreg=()=>{DB.preg=PREG;save();const s=document.getElementById("psaved");if(s){s.innerHTML=pgSvg("check",13)+" Αποθηκεύτηκε "+new Date().toLocaleTimeString("el-GR",{hour:"2-digit",minute:"2-digit"});s.classList.add("ok")}};
 let saveT=null;const saveSoon=()=>{clearTimeout(saveT);saveT=setTimeout(savePreg,250)};
 const pById=id=>PREG.find(p=>p.id===id);
-const newPreg=()=>({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),created:new Date().toISOString().slice(0,10),info:{},hist:{},labs:{},us:{},visits:[],done:{}});
+const newPreg=()=>({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),created:new Date().toISOString().slice(0,10),info:{},hist:{},labs:{},us:{},visits:[{d:new Date().toISOString().slice(0,10),bp:"",wt:"",ur:"",fh:"",lab:"",us:"",n:"Πρώτη επίσκεψη (άνοιγμα φακέλου)"}],done:{}});
 const D0=s=>{if(!s)return null;const d=new Date(s+"T12:00:00");return isNaN(d)?null:d};
 const fmtD2=d=>d?d.toLocaleDateString("el-GR",{day:"2-digit",month:"2-digit",year:"numeric"}):"–";
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
@@ -3037,7 +3037,8 @@ document.addEventListener("keydown",e=>{const s=$("#sheet");if(e.key==="Escape"&
 /* ================= ΓΥΝΑΙΚΟΛΟΓΙΚΗ ΚΑΡΤΕΛΑ ================= */
 const GYN_CX=["","Τεστ Παπ","HPV-DNA","Συνεξέταση (Παπ + HPV)"];
 function gyById(id){return (DB.gyn||[]).find(x=>x.id===id);}
-function gyNew(name){const n={id:uid(),created:new Date().toISOString().slice(0,10),info:{name:name||"",dob:"",amka:"",phone:"",notes:""},hist:{},scr:{},visits:[]};(DB.gyn=DB.gyn||[]).unshift(n);save();return n;}
+function gyFirstVisit(d){return {id:uid(),d:d||today(),reason:"Πρώτη επίσκεψη (άνοιγμα φακέλου)",exam:"",us:"",dx:"",next:"",plan:""};}
+function gyNew(name){const n={id:uid(),created:new Date().toISOString().slice(0,10),info:{name:name||"",dob:"",amka:"",phone:"",notes:""},hist:{},scr:{},visits:[gyFirstVisit()]};(DB.gyn=DB.gyn||[]).unshift(n);save();return n;}
 function gyAge(p){const d=p.info&&p.info.dob;if(!d)return null;const b=new Date(d),t=new Date();let a=t.getFullYear()-b.getFullYear();if(t<new Date(t.getFullYear(),b.getMonth(),b.getDate()))a--;return a>=0&&a<120?a:null;}
 function gyAddY(d,y){const x=new Date(d);x.setFullYear(x.getFullYear()+y);return x.toISOString().slice(0,10);}
 function gyFmtD(d){if(!d)return "";const [y,m,dd]=d.split("-");return `${dd}/${m}/${y}`;}
@@ -3063,6 +3064,7 @@ function pageGyn(id){
   if(MODE==="cloud-wait") return `<h1>Γυναικολογική καρτέλα</h1><p class="muted">Σύνδεση…</p>`;
   if(MODE==="cloud-locked") return `<h1>Γυναικολογική καρτέλα</h1><div class="callout warn"><p>Οι καρτέλες είναι κρυπτογραφημένες. Ξεκλείδωσε από τους <a href="#tracker">Ασθενείς</a>.</p></div>`;
   const p=gyById(id); if(!p) return `<h1>Γυναικολογική καρτέλα</h1><p class="muted">Η καρτέλα δεν βρέθηκε. <a href="#tracker">Επιστροφή στους ασθενείς</a></p>`;
+  if(!(p.visits||[]).length){p.visits=[gyFirstVisit(p.created)];save();}
   const age=gyAge(p),h=p.hist||{},s=p.scr||{},i=p.info||{};
   const F=(k,l,v,t="text",w="")=>`<label class="f${w}">${l}<input data-gf="${k}" type="${t}" value="${esc(v??"")}"></label>`;
   const T=(k,l,v)=>`<label class="f wide">${l}<textarea data-gf="${k}" rows="2" style="font-family:inherit;font-size:14.5px;min-height:56px">${esc(v??"")}</textarea></label>`;
@@ -3130,7 +3132,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* έλεγχος νέας έκδοσης */
-const BUILD="1795867058";
+const BUILD="1795867937";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='Υπάρχει νέα έκδοση <button class="btn sm" onclick="location.reload()">Ανανέωση</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
