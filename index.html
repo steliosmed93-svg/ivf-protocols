@@ -428,6 +428,8 @@ details.acc summary{cursor:pointer;padding:11px 0;font-weight:600}
 .pgw .pg-next{background:var(--surface)!important;background-image:none!important;box-shadow:none!important;border:1px solid var(--line)!important;border-radius:8px!important}
 .pgw .pg-next.late{background:var(--badsoft)!important}
 .pgw .pg-next.ok{background:var(--oksoft)!important}
+.pgsh .pg-usf{border:1px solid var(--line);border-radius:10px;padding:8px 10px 10px;margin:4px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;grid-column:1/-1}.pgsh .pg-usf legend{font-weight:700;font-size:13px;padding:0 4px;color:var(--accent)}.pgsh .pg-usf .wide{grid-column:1/-1}.pgsh .pg-usf select{width:100%}
+
 </style>
 </head>
 <body>
@@ -2971,13 +2973,22 @@ function shLab(){const opts=LABS.flatMap(([h,rows])=>rows.map(([k,l])=>`<option 
   <label class="pf"><span>Ημερομηνία</span><input type="date" id="nl_d" value="${new Date().toISOString().slice(0,10)}"></label>
   <button class="btn pri big wide" data-plsave>${pgSvg("check",18)} Αποθήκευση</button>`);
   const s=$("#nl_k");s.addEventListener("change",()=>{$("#nl_ow").hidden=s.value!=="_other"})}
-function shVisit(){sheetOpen(`<h2>Νέα επίσκεψη</h2><div class="pg-vform">
+function shVisitGA(){const p=pById(pgRoute().slice(2)),d=($("#nv_d")||{}).value,i=$("#nv_ga");if(!p||!d||!i||i.dataset.touched)return;const g=gaAt(p,D0(d));i.value=g!=null&&g>=0?gaTxt(g):"";}
+function shVisit(){setTimeout(()=>{shVisitGA();const d=$("#nv_d"),i=$("#nv_ga");if(d)d.addEventListener("change",shVisitGA);if(i)i.addEventListener("input",()=>i.dataset.touched=1);},0);sheetOpen(`<h2>Νέα επίσκεψη</h2><div class="pg-vform">
   <label class="pf"><span>Ημερομηνία</span><input type="date" id="nv_d" value="${new Date().toISOString().slice(0,10)}"></label>
   <label class="pf"><span>ΑΠ (π.χ. 120/80)</span><input id="nv_bp" inputmode="numeric"></label>
   <label class="pf"><span>Βάρος (kg)</span><input id="nv_wt" inputmode="decimal"></label>
   <label class="pf"><span>Ούρα (λεύκωμα)</span><input id="nv_ur"></label>
   <label class="pf"><span>ΚΕΠ / κινήσεις</span><input id="nv_fh"></label>
-  <label class="pf"><span>Υπερηχογράφημα</span><input id="nv_us"></label>
+  <fieldset class="pf wide pg-usf"><legend>Υπερηχογράφημα</legend>
+   <label class="pf"><span>Καρδιακή λειτουργία (ΚΛ)</span><select id="nv_kl"><option value=""></option><option>Θετική</option><option>Αρνητική</option></select></label>
+   <label class="pf"><span>Ηλικία κύησης (υπερηχογραφικά)</span><input id="nv_ga" placeholder="π.χ. 32+4"></label>
+   <label class="pf"><span>EFW (g)</span><input id="nv_efw" inputmode="numeric"></label>
+   <label class="pf"><span>Πλακούντας</span><input id="nv_pl" list="nv_pl_l"><datalist id="nv_pl_l"><option>Πρόσθιος</option><option>Οπίσθιος</option><option>Πυθμενικός</option><option>Πλάγιος δεξιά</option><option>Πλάγιος αριστερά</option><option>Χαμηλή πρόσφυση</option><option>Προδρομικός</option></datalist></label>
+   <label class="pf"><span>Μήκος τραχήλου (mm)</span><input id="nv_cx" inputmode="decimal"></label>
+   <label class="pf"><span>Προβολή</span><input id="nv_pres" list="nv_pres_l"><datalist id="nv_pres_l"><option>Κεφαλική</option><option>Ισχιακή</option><option>Εγκάρσια</option><option>Λοξή</option><option>Ασταθής</option></datalist></label>
+   <label class="pf wide"><span>Άλλα ευρήματα</span><input id="nv_us"></label>
+  </fieldset>
   <label class="pf"><span>Ht / Hb / PLT / WBC</span><input id="nv_lab"></label>
   <label class="pf wide"><span>Σημειώσεις / σχέδιο</span><textarea id="nv_n" rows="2"></textarea></label></div>
   <button class="btn pri big wide" data-pvisit>${pgSvg("check",18)} Αποθήκευση επίσκεψης</button>`)}
@@ -3019,7 +3030,7 @@ function pClick(e){
   const db=e.target.closest("[data-pdoneb]");if(db){const p=pById(pgRoute().slice(2));p.done[db.dataset.pdoneb]=true;savePreg();pgRender();toast("Σημειώθηκε ως έγινε");return true}
   
   const tb=e.target.closest("[data-ptab]");if(tb){pTab=tb.dataset.ptab;pgRender();return true}
-  const vs=e.target.closest("[data-pvisit]");if(vs){const p=pById(pgRoute().slice(2));const g=id=>($("#"+id)||{}).value||"";const v={d:g("nv_d"),bp:g("nv_bp"),wt:g("nv_wt"),ur:g("nv_ur"),fh:g("nv_fh"),lab:g("nv_lab"),us:g("nv_us"),n:g("nv_n")};if(!Object.values(v).slice(1).some(Boolean)){toast("Συμπληρώστε τουλάχιστον ένα πεδίο");return true}p.visits=(p.visits||[]).concat([v]).sort((a,b)=>(a.d||"").localeCompare(b.d||""));savePreg();sheetClose();pgRender();toast("Η επίσκεψη αποθηκεύτηκε");return true}
+  const vs=e.target.closest("[data-pvisit]");if(vs){const p=pById(pgRoute().slice(2));const g=id=>($("#"+id)||{}).value||"";const usd={kl:g("nv_kl"),ga:g("nv_ga").trim(),efw:g("nv_efw").trim(),pl:g("nv_pl").trim(),cx:g("nv_cx").trim(),pres:g("nv_pres").trim()};const usx=[usd.kl&&"ΚΛ "+usd.kl.toLowerCase(),usd.ga&&"ΗΚ "+usd.ga,usd.efw&&"EFW "+usd.efw+" g",usd.pl&&"Πλακούντας "+usd.pl.toLowerCase(),usd.cx&&"Τράχηλος "+usd.cx+" mm",usd.pres&&"Προβολή "+usd.pres.toLowerCase(),g("nv_us").trim()].filter(Boolean).join(", ");const v={d:g("nv_d"),bp:g("nv_bp"),wt:g("nv_wt"),ur:g("nv_ur"),fh:g("nv_fh"),lab:g("nv_lab"),us:usx,n:g("nv_n")};if(Object.values(usd).some(Boolean))v.usd=usd;if(!Object.values(v).slice(1).some(Boolean)){toast("Συμπληρώστε τουλάχιστον ένα πεδίο");return true}p.visits=(p.visits||[]).concat([v]).sort((a,b)=>(a.d||"").localeCompare(b.d||""));savePreg();sheetClose();pgRender();toast("Η επίσκεψη αποθηκεύτηκε");return true}
   const vd=e.target.closest("[data-pvdel]");if(vd){const p=pById(pgRoute().slice(2));p.visits.splice(+vd.dataset.pvdel,1);savePreg();pgRender();return true}
   const ex=e.target.closest("[data-pexp]");if(ex){const id=ex.dataset.pexp;if(id){const p=pById(id);pDownload(p,`kartela-${(p.info.name||"egkyos").replace(/\s+/g,"_")}.json`)}else pDownload(PREG,`karteles-egkyon-${new Date().toISOString().slice(0,10)}.json`);return true}
   const pr=e.target.closest("[data-pprint]");if(pr){if(pgRoute().startsWith("k-")&&pTab!=="sum"){pTab="sum";sheetClose();pgRender();setTimeout(()=>window.print(),350)}else{sheetClose();window.print()}return true}
@@ -3132,7 +3143,7 @@ $("#backBtn").onclick=goBack;$("#backDesk").onclick=goBack;
 window.addEventListener("hashchange",route);
 route();
 /* έλεγχος νέας έκδοσης */
-const BUILD="1795867937";
+const BUILD="1795868541";
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?u="+Date.now(),{cache:"no-store"});const h=await r.text();const m=h.match(/const BUILD="(\d+)"/);if(m&&m[1]!==BUILD&&!$("#updBar")){const d=document.createElement("div");d.id="updBar";d.style.cssText="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:var(--accent);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;font-size:14px";d.innerHTML='Υπάρχει νέα έκδοση <button class="btn sm" onclick="location.reload()">Ανανέωση</button>';document.body.appendChild(d);}}catch(e){}}
 setTimeout(checkUpdate,3000);setInterval(checkUpdate,10*60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate();});
 </script>
